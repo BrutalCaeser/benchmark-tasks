@@ -14,5 +14,6 @@
   "run_limit": "3,600 steps (3 minutes at 20 Hz)",
   "reset_notes": "Stand the three parts back in their row at x 15, the servo motor's long side along x.",
   "fidelity": "The parts are plain blocks with the outline of a servo motor, a bracket and a bearing block, not their real shapes; every object has the same rubber-like friction (1.2 static, 1.0 dynamic). The tray and its walls are fixed. The sim cannot tell a gripped part from a released one; on a real table, open the grippers before the photo.",
-  "scores": "Dream-1 run: 0.0; demo: 1.0"
+  "scores": "Dream-1 run: 0.0; demo: 1.0",
+  "media": "M-UCQRHP"
 }
