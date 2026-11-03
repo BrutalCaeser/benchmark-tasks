@@ -14,5 +14,6 @@
   "run_limit": "2,400 steps (2 minutes at 20 Hz)",
   "reset_notes": "Put both tubes back in their holders, caps up.",
   "fidelity": "The rotor is a fixed mock: it has no lid and does not spin, and its pockets are vertical square wells (real rotors are fixed-angle or swing-bucket). The tubes are plain cylinders with flat bottoms and no caps, so the sim cannot tell cap-up from cap-down, and both weigh exactly the same. PhysX has no rolling resistance, so a tube released in its pocket can keep rocking for seconds where a real one settles at once; seating therefore depends on where the tube is, not on whether it has stopped moving. The sim cannot tell a gripped tube from a released one, so a tube held down in a pocket counts; on a real table, open the grippers before the photo. Every object has the same rubber-like friction (1.2 static, 1.0 dynamic).",
-  "scores": "Dream-1 run: 0.25; demo: 1.0"
+  "scores": "Dream-1 run: 0.25; demo: 1.0",
+  "media": "M-Q5NLJC"
 }
