@@ -1,0 +1,19 @@
+{
+  "title": "Face cans to the shelf edge",
+  "category": "Impact on jobs",
+  "keywords": [
+    "retail",
+    "shelf facing",
+    "placement precision",
+    "bimanual"
+  ],
+  "instruction": "Pull each can forward to the front edge of the shelf, keeping it upright and on the shelf.",
+  "context": "Retail stockers face shelves many times a shift: each product is pulled to the front edge so the row looks full and lines up. Done by: stockers and order fillers.",
+  "setup": "A white laminated shelf board (20 cm deep, 56 cm wide, 3 cm thick) lies flat on the table, fixed in place and centred between the arms; its front edge is the one nearest the arms, 13 cm in front of the arm bases. Four red steel food cans (soup-can size: 6.6 cm across, 10 cm tall, 350 g each) stand upright at the back of the board, 7 mm from its back edge: 19 and 7 cm left of centre, and 7 and 19 cm right of centre.",
+  "scoring": "Each can scores 0.25 if, at the end, it stands upright (tilted at most 10 degrees) and still (moving under 1 cm/s) directly on the board (not on the table or on another can), and its frontmost point is between 6 mm behind and 3 mm past the board's front edge. A can that falls off the board, ends on another can or lies down scores 0. All four faced: 1.0.",
+  "run_limit": "2,400 steps (2 minutes at 20 Hz)",
+  "reset_notes": "Stand the four cans back 7 mm from the board's back edge, 19 and 7 cm either side of centre.",
+  "fidelity": "Real store shelves often have a front lip or price rail; this board has none, so the robot must stop each can itself. The cans are solid cylinders with no labels or rims. Every object has the same rubber-like friction (1.2 static, 1.0 dynamic), higher than a steel can on laminate. The board is fixed to the table.",
+  "scores": "Dream-1 run: 0.0; demo: 1.0",
+  "media": "M-YFEPDA"
+}
