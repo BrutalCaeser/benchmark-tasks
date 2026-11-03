@@ -15,5 +15,6 @@
   "run_limit": "3,600 steps (3 minutes at 20 Hz)",
   "reset_notes": "Restack the three boxes at x 24, y 20, green at the bottom, edges square to the table.",
   "fidelity": "The boxes are solid rigid blocks of equal size and weight; every object has the same rubber-like friction (1.2 static, 1.0 dynamic), more than cardboard on wood, so boxes slide less than real ones. The yellow square is a 1 mm fixed plate. The sim cannot tell a gripped box from a released one; on a real table, open the grippers before measuring.",
-  "scores": "Dream-1 run: 0.0; demo: 1.0"
+  "scores": "Dream-1 run: 0.0; demo: 1.0",
+  "media": "M-HQ4CNH"
 }
