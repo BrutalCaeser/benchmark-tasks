@@ -15,5 +15,6 @@
   "run_limit": "1,200 steps (60 seconds at 20 Hz)",
   "reset_notes": "Pull the driver back to its start, take the syringe out and lay it on its stands flange toward the pump, with the plunger pulled back full.",
   "fidelity": "Stand-in sizes for a 60 mL syringe. The barrel is 16 flat staves. The stopper slides with little friction (a real one needs a firm push to start), so the scorer allows 1 mm of plunger travel from the driver's contact. The flange slot's mouth is rounded like a clip's lead-in. The driver slides without its release lever, and there is no barrel clamp.",
-  "scores": "Dream-1 run: 0.0; demo: 1.0"
+  "scores": "Dream-1 run: 0.0; demo: 1.0",
+  "media": "M-BNL67N"
 }
