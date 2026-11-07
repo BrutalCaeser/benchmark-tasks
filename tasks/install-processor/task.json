@@ -15,5 +15,6 @@
   "run_limit": "3,000 steps (150 seconds at 20 Hz)",
   "reset_notes": "Shut the shield, put the lever down under its catch, and put the processor back on its stand, turned a quarter turn from the socket with its notches facing away from the arms.",
   "fidelity": "The socket has no contacts: its floor is flat. The lever is a rigid rod and its catch a sprung pin that moves aside (a real lever's wire flexes out from under a fixed tab), so the lever snaps under it and pulls out. The handle carries an 8 mm knob to grip. The shield closes on its hinge alone and doesn't clamp the substrate. The frame's inner edges and the keys are rounded as lead-ins. Lid size, thicknesses and the 30 g mass are approximate.",
-  "scores": "Dream-1 run: 0.0; demo: 1.0"
+  "scores": "Dream-1 run: 0.0; demo: 1.0",
+  "media": "M-GZ84M4"
 }
