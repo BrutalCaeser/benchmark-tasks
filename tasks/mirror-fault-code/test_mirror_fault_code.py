@@ -112,10 +112,10 @@ def test_the_pump_moved_scores_zero():
 
 @pytest.mark.parametrize("dx, dy, yaw, tilt, lift, ok", [
     (0.0, 0.0, 0.0, 0.0, 0.0, True),
-    (-0.007, 0.0, 0.0, 0.0, 0.0, False),  # base into the hood's mouth
-    (-0.003, 0.0, 0.0, 0.0, 0.0, True),
-    (0.032, 0.0, 0.0, 0.0, 0.0, False),  # glass past the wall's face
-    (0.029, 0.0, 0.0, 0.0, 0.0, True),
+    (-0.021, 0.0, 0.0, 0.0, 0.0, False),  # base into the hood's mouth
+    (-0.019, 0.0, 0.0, 0.0, 0.0, True),
+    (0.042, 0.0, 0.0, 0.0, 0.0, False),  # glass past the wall's face
+    (0.039, 0.0, 0.0, 0.0, 0.0, True),
     (0.0, 0.041, 0.0, 0.0, 0.0, False), (0.0, 0.039, 0.0, 0.0, 0.0, True),
     (0.0, -0.041, 0.0, 0.0, 0.0, False),
     (0.0, 0.0, 21.0, 0.0, 0.0, False), (0.0, 0.0, -19.0, 0.0, 0.0, True),  # turned away from the pump
@@ -154,11 +154,10 @@ def test_moving_parts_block_completion():
 def test_layout():
     m = M.MIRROR_PART
     assert m.mass and M.PUMP.mass == 20.0 and all(c.mass for c in M.CARTRIDGES)
-    # the glass: a 2-1/4 by 3-1/2 inch head, 50 degrees from vertical
     assert M.GLASS[1:] == (57.0, 89.0) and math.degrees(M.TILT) == pytest.approx(50.0)
-    # the mirror set at the goal fits between the hood's mouth and the wall
+    # the mirror set at the goal fits between the hood's mouth and the wall: it goes down from above, clear of the hood
     base_x = M.MIRROR_GOAL[0]
-    assert base_x - M.BASE[0] / 2000 > M.HOOD_END_X
+    assert base_x - M.BASE[0] / 2000 > M.HOOD_END_X + 0.008
     glass_top_x = base_x + M.GLASS[2] / 1000 * math.sin(M.TILT) + M.GLASS[0] / 2000
     assert glass_top_x < M.WALL_X
     # the box offsets the tests use match the part
@@ -168,12 +167,61 @@ def test_layout():
     # a horizontal sight line from the display's centre meets the glass
     reach_z = (M.DISPLAY_Z - M.BASE[2]) / math.cos(M.TILT)
     assert 0 < reach_z < M.GLASS[2]
-    # the display sits inside the hood, out of a straight-down view: the visor covers it
-    assert M.HOOD_D >= 30 and M.HOOD_HALF_W * 2 > M.DISPLAY[0]
+    # the display and its digit fit inside the hood (the carried base passes beside the hood's mouth, checked above)
+    assert M.HOOD_HALF_W * 2 - M.HOOD_T > M.DISPLAY[0] and M.DISPLAY_Z + M.DISPLAY[1] / 2 < M.HOOD_Z[1]
+    assert M.DIGIT_H / 2 + M.STROKE / 2 < M.DISPLAY[1] / 2 and M.DIGIT_W / 2 + M.STROKE / 2 < M.DISPLAY[0] / 2
+    assert M.HOOD_Z[0] < M.DISPLAY_Z - M.DISPLAY[1] / 2
+    # the visor cuts every direct sight line to the display steeper than 40 degrees (a straight-down wrist camera behind
+    # the pump looks from above that: traced, mirror removed)
+    bottom = M.DISPLAY_Z - M.DISPLAY[1] / 2
+    assert math.degrees(math.atan2(M.HOOD_Z[1] - bottom, M.HOOD_D)) < 40.0
 
 
-def test_demo_reaches():
+def _fake_observation(t):
+    class Obs:
+        images = {"right_cam": np.zeros((176, 320, 3), np.uint8)}
+        state_time = t
+    return Obs()
+
+
+def _play_read(digit, monkeypatch):
+    """demo(), then the observations of a run whose reads all give ``digit``."""
+    monkeypatch.setattr(M, "read_digit", lambda image: digit)
     demo = TASK.demo()
+    t0, t1 = M._reading["window"]
+    for t in np.arange(0.0, t1 + 0.5, 0.05):
+        M._look(_fake_observation(float(t)))
+    return demo
+
+
+def test_the_demo_waits_for_the_code():
+    """Before the read, and if nothing is read, the left arm stays at its standby pose: the layout alone fetches nothing."""
+    demo = TASK.demo()
+    assert all(w.pos == M.STANDBY for w in demo["left"])
+    assert "CODE" not in "".join(TASK.demo.__code__.co_names + M._look.__code__.co_names + M._fetch.__code__.co_names)
+
+
+@pytest.mark.parametrize("digit", [None, 1, 2, 3, 4])
+def test_the_demo_fetches_the_cartridge_it_read(digit, monkeypatch):
+    demo = _play_read(digit, monkeypatch)
+    xs = {round(w.pos[0], 3) for w in demo["left"] if w.pos[1] == M.CART_Y}
+    if digit is None:
+        assert M._reading["read"] == 0 and all(w.pos == M.STANDBY for w in demo["left"])
+    else:
+        assert M._reading["read"] == digit and xs == {M.CARTS[digit]}
+    # the read is made while the right arm holds the mirror behind the pump, before the left arm leaves standby
+    t0, t1 = M._reading["window"]
+    hold = demo["right"][M.READ_STEP]
+    assert "hold" in hold.label and hold.pos == M.READ_POSE and hold.finger == M.FINGER_OPEN
+    assert t1 == pytest.approx(sum(w.duration for w in demo["right"][:M.READ_STEP + 1]))
+    assert t1 - t0 == pytest.approx(M.READ_HOLD - M.READ_SKIP)
+    assert demo["right"][M.READ_STEP - 3].finger == M.FINGER_OPEN  # the mirror has been let go: it is set
+    assert t1 < demo["left"][0].duration
+
+
+@pytest.mark.parametrize("digit", [1, 2, 3, 4])
+def test_demo_reaches(digit, monkeypatch):
+    demo = _play_read(digit, monkeypatch)
     for arm in ("left", "right"):
         plan = ArmPlan(demo[arm], station.BASES[arm])
         for t in np.arange(0.0, plan.duration, 0.05):
@@ -184,3 +232,40 @@ def test_demo_reaches():
     longest = max(sum(w.duration for w in demo[a]) for a in demo)
     assert longest < limit / 20 * 0.6
     assert demo["right"][5].pos[:2] == pytest.approx((M.MIRROR_GOAL[0], M.MIRROR_GOAL[1] + M.POST_Y / 1000))
+
+
+def _paint(rows, size=(31, 50), at=(25, 111)):
+    """A right wrist frame with the display drawn from a reference grid: each cell darkened by its share in ninths."""
+    img = np.full((176, 320, 3), (200, 180, 150), np.uint8)  # tan, like the table
+    h, w = size
+    box = np.full((h, w, 3), (207, 224, 210), np.uint8)
+    gh, gw = M.READ_GRID
+    for i, row in enumerate(rows):
+        for j, v in enumerate(row):
+            cell = box[i * h // gh:(i + 1) * h // gh, j * w // gw:(j + 1) * w // gw]
+            k = cell.shape[0] * cell.shape[1]
+            flat = cell.reshape(-1, 3)
+            flat[np.round(np.linspace(0, k - 1, round(int(v) / 9 * k))).astype(int)] = (10, 10, 10)  # spread out
+            cell[:] = flat.reshape(cell.shape)
+    img[at[0]:at[0] + h, at[1]:at[1] + w] = box
+    return img
+
+
+@pytest.mark.parametrize("digit", [1, 2, 3, 4])
+def test_read_digit_reads_each_reference(digit):
+    assert M.read_digit(_paint(M.REFERENCE[digit])) == digit
+    assert M.read_digit(_paint(M.REFERENCE[digit], at=(80, 40))) == digit  # wherever the display shows
+    wider = _paint(M.REFERENCE[digit])
+    wider[24, 110:162] = wider[56, 110:162] = wider[24:57, 110] = wider[24:57, 161] = (207, 224, 210)
+    assert M.read_digit(wider) == digit  # its box 1 px bigger all round, as the blurred edges sometimes come out
+
+
+def test_read_digit_refuses_what_it_cannot_read():
+    assert M.read_digit(np.full((176, 320, 3), (200, 180, 150), np.uint8)) is None  # no display in view
+    blank = ("0" * M.READ_GRID[1],) * M.READ_GRID[0]
+    assert M.read_digit(_paint(blank)) is None  # the display, no digit
+    mixed = [[str((int(a) + int(b)) // 2) for a, b in zip(r2, r3)] for r2, r3 in zip(M.REFERENCE[2], M.REFERENCE[3])]
+    assert M.read_digit(_paint(mixed)) is None  # halfway between 2 and 3: neither clearly
+    assert min(np.abs(np.array([[int(c) for c in r] for r in M.REFERENCE[a]])
+                      - np.array([[int(c) for c in r] for r in M.REFERENCE[b]])).sum() / 9
+               for a in M.REFERENCE for b in M.REFERENCE if a < b) > M.MATCH_MAX + M.MATCH_MARGIN

@@ -12,6 +12,7 @@ that uses both still runs with the standard ``yam_arena`` embodiment. Nothing he
 from __future__ import annotations
 
 import math
+import os
 import sys
 import tempfile
 from dataclasses import dataclass
@@ -53,13 +54,14 @@ class Part(Box):
 
 
 def _write_usd(spec: Part) -> str:
-    """The part as a USD rigid body: one cube collider per piece, coloured. Written under the temp folder."""
+    """The part as a USD rigid body: one cube collider per piece, coloured. Written under the temp folder, in a folder
+    of this process's own, so that runs side by side never rewrite each other's files."""
     from pxr import Gf, Sdf, Usd, UsdGeom, UsdPhysics, UsdShade
 
     from yam_arena.station import linear_rgb
 
-    folder = Path(tempfile.gettempdir()) / "yam_parts"
-    folder.mkdir(exist_ok=True)
+    folder = Path(tempfile.gettempdir()) / "yam_parts" / str(os.getpid())
+    folder.mkdir(parents=True, exist_ok=True)
     path = folder / f"{spec.name}_{abs(hash((spec.pieces, spec.color))) % 10**10}.usda"
     path.unlink(missing_ok=True)  # CreateNew refuses an existing file
     stage = Usd.Stage.CreateNew(str(path))

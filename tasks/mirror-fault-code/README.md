@@ -4,15 +4,19 @@ A pump stands in front of a wall. Its controller shows a one-digit fault code on
 back, which faces the wall, so no camera can see it. The robot reads it the way a technician does, with an inspection
 mirror: it carries the mirror round the pump, sets it down behind the pump facing it, reads the code in the glass, and
 then stands the filter cartridge with that number on a green pad, leaving the three look-alikes alone. The FAA's
-advisory circular on visual inspection, AC 43-204 (*Visual Inspection for Aircraft*, 1997): "The mirror can be used
-with great effect in locations that cannot be viewed directly", and "The flashlight and the mirror are standard tools
-which should accompany the inspector on all inspections." Done by: maintenance technicians and inspectors.
+*Aviation Maintenance Technician Handbook: General* (FAA-H-8083-30B, 2023, p. 8-11): "Sometimes the inspection areas are
+obscured by structural members, equipment installations, or for some reason are awkward to check visually. [...]
+Mirrors, borescopes, and fiber optics are useful in providing the means of observing obscure areas." Done by:
+maintenance technicians and inspectors.
 
-The hard part is seeing through a tool, then acting on what it showed. The display sits in a hood 3 cm deep, whose mouth
-is 14.5 cm from the wall: with the mirror taken away, a wrist camera held over the gap, beside it and turned back toward
-the pump never reads the code (seven poses traced; at most an edge of the display shows). The mirror has to go down in
-that gap, flat and turned to the pump within 20 degrees, with its glass clear of the wall; then the right one of four
-cartridges has to be picked. A wrong cartridge moved scores 0, so a guess wins one time in four.
+The hard part is seeing through a tool, then acting on what it showed. The display sits in a hood 5.5 cm deep, whose
+mouth is 17 cm from the wall; the hood cuts every straight sight line to the display steeper than 36 degrees, and a
+wrist camera pointing down behind the pump looks from above that. With the mirror taken away, the right wrist camera
+shows none of the display at any of 28 such poses (four wrist turns, 6 to 15 cm up, traced), and the demo's reader finds
+nothing in those frames. A policy that tilted its wrist camera down into the gap could look straight in; nothing in the
+scoring forbids that, as nothing stops a technician with room to lean in. The mirror has to go down in the gap, flat and
+turned to the pump within 20 degrees, clear of the hood's mouth and the wall; then the right one of four cartridges has
+to be picked. A wrong cartridge moved scores 0, so a guess wins one time in four.
 
 ## Run a trial
 On a machine with the official simulator (the Robocurve Brev launchable, or `yam-isaac-lab-arena`'s `setup.sh`), with
@@ -63,25 +67,39 @@ cartridges' spots, and one of the mirror behind the pump.
   (MIT License; the notice is at the top of the file); `parts.py` needs its import hook. `parts.py` (ours) builds loose
   parts from boxes; a piece in its `MIRROR` colour is polished metal and one in `GLOW` lights itself.
 - **The mirror.** A hand inspection mirror is tilted by the wrist; a top-down gripper can't, so the glass is fixed at 50
-  degrees on a weighted base and the robot carries it by its post, sets it down and turns it. The glass is a common
-  2-1/4 by 3-1/2 inch head.
-- **The display** lights itself, as a backlit LCD does, so the code reads in the mirror under the station's lights. Its
-  hood keeps it out of every direct view the arms can reach (traced, mirror removed).
-- **The demo** plays fixed waypoints from the known layout and does not read the code: it carries the mirror round the
-  pump's side, sets it down behind the pump and holds its wrist camera over it, then fetches cartridge 3. The code shows
-  in the glass in the right wrist camera as the mirror goes down (the demo video's right half, from about 9.5 s). A
-  policy has to read it there.
+  degrees on a weighted base and the robot carries it by its post, sets it down and turns it. The glass's size (57 by 89
+  mm) is illustrative. The demo squeezes the post hard: held lightly, the mirror swung 24 degrees on the post and landed
+  off its mark.
+- **The display** lights itself, as a backlit LCD does, so the code reads in the mirror under the station's lights. It
+  is 6 by 3.6 cm, its digit 2.8 cm tall, with the hood's visor 4 mm above it.
+- **The demo reads the code.** It carries the mirror round the pump's side by its post, sets it down behind the pump,
+  then holds the right wrist camera over it for 2 s, turned so that the camera looks into the glass from the wall's
+  side; the whole display shows in the glass, upright. `read_digit()` finds the display in that camera's frames (the
+  only light green in view), splits it into a 6 by 9 grid of dark-pixel shares, and matches the grid against one
+  reference per digit, measured from runs with each code; a frame counts only if one digit matches clearly, and the demo
+  takes the majority of the 30 frames in the hold (all 120 frames of those runs read right). Until then the left arm
+  waits at a standby pose, and it fetches nothing if nothing was read. yam_scripted plays `demo()` open loop, so
+  `demo()` wraps the policy's `act()` to hand each observation to the reader; it uses nothing else from the simulator.
+  The rest of the plan (where the mirror, the cartridges and the pad are) is the known layout, all in plain view of the
+  top camera. The environment variable `MIRROR_FAULT_CODE` (1 to 4, default 3) changes the displayed code; it is only
+  for checking the demo, never set in the official run.
+- **Parts written side by side.** `parts.py` writes each part's USD file in a folder of the process's own. Before, two
+  runs of this task started together on one machine used the same file paths, and one of them crashed twice; with a
+  folder per process, runs side by side finished.
 
 ## Runtime and seeds
-- Per trial on one L40S (inspect-robots 1.0): the scripted demo reaches 1.0 at step 549 (27.5 s of simulated time,
-  about 3 min of wall clock with stored frames). Dream-1 used all 2,400 steps and scored 0.0: it reached toward the
-  mirror with its right arm and toward the cartridges with its left, and moved neither.
-- The demo with its first move 0.05 s and 0.10 s late: 1.0 and 1.0. With the mirror set 1 cm to the side: 1.0; set 1 cm
-  closer to the pump, its base reaches into the hood's mouth and it does not count as set: 0.5. The demo fetching
-  cartridge 1 instead of 3: 0.
+- Per trial on one L40S (inspect-robots 1.0): the scripted demo reads 3 in the mirror (30 of 30 frames) and reaches 1.0
+  at step 581 (29 s of simulated time, about 2.5 min of wall clock). Dream-1 has not yet run on this layout; on an
+  earlier one (a shallower hood, the mirror placed nearer the pump) it used all 2,400 steps and scored 0.0.
+- The demo reads the code, it does not know it. With the displayed code set to 1, 2, 3 and 4 (`MIRROR_FAULT_CODE`, test
+  runs only), it read 1, 2, 3 and 4, each in 30 of 30 frames, and scored 1.0 each, at steps 581, 580, 581 and 580.
+  Reading the code and then fetching cartridge 1 instead: 0.
+- The demo with its first move 0.05 s and 0.10 s late: 1.0 and 1.0 (read 3; steps 582 and 583).
 - One fixed layout: `-E object_jitter=0`, so the seed doesn't change the start.
-- `test_mirror_fault_code.py` checks the scoring and layout without a GPU (`python -m pytest -q
-  test_mirror_fault_code.py`): the start, every credit level, the 0.9 cap, a wrong cartridge moved, bumped or put on the
-  pad, the pump moved, the mirror's zone, flatness, facing and resting limits either side, the pad's limits, motion and
-  spin, the layout's clearances, and the demo's reach. A mutation check (22 deliberate breaks of the scorer, each run
-  against the tests) catches 22 of 22.
+- `test_mirror_fault_code.py` checks the scoring, layout, reader and demo without a GPU (`python -m pytest -q
+  test_mirror_fault_code.py`, 47 tests): the start, every credit level, the 0.9 cap, a wrong cartridge moved, bumped or
+  put on the pad, the pump moved, the mirror's zone, flatness, facing and resting limits either side, the pad's limits,
+  motion and spin, the hood's sight-line angle and clearances, the reader on each reference (also moved, and with its
+  box 1 px bigger) and its refusals, the demo waiting for the read and fetching the cartridge read, and the demo's reach
+  for every code. A mutation check (30 deliberate breaks of the scorer, the reader and the demo's hand-off, each run
+  against the tests) catches 30 of 30.
