@@ -15,5 +15,6 @@
   "run_limit": "2,400 steps (2 minutes at 20 Hz)",
   "reset_notes": "Slide both weights back to 0, the large one into its 0 notch.",
   "fidelity": "The tray rests on a frictionless knife edge on the beam's short arm; a real scale carries it on a lever linkage. The large weight's notches are two round bars that cradle a key under it, and it lifts 2.5 mm to move (a real one is pulled forward to release it). No beam lock or tare screw. The weights' masses and the bars' spacing follow from the lever ratio, not seca drawings. The manikin is fixed in the tray.",
-  "scores": "Dream-1 run: 0.0; demo: 1.0"
+  "scores": "Dream-1 run: 0.0; demo: 1.0",
+  "media": "M-8PVWUK"
 }
