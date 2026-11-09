@@ -1,4 +1,4 @@
-# Weigh an infant manikin on a beam baby scale: set the kilogram notch, then slide the gram weight until the pointer floats level
+# Weigh an infant manikin on a beam scale: set the kilogram notch, then slide the gram weight until the pointer is level
 
 A mechanical baby scale stands on the table with an infant training manikin in its tray and both sliding weights at 0.
 The robot weighs the manikin the way a nurse weighs a baby on a seca 725: it moves the large sliding weight from notch to notch
