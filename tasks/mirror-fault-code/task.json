@@ -1,0 +1,19 @@
+{
+  "title": "Read a fault code that faces the wall in an inspection mirror, then fetch the spare it names",
+  "category": "Impact on jobs",
+  "keywords": [
+    "maintenance",
+    "inspection mirror",
+    "indirect viewing",
+    "tool use",
+    "read then act"
+  ],
+  "instruction": "The pump's fault code shows on the display on its back, facing the wall. Set the inspection mirror on the table behind the pump, facing it, read the code in the mirror, then stand the filter cartridge with that number on the green pad. Leave the other cartridges where they are.",
+  "context": "FAA Advisory Circular 43-204, Visual Inspection for Aircraft: \"The mirror can be used with great effect in locations that cannot be viewed directly.\" Technicians use inspection mirrors to read plates, labels and indicators on the far side of fixed equipment. Done by: maintenance technicians and inspectors.",
+  "setup": "Positions in cm on the table, from the midpoint between the two arm bases: x forward (away from the arms), y to the robot's left. A grey pump, 12 cm deep, 14 cm wide and 14 cm tall, 20 kg, centred at x 18.5, y -4; its back face (x 24.5) carries a backlit display 6 by 6 cm, its centre 5 cm up, showing one black digit 4 cm tall, set in a dark hood 3 cm deep with walls 6 mm thick (a visor over it and a cheek each side). A tan wall 20 cm tall, its face at x 42, 50 cm long, centred at y -4. To the right, an inspection mirror: a steel base 8 by 10 cm and 1.2 cm thick, with a glass 5.7 by 8.9 cm tilted 50 degrees from vertical (its top away from the robot) and a dark post 1.2 cm square and 6 cm tall at the base's right edge; 0.35 kg; base centred at x 25, y -22. To the left, four blue filter cartridges 4 by 4 by 7 cm, 0.12 kg, each with a white top printed with a black digit 2.4 cm tall, standing at y 22: number 2 at x 20, 4 at x 26, 1 at x 32, 3 at x 38. A green pad 8 by 8 cm and 2 mm thick at x 30, y 10.",
+  "scoring": "The mirror is set when its whole footprint lies between the hood's mouth (x 27.5) and the wall (x 42), its centre is within 4 cm of y -4, its base rests flat on the table (within 10 degrees) and its glass faces the pump (within 20 degrees). The code's cartridge is out when it is 3 cm or more from its spot, and on the pad when its centre is within 2 cm of the pad's, it is upright within 10 degrees and it rests on the pad. A wrong cartridge counts as taken when it is 1.5 cm or more from its spot or tipped 15 degrees. A wrong cartridge taken, or the pump moved 5 mm: 0. Otherwise 0.25 for the mirror set, plus 0.25 for the right cartridge out or 0.5 for it on the pad. The mirror set, the right cartridge on the pad and everything still (under 1 cm/s and 0.5 rad/s): 0.9; held for 1 s: 1.0. Possible scores: 0, 0.25, 0.5, 0.75, 0.9, 1.0. To check a real trial: a top photo of the pad and the cartridges' spots, and one of the mirror behind the pump.",
+  "run_limit": "2,400 steps (2 minutes at 20 Hz)",
+  "reset_notes": "Put the mirror back on its spot to the right, and the four cartridges back on their spots, 2, 4, 1, 3 from near to far.",
+  "fidelity": "The mirror stands on a weighted base with its glass fixed at 50 degrees, since a top-down gripper cannot tilt a hand mirror: the robot carries it, sets it down and turns it. The display lights itself, as a backlit LCD does. The pump is loose but 20 kg. Cartridges are boxes with a digit printed on top. The pump's, base's and cartridges' sizes are illustrative.",
+  "scores": "Dream-1 run: 0.0; demo: 1.0"
+}
