@@ -89,8 +89,9 @@ cartridges' spots, and one of the mirror behind the pump.
 
 ## Runtime and seeds
 - Per trial on one L40S (inspect-robots 1.0): the scripted demo reads 3 in the mirror (30 of 30 frames) and reaches 1.0
-  at step 581 (29 s of simulated time, about 2.5 min of wall clock). Dream-1 has not yet run on this layout; on an
-  earlier one (a shallower hood, the mirror placed nearer the pump) it used all 2,400 steps and scored 0.0.
+  at step 581 (29 s of simulated time, about 2.5 min of wall clock). Dream-1 used all 2,400 steps and scored 0.0: its
+  right arm reached to the mirror without moving it, and its left arm swept into the cartridge row and knocked several
+  cartridges out of place.
 - The demo reads the code, it does not know it. With the displayed code set to 1, 2, 3 and 4 (`MIRROR_FAULT_CODE`, test
   runs only), it read 1, 2, 3 and 4, each in 30 of 30 frames, and scored 1.0 each, at steps 581, 580, 581 and 580.
   Reading the code and then fetching cartridge 1 instead: 0.
