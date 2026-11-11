@@ -15,5 +15,6 @@
   "run_limit": "2,400 steps (2 minutes at 20 Hz)",
   "reset_notes": "Put the mirror back on its spot to the right, and the four cartridges back on their spots, 2, 4, 1, 3 from near to far.",
   "fidelity": "The mirror stands on a weighted base with its glass fixed at 50 degrees, since a top-down gripper cannot tilt a hand mirror: the robot carries it, sets it down and turns it. The display lights itself, as a backlit LCD does. The pump is loose but 20 kg. Cartridges are boxes with a digit printed on top. The pump's, base's, glass's and cartridges' sizes are illustrative.",
-  "scores": "Dream-1 run: 0.0; demo: 1.0"
+  "scores": "Dream-1 run: 0.0; demo: 1.0",
+  "media": "M-FZE3CX"
 }
