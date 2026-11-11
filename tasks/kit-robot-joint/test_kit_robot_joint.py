@@ -71,16 +71,16 @@ def test_the_start_scores_zero():
 
 
 def test_all_three_kitted_is_success():
-    assert M.success(all_kitted()) and M.score(all_kitted()) == 1.0
+    assert M.success(all_kitted()) and M.score(all_kitted()) == pytest.approx(0.9)
 
 
 @pytest.mark.parametrize("part", list(M.PARTS))
-def test_each_part_in_its_pocket_scores_a_third(part):
-    assert M.score(scene(**{part: in_own_pocket(part)})) == pytest.approx(1 / 3)
+def test_each_part_in_its_pocket_scores_a_quarter(part):
+    assert M.score(scene(**{part: in_own_pocket(part)})) == pytest.approx(0.25)
 
 
 def test_the_motor_lying_along_its_pocket_counts_and_across_it_does_not():
-    assert M.score(scene(servo_motor=in_own_pocket("servo_motor", yaw_deg=90))) == pytest.approx(1 / 3)
+    assert M.score(scene(servo_motor=in_own_pocket("servo_motor", yaw_deg=90))) == pytest.approx(0.25)
     assert M.score(scene(servo_motor=in_own_pocket("servo_motor", yaw_deg=0))) == 0.0  # sticks out over the walls
 
 
@@ -94,7 +94,7 @@ def test_the_bearing_block_in_the_motors_pocket_earns_nothing():
 def test_corners_must_stay_inside_the_pocket(dx_mm, inside):
     """4 mm to spare on each side; touching the wall (4.0) or pressed 0.3 mm into it still counts."""
     objects = scene(bracket_block=in_own_pocket("bracket_block", dx=dx_mm / 1000))
-    assert M.score(objects) == pytest.approx(1 / 3 if inside else 0.0)
+    assert M.score(objects) == pytest.approx(0.25 if inside else 0.0)
 
 
 def test_a_tilted_part_resting_on_a_rim_is_not_in():
@@ -109,7 +109,7 @@ def test_upside_down_parts_count():
 
 def test_the_bracket_counts_on_any_face():
     """It is a 4 cm cube."""
-    assert M.score(scene(bracket_block=in_own_pocket("bracket_block", tilt_deg=90))) == pytest.approx(1 / 3)
+    assert M.score(scene(bracket_block=in_own_pocket("bracket_block", tilt_deg=90))) == pytest.approx(0.25)
 
 
 def posed(part, quat_xyzw, x, y, bottom_z):
@@ -143,7 +143,7 @@ def test_a_part_held_above_its_pocket_is_not_in():
 
 def test_still_moving_is_not_yet_success():
     objects = all_kitted(bearing_block=in_own_pocket("bearing_block", moving=True))
-    assert M.score(objects) == 1.0 and not M.success(objects)
+    assert M.score(objects) == pytest.approx(0.75) and not M.success(objects)
 
 
 def test_the_demo_places_each_part_over_its_own_pocket():
@@ -165,3 +165,12 @@ def test_the_demo_is_within_reach():
     for t in np.arange(0.0, plan.duration, 0.05):
         plan.action7(t)
     assert plan.worst_ik_mm < 0.5 and plan.worst_ik_deg < 0.1, (plan.worst_ik_mm, plan.worst_ik_deg)
+
+
+def test_score_never_reaches_full_marks_on_its_own():
+    assert M.score(all_kitted()) < 1.0
+
+
+def test_two_parts_in_score_a_half():
+    objects = scene(bracket_block=in_own_pocket("bracket_block"), bearing_block=in_own_pocket("bearing_block"))
+    assert M.score(objects) == pytest.approx(0.5)

@@ -38,13 +38,15 @@ pocket, but it is the wrong way round for the kit, so it doesn't count.
 
 | Outcome | Score |
 |---|---|
-| All three parts in their own pockets | 1.0 |
-| Two | 0.67 |
-| One | 0.33 |
+| All three parts in their own pockets and still, held 1 s | 1.0 |
+| All three in and still | 0.9 |
+| All three in, one still moving | 0.75 |
+| Two | 0.5 |
+| One | 0.25 |
 | None | 0 |
 
 A part in another part's pocket earns nothing for itself, and it usually blocks the part that belongs there: the
-bearing block in the motor's pocket, with the bracket in its own, scores 0.33.
+bearing block in the motor's pocket, with the bracket in its own, scores 0.25.
 
 On a real table, open the grippers and take a top-down photo.
 
@@ -53,7 +55,7 @@ On a real table, open the grippers and take a top-down photo.
   its own; the bearing block fits all three. Putting the bearing block in the motor's or the bracket's pocket scores
   nothing for it and leaves the other part nowhere to go.
 - **The turn is checked in the sim, not just on paper.** The demo carried across without turning the motor scores
-  0.67: the motor comes to rest on its pocket's walls, and the other two parts count.
+  0.5: the motor comes to rest on its pocket's walls, and the other two parts count.
 - **Low walls, tall parts.** The pocket walls stand 8 mm and the parts 4 cm, so a gripper holding a part near its top
   stays clear of the walls once the part is down.
 - **The demo lets go 4 mm above the pocket floor,** just inside the walls. Set down on the floor while still gripped,

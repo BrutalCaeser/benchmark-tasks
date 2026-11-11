@@ -123,9 +123,13 @@ def distance(objects):
 
 
 def score(objects):
-    """Partial credit (success scores 1.0): one third for each part in its own pocket. A part in another part's pocket
-    earns nothing, and usually costs the part that belonged there too."""
-    return sum(_in_pocket(part, objects[part]) for part in PARTS) / len(PARTS)
+    """Partial credit: 0.25 for each part in its own pocket, 0.9 for all three in and still; 1.0 only comes from
+    success() held for 1 s. A part in another part's pocket earns nothing, and usually costs the part that belonged
+    there too."""
+    placed = [part for part in PARTS if _in_pocket(part, objects[part])]
+    if len(placed) == len(PARTS) and all(objects[part].resting() for part in PARTS):
+        return 0.9
+    return 0.25 * len(placed)
 
 
 GRIP_BELOW_TOP = 0.012  # finger pads end 15 mm above a part's bottom: 7 mm over the pocket walls once it is seated
