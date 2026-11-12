@@ -8,7 +8,9 @@ with the counterpointer, and let go.
 """
 
 import math
+import os
 import pathlib
+import random
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
@@ -39,7 +41,12 @@ KG_Y0, KG_STEP = 30.0, 15.0  # the 0 kg notch, then one notch per kilogram, 0 to
 G_Y0, G_SPAN = 30.0, 250.0  # 0 g on the small weight's bar; 1,000 g is G_SPAN further
 M_KG = A / KG_STEP  # kg: moving it one notch balances 1 kg more in the tray
 M_G = A / G_SPAN  # kg: moving it G_SPAN balances 1 kg more
-BABY = 3.62  # the manikin, kg
+# the manikin's mass, kg: drawn afresh each time the task file loads (each trial), uniformly from a newborn's range, to
+# the gram. Nothing in the scene shows it, so the reading has to come from the beam. WEIGH_MANIKIN_KG sets it, to check a
+# trial at a known mass.
+MASS_RANGE = (2.5, 4.5)
+BABY = float(os.environ.get("WEIGH_MANIKIN_KG") or round(random.SystemRandom().uniform(*MASS_RANGE), 3))
+print(f"weigh_baby: the manikin weighs {BABY:.3f} kg in this trial (for the record; the policy never sees it)", flush=True)
 TRAY_MASS = 0.6
 BEAM_MASS = 0.9
 STOP = math.radians(1.2)  # the beam rocks between these stops
@@ -240,8 +247,14 @@ def success(objects) -> bool:
     return _complete(measures(objects))
 
 
-# -- the scripted demo: the right arm moves the large weight to 3 kg, then the small weight to 620 g ----------------
-# It goes straight to the manikin's known reading; a policy has to find it from the pointer against the counterpointer.
+# -- the scripted demo: it weighs the manikin from the pointer, as a person does --------------------------------------
+# yam_scripted plays demo() open loop from the layout, and the manikin's mass is not in the layout. So the demo sets a
+# weight, lets go, and holds its right wrist camera over the beam's far end (VIEW), where the red pointer shows against
+# the black counterpointer; _look() reads those frames and says whether the beam tips down (the reading too high) or
+# up, and writes the next moves into the waypoints still ahead (yam_scripted reads them at every control step).
+# The large weight: 3 kg first (the manikin weighs at least 2.5), then one notch up or down; then back one if it
+# tipped. The small weight: halving the bracket from 0 to 1,000 g six times leaves a 16 g bracket, and it ends in the
+# middle of it.
 OPEN_NARROW = -0.010  # 20 mm between the fingers: clear of the other bar's weight
 # WHY fully closed on the large weight's tab: pinched to a 5 mm gap, the fingers slid up the 8 mm tab and the 400 g
 # weight rose 0.3 mm of a 3 mm lift, its key still between the notch bars (traced, official sim, 2026-11-07)
@@ -252,37 +265,189 @@ LIFT = 0.015
 AXIS_Z = TOP + BAR_Z / 1000
 KG_TCP_Z = AXIS_Z + (3 + KG_UP + KG_WALL) / 1000 + 0.013 + 0.002  # fingertips 2 mm above the sleeve
 G_TCP_Z = AXIS_Z + (3 + G_UP + G_WALL) / 1000 + 0.013 + 0.002
-KG_AT = (int(BABY), round((BABY - int(BABY)) * 1000))  # 3 kg, 620 g
-KG_FROM = _to_world(KG_X, KG_Y0 + KG_START * KG_STEP)
-# WHY 3 mm past the 3 kg notch: carried along its bar, the weight stopped 2.9 to 4.1 mm short of the arm's target
-# (traced, official sim, 2026-11-07); the notch bars' round tops take up the rest
+UP = 0.04
+# WHY 3 mm toward the bar's far end, whichever way the weight moves: carried along its bar, it came to rest 2.4 mm nearer
+# the pivot than the arm's target going out and 1.5 mm nearer coming back; aimed 3 mm past the notch on the way back,
+# its key landed on the notch's near bar and slid off between notches (traced, official sim, 2026-11-12). The notch
+# bars' round tops take up the rest.
 KG_AIM_PAST = 3.0
-KG_TO = _to_world(KG_X, NOTCH_Y[KG_AT[0]] + KG_AIM_PAST)
-G_FROM = _to_world(G_X, G_Y0 + G_START / 1000 * G_SPAN)
-# WHY 0.5 mm past 620 g: slid along its bar, the small weight stopped 0.4 mm short of the arm's target (traced,
-# official sim, 2026-11-07)
-G_AIM_PAST = 0.5
-G_TO = _to_world(G_X, G_Y0 + KG_AT[1] / 1000 * G_SPAN + G_AIM_PAST)
+# WHY 1 mm toward the far end: slid along its bar, the small weight stopped 1.1 to 1.3 mm nearer the pivot than the
+# arm's target (traced, official sim, 2026-11-12)
+G_AIM_PAST = 1.0
+# WHY every move ends outward: slid back toward the pivot, the small weight trailed the fingers by 4 to 7 mm (16 to 31 g;
+# aimed at 250 g it rested at 278 g, official sim, 2026-11-12), while slid outward it trails by about 1 mm. So it goes
+# 40 g under the target first and comes out onto it.
+G_UNDER = 40.0
+KG_FIRST, KG_TRIES = 3, 3  # the first notch tried, and how many notch moves the plan has room for
+G_HALVINGS = 6
+VIEW, VIEW_YAW = (0.43, -0.22, TOP + 0.14), -0.3  # the right wrist camera sees the pointer beside the counterpointer
+LOOK_S, READ_S, MARGIN_S = 2.2, 1.0, 0.15  # held at VIEW; frames of the last READ_S s, ending MARGIN_S before it ends
+# The pointer in the right wrist camera at VIEW (pixels, x then y, centre of its red pixels) with the beam on its up
+# stop and on its down stop, from runs with the weights set to tip it each way (official sim, 2026-11-12: about 69 and
+# 50 red pixels, 13 px apart); level is halfway.
+POINTER_UP, POINTER_DOWN = (43.2, 59.5), (55.0, 53.5)
 
 
-def demo():
-    up = 0.04
-    right = [
-        Waypoint(2.0, (*KG_FROM, KG_TCP_Z + up), OPEN_NARROW, "over the large weight"),
-        Waypoint(1.5, (*KG_FROM, KG_TCP_Z), OPEN_NARROW, "down to its tab"),
-        Waypoint(0.8, (*KG_FROM, KG_TCP_Z), KG_PINCH, "pinch the tab"),
-        Waypoint(1.0, (*KG_FROM, KG_TCP_Z + LIFT), KG_PINCH, "lift it off the notch"),
-        Waypoint(3.0, (*KG_TO, KG_TCP_Z + LIFT), KG_PINCH, "slide it to 3 kg"),
-        Waypoint(1.5, (*KG_TO, KG_TCP_Z + 0.002), KG_PINCH, "down onto the notch"),
-        Waypoint(0.8, (*KG_TO, KG_TCP_Z + 0.002), OPEN_NARROW, "let go: it settles into the notch"),
-        Waypoint(1.0, (*KG_TO, KG_TCP_Z + up), OPEN_NARROW, "up"),
-        Waypoint(2.0, (*G_FROM, G_TCP_Z + up), OPEN_NARROW, "over the small weight"),
-        Waypoint(1.5, (*G_FROM, G_TCP_Z), OPEN_NARROW, "down to its tab"),
-        Waypoint(0.8, (*G_FROM, G_TCP_Z), G_PINCH, "pinch the tab"),
-        Waypoint(5.0, (*G_TO, G_TCP_Z), G_PINCH, "slide it to 620 g"),
-        Waypoint(0.8, (*G_TO, G_TCP_Z), OPEN_NARROW, "let go"),
-        Waypoint(1.0, (*G_TO, G_TCP_Z + up), OPEN_NARROW, "up"),
-        Waypoint(6.0, (0.20, -0.30, TOP + 0.20), FINGER_OPEN, "away, hands off while the beam settles"),
+def kg_world(notch, aim=0.0):
+    return _to_world(KG_X, NOTCH_Y[notch] + aim)
+
+
+def g_world(grams, aim=0.0):
+    return _to_world(G_X, G_Y0 + grams / 1000 * G_SPAN + aim)
+
+
+def pointer(image):
+    """The centre (x, y) of the red pointer's pixels in a right wrist camera frame, or None if fewer than 4 show."""
+    a = np.asarray(image, dtype=int)
+    r, g, b = a[..., 0], a[..., 1], a[..., 2]
+    ys, xs = np.nonzero((r > 110) & (g < 70) & (b < 70) & (r > 2 * g))
+    return (float(xs.mean()), float(ys.mean())) if len(xs) >= 4 else None
+
+
+def tips_down(centres) -> bool:
+    """Whether the pointer sat below level, from its centres in the frames read: their mean, along the line from where
+    it shows on the up stop to where it shows on the down stop, past the midpoint."""
+    up, down = np.array(POINTER_UP), np.array(POINTER_DOWN)
+    c = np.mean(np.array(centres), axis=0)
+    return float(np.dot(c - (up + down) / 2, down - up)) > 0.0
+
+
+def _kg_move(frm, to):
+    """Waypoints that take the large weight from notch frm to notch to and come back to VIEW (all holds if equal)."""
+    if frm == to:
+        return [Waypoint(d, VIEW, OPEN_NARROW, "hold: the large weight stays", VIEW_YAW) for d in _KG_TIMES]
+    a, b = kg_world(frm), kg_world(to, KG_AIM_PAST)
+    return [
+        Waypoint(_KG_TIMES[0], (*a, KG_TCP_Z + UP), OPEN_NARROW, f"over the large weight at {frm} kg"),
+        Waypoint(_KG_TIMES[1], (*a, KG_TCP_Z), OPEN_NARROW, "down to its tab"),
+        Waypoint(_KG_TIMES[2], (*a, KG_TCP_Z), KG_PINCH, "pinch the tab"),
+        Waypoint(_KG_TIMES[3], (*a, KG_TCP_Z + LIFT), KG_PINCH, "lift it off the notch"),
+        Waypoint(_KG_TIMES[4], (*b, KG_TCP_Z + LIFT), KG_PINCH, f"carry it to {to} kg"),
+        Waypoint(_KG_TIMES[5], (*b, KG_TCP_Z + 0.002), KG_PINCH, "down onto the notch"),
+        Waypoint(_KG_TIMES[6], (*b, KG_TCP_Z + 0.002), OPEN_NARROW, "let go: it settles into the notch"),
+        Waypoint(_KG_TIMES[7], (*b, KG_TCP_Z + UP), OPEN_NARROW, "up"),
+        Waypoint(_KG_TIMES[8], VIEW, OPEN_NARROW, "to the pointer", VIEW_YAW),
     ]
+
+
+def _g_move(frm, to):
+    """Waypoints that slide the small weight from frm to to grams and come back to VIEW. It always ends on an outward
+    slide: first past the target toward the pivot, then out onto it."""
+    a, b = g_world(frm), g_world(to, G_AIM_PAST)
+    under = g_world(max(0.0, to - G_UNDER), G_AIM_PAST)
+    return [
+        Waypoint(_G_TIMES[0], (*a, G_TCP_Z + UP), OPEN_NARROW, f"over the small weight at {frm:.0f} g"),
+        Waypoint(_G_TIMES[1], (*a, G_TCP_Z), OPEN_NARROW, "down to its tab"),
+        Waypoint(_G_TIMES[2], (*a, G_TCP_Z), G_PINCH, "pinch the tab"),
+        Waypoint(_G_TIMES[3], (*under, G_TCP_Z), G_PINCH, f"slide it to just under {to:.0f} g"),
+        Waypoint(_G_TIMES[4], (*b, G_TCP_Z), G_PINCH, f"slide it to {to:.0f} g"),
+        Waypoint(_G_TIMES[5], (*b, G_TCP_Z), OPEN_NARROW, "let go"),
+        Waypoint(_G_TIMES[6], (*b, G_TCP_Z + UP), OPEN_NARROW, "up"),
+        Waypoint(_G_TIMES[7], VIEW, OPEN_NARROW, "to the pointer", VIEW_YAW),
+    ]
+
+
+_KG_TIMES = (1.5, 1.0, 0.6, 0.8, 2.0, 1.0, 0.6, 0.6, 1.5)
+# WHY a quick let-go and lift: the weights are still from the end of the slide, so the 1 s hold that ends a trial can
+# start while the fingers are still on the tab; at 0.6 s each, a run ended with the fingers just opening round it
+# (official sim, 2026-11-12). At 0.3 and 0.4 s the hand is 4 cm clear before 1 s has passed.
+_G_TIMES = (1.5, 1.0, 0.6, 2.4, 1.0, 0.3, 0.4, 1.5)
+_plan = {"steps": [], "at": 0, "kg": 0, "g": (0.0, 1000.0), "g_at": 0.0, "reads": [], "log": []}
+
+
+def _fill(slots, waypoints):
+    for slot, w in zip(slots, waypoints):
+        slot.pos, slot.finger, slot.label, slot.yaw = w.pos, w.finger, w.label, w.yaw
+
+
+def _decide(down):
+    """After a look: the next move, written into the next step's slots."""
+    p = _plan
+    i, steps = p["at"], p["steps"]
+    kind, _, _ = steps[i]
+    p["log"].append((kind, p["kg"], p["g_at"], down))
+    if i + 1 >= len(steps):
+        return
+    nxt_kind, slots, _ = steps[i + 1]
+    if kind == "kg":
+        tried = sum(1 for k, *_ in steps[:i + 1] if k == "kg")
+        if tried == 1:
+            to = p["kg"] - 1 if down else p["kg"] + 1
+        elif p["kg"] > KG_FIRST and down:  # tipped at 4 kg: back one
+            to = p["kg"] - 1
+        else:
+            to = p["kg"]
+        if nxt_kind == "kg":
+            _fill(slots, _kg_move(p["kg"], to))
+            p["kg"] = to
+            return
+    if kind == "g":
+        lo, hi = p["g"]
+        p["g"] = (lo, p["g_at"]) if down else (p["g_at"], hi)
+    lo, hi = p["g"]
+    to = (lo + hi) / 2
+    _fill(slots, _g_move(p["g_at"], to))
+    p["g_at"] = to
+
+
+def _look(observation):
+    """During each look window, collect the pointer's centre; after it, decide the next move."""
+    p = _plan
+    if p["at"] >= len(p["steps"]) or "right_cam" not in observation.images:
+        return
+    t = float(observation.state_time)
+    start, end = p["steps"][p["at"]][2]
+    if start <= t <= end:
+        c = pointer(np.asarray(observation.images["right_cam"]))
+        if c is not None:
+            p["reads"].append(c)
+    elif t > end:
+        down = tips_down(p["reads"]) if p["reads"] else False
+        print(f"weigh_baby demo: step {p['at']} ({p['steps'][p['at']][0]}), large weight {p['kg']} kg, small "
+              f"{p['g_at']:.0f} g: beam tips {'down' if down else 'up'} ({len(p['reads'])} frames)", flush=True)
+        _decide(down)
+        p["at"] += 1
+        p["reads"] = []
+
+
+def _watch():
+    """Hand each observation yam_scripted acts on to _look() (the policy is imported by the time it calls demo())."""
+    scripted = sys.modules.get("yam_arena.scripted")
+    if scripted is None:
+        return
+    policy = scripted.YamScriptedPolicy
+    policy._weigh_look = staticmethod(_look)
+    if not getattr(policy.act, "_weigh_watch", False):
+        act = policy.act
+
+        def act_and_look(self, observation):
+            type(self)._weigh_look(observation)
+            return act(self, observation)
+
+        act_and_look._weigh_watch = True
+        policy.act = act_and_look
+
+
+def demo(delay=0.0):
+    """``delay`` (s) slows the right arm's first move: the plan must not depend on starting at once."""
+    right = _kg_move(0, KG_FIRST)
+    right[0] = Waypoint(right[0].duration + delay, right[0].pos, right[0].finger, right[0].label)
+    look = lambda: Waypoint(LOOK_S, VIEW, OPEN_NARROW, "watch the pointer against the counterpointer", VIEW_YAW)
+    steps, t = [], 0.0
+    right.append(look())
+    t = sum(w.duration for w in right)
+    steps.append(("kg", [], (t - MARGIN_S - READ_S, t - MARGIN_S)))
+    for kind, n in (("kg", KG_TRIES - 1), ("g", G_HALVINGS)):
+        for _ in range(n):
+            slots = [Waypoint(w.duration, VIEW, OPEN_NARROW, "wait for the pointer", VIEW_YAW)
+                     for w in (_kg_move(0, 1) if kind == "kg" else _g_move(0.0, 1.0))]
+            right += slots + [look()]
+            t = sum(w.duration for w in right)
+            steps.append((kind, slots, (t - MARGIN_S - READ_S, t - MARGIN_S)))
+    final = [Waypoint(w.duration, VIEW, OPEN_NARROW, "wait", VIEW_YAW) for w in _g_move(0.0, 1.0)]
+    right += final + [Waypoint(4.0, (0.20, -0.30, TOP + 0.20), FINGER_OPEN, "away, hands off while the beam settles")]
+    steps.append(("end", final, (math.inf, math.inf)))
+    _plan.update(steps=steps, at=0, kg=KG_FIRST, g=(0.0, 1000.0), g_at=0.0, reads=[], log=[])
+    _watch()
     left = [Waypoint(1.0, (0.20, 0.25, TOP + 0.20), FINGER_OPEN, "out of the way")]
     return {"left": left, "right": right}

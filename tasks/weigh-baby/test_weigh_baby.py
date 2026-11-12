@@ -6,7 +6,9 @@ from this folder:
 
 import json
 import math
+import os
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -15,6 +17,8 @@ from yam_arena import station
 from yam_arena.demo import ArmPlan
 from yam_arena.task_file import ObjectState, load
 
+# the manikin's mass is drawn at random each load; these checks fix it at 3.62 kg (and load others where they need to)
+os.environ["WEIGH_MANIKIN_KG"] = "3.62"
 TASK = load(Path(__file__).with_name("weigh_baby.py"))
 M = TASK.module
 from mechanism import MechanismState  # noqa: E402  (the task file puts its folder on the path)
@@ -115,26 +119,106 @@ def test_layout():
     assert len(M.NOTCH_Y) == 17 and M.NOTCH_Y[-1] <= M.BAR_Y1 - 6  # 0 to 16 kg, the weight's sleeve on the bar
     assert M.G_Y0 + M.G_SPAN <= M.BAR_Y1 - 5
     assert M.BAR_Z < M.PZ  # both weights hang below the pivot
-    assert M.KG_AT == (3, 620)
 
 
-def test_demo_reaches_and_aims_at_the_reading():
+def _load_with(mass):
+    """The task module loaded fresh, with the manikin's mass set (None: drawn at random)."""
+    old = os.environ.pop("WEIGH_MANIKIN_KG", None)
+    if mass is not None:
+        os.environ["WEIGH_MANIKIN_KG"] = str(mass)
+    try:
+        return load(Path(__file__).with_name("weigh_baby.py")).module
+    finally:
+        os.environ.pop("WEIGH_MANIKIN_KG", None)
+        if old is not None:
+            os.environ["WEIGH_MANIKIN_KG"] = old
+
+
+def test_the_mass_is_drawn_for_each_trial_within_the_stated_range():
+    masses = [_load_with(None).BABY for _ in range(12)]
+    assert all(2.5 <= m <= 4.5 for m in masses)
+    assert len(set(masses)) > 6  # it varies from trial to trial
+    assert M.MASS_RANGE == (2.5, 4.5)
+
+
+def test_the_score_follows_the_actual_mass_so_no_preset_works():
+    m = _load_with(2.71)
+    assert m.score(state(2, 710)) == 0.9 and m.success(state(2, 710))
+    assert m.score(state(3, 620)) == 0.0  # the 3.62 kg reading: a wrong notch, 910 g off
+    assert m.score(state(2, 500)) == 0.25  # the right notch, 210 g off
+    assert m.score(state(2, 620)) == 0.5  # 90 g off
+    m = _load_with(4.05)
+    assert m.score(state(4, 50)) == 0.9
+    assert m.score(state(3, 620)) == 0.0
+    # a preset reading is within 20 g of the drawn mass for 2 % of trials at most
+    assert 2 * M.DONE / (M.MASS_RANGE[1] - M.MASS_RANGE[0]) <= 0.02
+
+
+def test_any_notch_counts_if_the_beam_balances():
+    m = _load_with(3.004)
+    assert m.score(state(2, 1000)) == 0.9  # 2 kg + 1,000 g balances 3.000 kg as well as 3 kg + 0 g does
+    assert m.score(state(3, 0)) == 0.9
+
+
+def _frame(down):
+    """A right wrist camera frame from VIEW with the red pointer where it shows on the down or the up stop."""
+    img = np.full((176, 320, 3), 200, dtype=np.uint8)
+    x, y = M.POINTER_DOWN if down else M.POINTER_UP
+    img[int(y) - 6:int(y) + 6, int(x) - 2:int(x) + 2] = (200, 30, 30)
+    return img
+
+
+def _run_search(mass, demo):
+    """Play the demo's looks against a beam that tips down when the reading is above ``mass``; the final reading."""
+    plan = M._plan
+    end = max(w for k, _, (a, w) in plan["steps"] if k != "end") + 1.0
+    for t in np.arange(0.0, end, 0.05):
+        reading = plan["kg"] + plan["g_at"] / 1000
+        M._look(SimpleNamespace(state_time=t, images={"right_cam": _frame(reading > mass)}))
+    return plan["kg"] + plan["g_at"] / 1000, plan
+
+
+def test_the_pointer_reader():
+    assert M.pointer(_frame(True)) == pytest.approx(M.POINTER_DOWN, abs=1.0)
+    assert M.tips_down([M.pointer(_frame(True))]) and not M.tips_down([M.pointer(_frame(False))])
+    assert M.pointer(np.full((176, 320, 3), 200, dtype=np.uint8)) is None
+
+
+@pytest.mark.parametrize("mass", [2.5, 2.501, 2.62, 2.998, 3.0, 3.004, 3.333, 3.62, 3.996, 4.0, 4.012, 4.37, 4.5])
+def test_the_demo_finds_the_reading_from_the_pointer_alone(mass):
     demo = TASK.demo()
+    final, plan = _run_search(mass, demo)
+    assert abs(final - mass) <= 0.010, (mass, final, plan["log"])
+    # every move it made went into waypoints still ahead of it: the last one aims at the final reading
+    slide = [w for w in demo["right"] if w.label.startswith("slide it to")][-1]
+    assert slide.label == f"slide it to {plan['g_at']:.0f} g"
+
+
+def test_the_demo_reads_only_the_camera():
+    # the plan knows nothing of the mass: with the camera showing nothing it reads "up" and climbs one notch only
+    TASK.demo()
+    plan = M._plan
+    for t in np.arange(0.0, 40.0, 0.05):
+        M._look(SimpleNamespace(state_time=t, images={"right_cam": np.full((176, 320, 3), 200, dtype=np.uint8)}))
+    assert plan["kg"] == M.KG_FIRST + 1  # read as "tips up" each time: one notch up, and no further
+    assert "BABY" not in M.demo.__code__.co_names and "BABY" not in M._look.__code__.co_names
+    assert "BABY" not in M._decide.__code__.co_names
+
+
+def test_demo_reaches_and_fits_the_run_limit():
+    demo = TASK.demo()
+    _run_search(3.62, demo)  # fill the moves in, as a run would
     for arm in ("left", "right"):
         plan = ArmPlan(demo[arm], station.BASES[arm])
         for t in np.arange(0.0, plan.duration, 0.05):
             plan.action7(t)
         assert plan.worst_ik_mm < 2.0 and plan.worst_ik_deg < 2.0, arm
-    right = demo["right"]
-    assert right[4].pos[:2] == pytest.approx(M.KG_TO) and right[11].pos[:2] == pytest.approx(M.G_TO)
-    assert (M.KG_TO[0] - M.PIVOT_XY[0]) * 1000 == pytest.approx(M.NOTCH_Y[3] + M.KG_AIM_PAST)
-    assert M.KG_AIM_PAST < M.KG_STEP / 2  # still nearest the 3 kg notch
-    assert (M.G_TO[0] - M.PIVOT_XY[0]) * 1000 == pytest.approx(M.G_Y0 + 0.62 * M.G_SPAN + M.G_AIM_PAST)
-    assert M.G_AIM_PAST / M.G_SPAN * 1000 < 20  # even with no drag, the demo's reading stays inside the 20 g band
-    duration = sum(w.duration for w in right)
+    assert M.KG_AIM_PAST < M.KG_STEP / 2  # still nearest the aimed notch
+    assert M.G_AIM_PAST / M.G_SPAN * 1000 < 20  # even with no drag, the reading stays inside the 20 g band
+    duration = sum(w.duration for w in demo["right"])
     spec = json.loads(Path(__file__).with_name("task.json").read_text())
     limit = int(spec["run_limit"].split()[0].replace(",", ""))
-    assert duration < limit / 20 * 0.6
+    assert duration < limit / 20 * 0.7
 
 
 def test_setup_text_matches_the_layout():
@@ -152,7 +236,8 @@ def test_setup_text_matches_the_layout():
                   f"0 kg at x {cm_x(M.KG_Y0)}, then one every {M.KG_STEP / 10:g} cm to 16 kg at x {cm_x(M.NOTCH_Y[16])}",
                   f"0 g at x {cm_x(M.G_Y0)} to 1,000 g at x {cm_x(M.G_Y0 + M.G_SPAN)}",
                   f"{round(M.M_KG * 1000)} g. The small", f"{round(M.M_G * 1000)} g. Both", f"at x {cm_x(M.TARE_Y)}",
-                  f"rocks {math.degrees(M.STOP):g} degrees", f"{M.A:g} mm from the pivot", f"a {M.BABY:g} kg vinyl"):
+                  f"rocks {math.degrees(M.STOP):g} degrees", f"{M.A:g} mm from the pivot",
+                  f"from {M.MASS_RANGE[0]:g} to {M.MASS_RANGE[1]:g} kg to the gram"):
         assert words in setup, words
 
 

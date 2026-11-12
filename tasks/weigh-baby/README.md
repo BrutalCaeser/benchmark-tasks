@@ -1,20 +1,26 @@
 # Weigh an infant manikin on a beam scale: set the kilogram notch, then slide the gram weight until the pointer is level
 
 A mechanical baby scale stands on the table with an infant training manikin in its tray and both sliding weights at 0.
-The robot weighs the manikin the way a nurse weighs a baby on a seca 725: it moves the large sliding weight from notch to notch
-until the beam tips, backs it one notch, then slides the small weight along its gram bar until the pointer floats level
-with the counterpointer, and lets go. The steps are from the seca 725 instructions for use
+The robot weighs the manikin the way a medical assistant or nurse weighs a baby on a seca 725: it moves the large
+sliding weight from notch to notch until the beam tips, backs it one notch, then slides the small weight along its gram
+bar until the pointer floats level with the counterpointer, and lets go. Weighing patients is a core medical-assistant
+duty: O*NET's task list for Medical Assistants (31-9092.00) includes "Interview patients to obtain medical information
+and measure their vital signs, weight, and height." The steps are from the seca 725 instructions for use
 ([PDF](https://www.seca.com/fileadmin/documents/manual/seca_man_725_745_int_DE_EN_FR_IT_ES_PT_PL.pdf), "Weighing"):
 "Move the large sliding weight until pointer and counterpointer are at approximately the same level", then "Move the
 small sliding weight until pointer and counterpointer are at exactly the same level". The same page warns: "If you touch
 the scale, weight will not be measured correctly."
 
-The answer is nowhere in the scene: the robot has to find it from the beam. The large weight's notch decides the
-kilograms (one notch off is a kilogram wrong), and the small weight has to stop within 5 mm of the balance point on its
-25 cm bar: 20 g. The only feedback is the pointer, which moves about 2 mm per 10 g against a counterpointer that does
-not move. The beam floats only within about 30 g of the balance; 24 g past it, the beam already tips 0.86 degrees
-toward its stop (official sim, inspect-robots 0.60.0, 2026-11-07). So the robot has to move a weight, let go, watch the pointer, and move it
-again.
+**The manikin's mass changes every trial.** It is drawn at random when the task file loads, uniformly from 2.5 to
+4.5 kg to the gram, and nothing in the scene shows it, so no preset of the weights can stand in for weighing: a fixed
+reading lands within the 20 g band in at most 2 % of trials. The score is computed against that trial's mass. To run a
+trial at a known mass (for checking), set `WEIGH_MANIKIN_KG`, for example `WEIGH_MANIKIN_KG=3.62`.
+
+The large weight's notch decides the kilograms (one notch off is a kilogram wrong), and the small weight has to stop
+within 5 mm of the balance point on its 25 cm bar: 20 g. The only feedback is the pointer, which moves about 2 mm per
+10 g against a counterpointer that does not move. The beam floats only within about 30 g of the balance; 24 g past it,
+the beam already tips 0.86 degrees toward its stop (official sim, inspect-robots 0.60.0, 2026-11-07). So the robot has
+to move a weight, let go, watch the pointer, and move it again.
 
 ## Run a trial
 On a machine with the official simulator (the Robocurve Brev launchable, or `yam-isaac-lab-arena`'s `setup.sh`), with
@@ -27,13 +33,13 @@ installing.
 inspect-robots run --embodiment yam_arena --policy dream \
   -E task=weigh_baby.py -E object_jitter=0 -E control_hz=20 -E cam_width=320 -E cam_height=176 \
   --instruction "Weigh the infant manikin on the beam scale. Move the large sliding weight one notch at a time until the beam tips down, then back one notch. Then slide the small weight along its bar until the red pointer floats level with the black counterpointer, and let go of both weights." \
-  --scorer task_score --max-steps 2400 --store-frames --log-dir ~/yam-eval/weigh-baby-dream
+  --scorer task_score --max-steps 3600 --store-frames --log-dir ~/yam-eval/weigh-baby-dream
 
 # The scripted demo, which reaches full score
 inspect-robots run --embodiment yam_arena --policy yam_scripted \
   -E task=weigh_baby.py -E object_jitter=0 -E control_hz=20 -E cam_width=320 -E cam_height=176 \
   --instruction "Weigh the infant manikin on the beam scale. Move the large sliding weight one notch at a time until the beam tips down, then back one notch. Then slide the small weight along its bar until the red pointer floats level with the black counterpointer, and let go of both weights." \
-  --scorer task_score --max-steps 2400 --store-frames --log-dir ~/yam-eval/weigh-baby-demo
+  --scorer task_score --max-steps 3600 --store-frames --log-dir ~/yam-eval/weigh-baby-demo
 
 # One MP4 per camera, next to each run's frames
 for log in ~/yam-eval/weigh-baby-dream/*.json; do inspect-robots video "$log"; done
@@ -50,16 +56,19 @@ small weight's whole bar, balances 1 kg in the tray. The large weight **sits in 
 
 | State | Score |
 |---|---|
-| Large weight not sitting in a notch: held up, between notches, or in a wrong notch (at least 380 g off) | 0 |
-| Large weight in the 3 kg notch, reading more than 100 g from 3.62 kg | 0.25 |
+| Large weight not sitting in a notch: held up or between notches | 0 |
+| In a notch, reading more than 100 g from the manikin's mass: in the notch of its whole kilograms | 0.25 |
+| The same, in any other notch | 0 |
 | Reading within 100 g | 0.5 |
 | Reading within 40 g | 0.75 |
 | Reading within 20 g, beam floating clear of both stops, both weights still | 0.9 |
 | The same, held for 1 s (the trial ends) | 1.0 |
 
-Possible scores: 0, 0.25, 0.5, 0.75, 0.9, 1.0. The start (both weights at 0) scores 0. The score reads the weights, not the
-beam, so holding the beam level or pressing on the tray earns nothing. It cannot see whether a hand is still on a
-weight. On a real scale: read the two weights and compare with the manikin's mass, and photograph the pointer against
+Possible scores: 0, 0.25, 0.5, 0.75, 0.9, 1.0. The start (both weights at 0) scores 0. Any notch counts if the reading
+is right: 2 kg with the small weight at 1,000 g balances the same as 3 kg at 0 g. The score reads the weights, not the
+beam, so holding the beam level or pressing on the tray earns nothing. It does not see the hands; a weight still held
+has to sit at the right reading with the beam floating clear of its stops, which needs the mass, so holding one is no
+way around weighing. On a real scale: read the two weights and compare with the manikin's mass, and photograph the pointer against
 the counterpointer.
 
 ## Design notes
@@ -76,23 +85,37 @@ the counterpointer.
 - **The knife edge has no friction**, like a real scale's hardened knife edge.
 - **The notches.** Each kilogram notch is two round bars across the bar's top; the large weight's key stands between
   them. The weight lifts out to move and sets back in (a real one is pulled forward to release it).
-- **The demo** moves the large weight to the 3 kg notch and the small weight to 620 g, the manikin's known reading. A
-  policy has to find that reading from the pointer, which the wrist cameras see beside the counterpointer.
+- **The demo weighs from the camera, not from the answer.** `demo()` never reads the mass. After each move the right
+  arm lets go and holds its wrist camera at one pose over the beam's far end, where the red pointer shows against the
+  black counterpointer; the demo finds the red pixels in the last second of frames and calls the beam "down" when they
+  sit past the midpoint between where they show on the up stop and on the down stop (13 px apart, measured in the
+  official sim). It tries the 3 kg notch first (the manikin weighs at least 2.5 kg), then one notch up or down, and
+  backs off one notch if the beam tipped; then it halves the small weight's bracket six times, from 0 to 1,000 g, and
+  leaves the weight in the middle of the last 16 g bracket. The moves are written into the waypoints still ahead
+  (yam_scripted reads them every control step) through a wrapper on the scripted policy's `act()`.
 - **Sizes.** The scale's footprint is the seca 725's 552 by 312 mm and its capacity is 16 kg, as in the manual's
   technical data. The beam's proportions, the weights' masses and the 25 cm gram bar follow from the lever ratio, not
   from seca drawings.
 
 ## Runtime and seeds
-- Per trial on one L40S, inspect-robots 1.0.0: the scripted demo reaches 1.0 at step 439 (22 s of simulated time,
-  about 2 min of wall clock with stored frames). Dream-1 uses all 2,400 steps and scored 0.0: its right arm reached
-  along the beam toward the far end and hovered there, and its left arm stayed near its base (official runs,
-  2026-11-07 and 2026-11-09).
-- Timing: with every move of the demo starting 0.05 s or 0.10 s later, it still reaches 1.0 (readings 3.6149 and
-  3.6145 kg; inspect-robots 1.0.0, 2026-11-09).
-- One fixed layout: `-E object_jitter=0`, so the seed doesn't change the start.
+- Per trial on one L40S, inspect-robots 1.0.0, official settings (2026-11-12). The scripted demo reached 1.0 with the
+  mass drawn at random (3.451 kg; 1,728 steps, 86 s of simulated time) and at set masses across the range: 2.505,
+  3.013 (13 g above a whole kilogram), 4.358 and 4.49 kg. It also reached 1.0 with every move starting 0.05 s late
+  (3.375 kg) and 0.10 s late (4.424 kg). Each trial ends once the reading is within 20 g with the beam floating and
+  the weights still for 1 s, so some end before the last halving.
+- The old fixed demo (3 kg and 620 g, the answer for a 3.62 kg manikin) scores 0 against a 2.95 kg manikin: a preset
+  doesn't weigh.
+- Dream-1 used all 3,600 steps and scored 0.0 (manikin 3.861 kg): its right arm moved over the beam's far end and its
+  left arm stayed near its base.
+- Two demo fixes came from these runs, both traced in the official sim: the large weight comes to rest about 2 mm
+  nearer the pivot than the arm's target whichever way it moves, so it is aimed 3 mm toward the far end; and the small
+  weight trails the fingers 4 to 7 mm when slid toward the pivot but about 1 mm when slid outward, so every move ends
+  on an outward slide.
+- One fixed layout: `-E object_jitter=0`, so the seed doesn't change the start; only the manikin's mass changes.
 - `test_weigh_baby.py` checks the scoring without a GPU (`python -m pytest -q test_weigh_baby.py`): the start, every
-  credit band either side, 0.9 until held and never 1.0 from `score()`, a wrong notch, a weight held up or between
-  notches, the beam on a stop, moving weights, seating and the reading on a tilted beam, the counterweight's balance,
-  the knife edge and hanger, the weights' clearance from the scale's body, the layout, the setup text's positions,
-  and the demo's reach and aims. A mutation check (22 deliberate breaks of the scorer, layout and demo, each run
-  against the tests) catches 22 of 22.
+  credit band either side, 0.9 until held and never 1.0 from `score()`, a weight held up or between notches, the beam
+  on a stop, moving weights, seating and the reading on a tilted beam, the mass drawn within its range and varying,
+  the score following the drawn mass (a preset fails), any notch counting when the beam balances, the counterweight's
+  balance, the knife edge and hanger, the weights' clearance from the scale's body, the layout, the setup text, the
+  demo's pointer reader, its search played against a simulated beam at 13 masses from 2.5 to 4.5 kg (each within
+  10 g), that it never reads the mass, and its reach and length.
