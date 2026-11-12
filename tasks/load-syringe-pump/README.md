@@ -40,44 +40,63 @@ The run prints `task_score` at the end. The trial ends at 1.0 once the syringe i
 plunger and everything has been still for 1 s; otherwise it scores the last step.
 
 ## Scoring
-The syringe is **in the cradle** when its barrel's axis is within 3 mm of the cradle's centre line sideways, at most
-15 mm above its seat and within 15 degrees of the cradle's line. It is **seated** when the axis is within 1 mm of its
-seat, level within 1.5 degrees, and the flange's centre is within 0.8 mm of the slot's. The plunger is **pushed in**
-when its stopper has moved more than 1 mm toward the nose.
+The syringe is **in the cradle** when its barrel's nose end rests on the cradle's rods (the axis there within 3 mm of
+the cradle's centre line sideways, 2.5 mm of its seated height and 5 mm of its seated place along the cradle) and the barrel is within 15 degrees of the cradle's
+line. It is **seated** when the axis is within 1 mm of its seat (sideways and up), level and square to the cradle within
+1.5 degrees, and the flange's centre is within 0.8 mm of the slot's. The plunger is **in the barrel** when its stopper is
+within 1 mm of the axis and its rod within 5 degrees of it.
 
 | State | Score |
 |---|---|
-| Plunger pushed in, at any point of the rest: a dose given | 0 |
-| Syringe not in the cradle: on its stands, held above, off the side | 0 |
+| Plunger pushed in more than 1 mm at any point (a dose given), even if pulled back later | 0 |
+| Plunger drawn back more than 3 mm at any point, or out of the barrel | 0 |
+| Syringe not in the cradle: on its stands, held above, off the side or off the rods' end, turned end for end | 0 |
 | In the cradle, not seated: flange on the body beside its slot, syringe cocked | 0.2 |
-| Seated, driver still back | 0.5 |
-| Seated, driver within 5 mm of the thumb disc | 0.75 |
-| Seated, driver within 1 mm, everything still, held 1 s | 1.0 |
+| Seated, driver still back (or its face more than 0.2 mm past the thumb disc: it holds nothing) | 0.5 |
+| Seated, driver within 5 mm short of the thumb disc | 0.75 |
+| Seated, driver from 1 mm short of the disc to 0.2 mm into it (contact overlap), everything still (under 1 cm/s and 0.5 rad/s; the driver moving under 0.5 mm a step) | 0.9 |
+| The same, held 1 s: the trial ends there | 1.0 |
 
-Possible scores: 0, 0.2, 0.5, 0.75, 1.0. Ramming the driver home pushes the plunger in and scores 0. On a real pump: a
-side photo for the flange in its slot and the driver at the thumb disc, and the barrel's graduations for the plunger
-unmoved.
+Possible scores: 0, 0.2, 0.5, 0.75, 0.9, 1.0. A trial that ends without the full state having held 1 s scores its last
+step, so a syringe that settles only in the final second gets 0.9. Ramming the driver home pushes the plunger in and
+scores 0, and so does pulling the plunger out of the barrel. On a real pump: a side video for the flange in its slot,
+the driver at the thumb disc and the plunger never moving off its graduation.
 
 ## Design notes
 - **Where the pieces come from.** `mechanism.py` is copied unchanged from robocurve/benchmark-tasks pull request #223
   (MIT License; the notice is at the top of the file): the pump is a fixed body with the driver on a sliding joint, and
   `score()` reads the driver's position. `parts.py` (ours) builds the barrel and the plunger as loose parts from boxes.
 - **How precise it has to be.** The flange has 0.5 mm of play a side in its slot. The barrel's axis has to end within
-  1 mm of its seat, and the driver within 1 mm of the thumb disc while moving the plunger no more than 1 mm. Set down
-  with its axis 1.55 mm off the cradle's line, the syringe did not seat (0.2; official sim, traced, 2026-11-06).
+  1 mm of its seat, and the driver from 1 mm short of the thumb disc to 0.2 mm into it (the official demo ends at
+  -0.007 mm, touching) while the plunger moves less than 1 mm in. A run that
+  seated the syringe and then drew the plunger 27 mm back, nearly out of the barrel, scored 0 (official sim, 2026-11-07).
+- **The cradle** is two rods the barrel rests between, touching it 45 degrees either side of its lowest line, so a
+  barrel set down 2 mm off the line rolls onto it (official sim). What decides the score is the flange in its 3.5 mm slot
+  and the driver at the plunger, not where the arm let go across the cradle.
 - **The flange slot's mouth** is rounded (5 mm), as a flange clip's lead-in is. With square edges the flange landed on
   the pump's body beside the slot and the syringe sat cocked 8 degrees: the misloaded flange PMDA warns about.
 - **The plunger.** The stopper slides with little friction (a real one needs a firm push to start), so any contact
-  moves it a little. The scorer allows 1 mm of plunger travel: the driver can come up against the thumb disc, but
-  driving it home pushes the plunger in and scores 0.
+  moves it a little. The scorer allows 1 mm of plunger travel in and 3 mm out: the driver can come up against the thumb
+  disc, but driving the plunger in, or drawing it back or out, scores 0. The plunger's travel is recorded from the
+  reset, so a push that is later pulled back still counts.
 - **Sizes** are a stand-in for a 60 mL syringe (barrel 29.6 mm across).
 
 ## Runtime and seeds
-- Per trial on one L40S: the scripted demo reaches 1.0 at step 578 (29 s of simulated time, about 3 min of wall clock
-  with stored frames); Dream-1 uses all 1,200 steps (about 6 min) and scored 0.0: its right arm reached over the syringe
-  on its stands and never lifted it.
-- One fixed layout: `-E object_jitter=0`, so the seed doesn't change the start.
+- Per trial on one L40S: the scripted demo reaches 1.0 at step 575 (29 s of simulated time, about 2 min of wall clock
+  with stored frames); Dream-1 uses all 1,200 steps (about 4 min) and scored 0.0: its arms moved over the table, but
+  the syringe stayed on its stands. On the revised task (2026-11-12) the stock Dream adapter rejected Dream-1's first
+  reply (a left gripper of -0.062, past its 0.05 slack around 0..1) on both tries; with that slack widened to 0.1 for
+  one run, Dream-1 again used all 1,200 steps and scored 0.0, the syringe on its stands.
+- One fixed layout: `-E object_jitter=0`, so the seed doesn't change the start. The demo also reaches 1.0 started 0.05
+  and 0.10 s late (`demo(delay=...)`), and with the syringe set down 2 mm either way across the cradle or 1 mm either
+  way along it (official sim, no stored frames, 2026-11-07). After the revision (official sim, inspect-robots 1.0.0,
+  2026-11-12): the demo reaches 1.0 at step 575, also started 0.05 and 0.10 s late, and ends with the driver 0.007 mm
+  into the thumb disc; the same demo with the driver aimed 5 mm past touching pushes the plunger in and scores 0.
 - `test_load_syringe_pump.py` checks the scoring without a GPU (`python -m pytest -q test_load_syringe_pump.py`): the
-  start, every credit level, the driver, seat and flange limits either side, a pushed plunger, a cocked syringe, one off
-  the cradle or held above it, motion, the layout and the setup text's positions, and the demo's reach. A mutation check
-  (16 deliberate breaks of the scorer, layout and demo, each run against the tests) catches 16 of 16.
+  start, every credit level, each limit just inside and just outside (seat, tilt, yaw, flange, in the cradle, driver,
+  stillness and spin, a driver still moving, plunger in, out and in its barrel), a push or pull later undone, the
+  plunger pulled out and left anywhere or turned end for end, the driver run past a plunger drawn out of its way, a
+  push then a retract (0 for the rest of the trial), negative gaps, the syringe off the rods' end or turned end for end, the
+  1 s hold (the complete state alone scores 0.9), the layout, the setup text's numbers, and the demo's reach and
+  delay. A mutation check (35 deliberate breaks of the scorer, layout and demo, each run against the tests) caught 35
+  of 35 before the revision (2026-11-07).
