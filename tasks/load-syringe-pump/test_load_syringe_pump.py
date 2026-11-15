@@ -121,10 +121,11 @@ def test_clamp_limits():
     assert sc(scene(swivel_deg=4.9, gap=0.0005)) == 0.9
     assert sc(scene(swivel_deg=-4.9, gap=0.0005)) == 0.9
     assert sc(scene(swivel_deg=5.1, gap=0.0005)) == 0.6
-    assert sc(scene(lift=0.0014, gap=0.0005)) == 0.9
-    assert sc(scene(lift=0.0016, gap=0.0005)) == 0.6
-    assert sc(scene(lift=-0.0014, gap=0.0005)) == 0.9
-    assert sc(scene(lift=-0.0016, gap=0.0005)) == 0.6  # lower than a barrel allows: no barrel under the pad
+    assert sc(scene(lift=0.0004, gap=0.0005)) == 0.9
+    assert sc(scene(lift=0.0006, gap=0.0005)) == 0.6  # held up off the barrel, its pad 0.6 mm above it
+    assert sc(scene(lift=0.0014, gap=0.0005)) == 0.6
+    assert sc(scene(lift=-0.0004, gap=0.0005)) == 0.9
+    assert sc(scene(lift=-0.0006, gap=0.0005)) == 0.6  # lower than a barrel allows: no barrel under the pad
 
 
 def test_a_moving_clamp_is_not_clamped():

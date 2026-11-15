@@ -192,9 +192,11 @@ COMPLETE = 0.9  # score() for the complete state; 1.0 comes only from success() 
 STILL, SPIN = 0.01, 0.5  # m/s, rad/s
 DRIVER_STILL = 0.0005  # the driver moved at most this in the last control step (0.01 m/s at 20 Hz)
 # clamped: the arm swung back over the cradle (within 5 degrees) and its pad down on the barrel's top (the post within
-# 1.5 mm of where the pad meets a seated barrel), not moving (as the driver). Held up off the barrel by a hand, or left on
+# 0.5 mm of where the pad meets a seated barrel), not moving (as the driver). Held up off the barrel by a hand, or left on
 # the handle, the barrel is loose in the cradle.
-CLAMP_SWIVEL_DEG, CLAMP_ON = 5.0, 0.0015
+# WHY 0.5 mm: at rest on the barrel the post sits 0.06 mm up (official sim, 2026-11-15); with 1.5 mm, a hand still
+# lowering the clamp, its pad 1.4 mm above the barrel, already counted as clamped.
+CLAMP_SWIVEL_DEG, CLAMP_ON = 5.0, 0.0005
 CLAMP_STILL = (0.0005, math.radians(1.0))  # the post's and the arm's change in a control step
 _SC, _, _ = _bbox_centre(SYRINGE_PIECES)
 _PC, _, _ = _bbox_centre(PLUNGER_PIECES)

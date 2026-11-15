@@ -49,7 +49,7 @@ the cradle's centre line sideways, 2.5 mm of its seated height and 5 mm of its s
 line. It is **seated** when the axis is within 1 mm of its seat (sideways and up), level and square to the cradle within
 1.5 degrees, and the flange's centre is within 0.8 mm of the slot's. The plunger is **in the barrel** when its stopper is
 within 1 mm of the axis and its rod within 5 degrees of it. The barrel is **clamped** when the clamp is swung back over
-the cradle (within 5 degrees) with its pad down on the barrel's top (the post within 1.5 mm of that height) and not
+the cradle (within 5 degrees) with its pad down on the barrel's top (the post within 0.5 mm of that height) and not
 moving (under 0.5 mm and 1 degree a step): left on the handle, or held up off the barrel, it isn't. The driver is
 **near** when its face is within 5 mm short of the thumb disc, and **flush** from 1 mm short of the disc to 0.2 mm into
 it (contact overlap) with everything still (under 1 cm/s and 0.5 rad/s; the driver moving under 0.5 mm a step). A face
