@@ -99,7 +99,12 @@ the clamp down on the barrel, the driver at the thumb disc and the plunger never
 - **Sizes** are a stand-in for a 60 mL syringe (barrel 29.6 mm across); the clamp's are a stand-in too.
 
 ## Runtime and seeds
-- Per trial on one L40S: the scripted demo reaches 1.0 at step 575 (29 s of simulated time, about 2 min of wall clock
+- With the barrel clamp (official sim, inspect-robots 1.0.0, 2026-11-15): the scripted demo reaches 1.0 at step 953
+  (48 s of simulated time): the clamp swivelled 89.9 degrees onto the handle and rested 4.6 mm down, the syringe seated,
+  the driver flush with the thumb disc, the clamp turned back and resting on the barrel 0.06 mm above its seated height,
+  and the plunger moved 0.01 mm. Dream-1 used all 1,800 steps and scored 0.0: its arms moved over the table, but the
+  syringe stayed on its stands. The delayed starts and offsets below were run before the clamp was added.
+- Before the clamp, per trial on one L40S: the scripted demo reached 1.0 at step 575 (29 s of simulated time, about 2 min of wall clock
   with stored frames); Dream-1 uses all 1,200 steps (about 4 min) and scored 0.0: its arms moved over the table, but
   the syringe stayed on its stands. On the revised task (2026-11-12) the stock Dream adapter rejected Dream-1's first
   reply (a left gripper of -0.062, past its 0.05 slack around 0..1) on both tries; with that slack widened to 0.1 for
@@ -110,7 +115,8 @@ the clamp down on the barrel, the driver at the thumb disc and the plunger never
   2026-11-12): the demo reaches 1.0 at step 575, also started 0.05 and 0.10 s late, and ends with the driver 0.007 mm
   into the thumb disc; the same demo with the driver aimed 5 mm past touching pushes the plunger in and scores 0.
 - `test_load_syringe_pump.py` checks the scoring without a GPU (`python -m pytest -q test_load_syringe_pump.py`): the
-  start, every credit level, each limit just inside and just outside (seat, tilt, yaw, flange, in the cradle, driver,
+  start, every credit level clamped and not, each limit just inside and just outside (seat, tilt, yaw, flange, in the
+  cradle, the clamp's swivel and height, a clamp still moving, driver,
   stillness and spin, a driver still moving, plunger in, out and in its barrel), a push or pull later undone, the
   plunger pulled out and left anywhere or turned end for end, the driver run past a plunger drawn out of its way, a
   push then a retract (0 for the rest of the trial), negative gaps, the syringe off the rods' end or turned end for end, the
