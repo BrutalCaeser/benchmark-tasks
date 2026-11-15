@@ -46,11 +46,12 @@ def part(centre_local, origin, rot, speed=0.0, spin=0.0):
 
 
 def scene(origin=None, rot=None, pushed=0.0, gap=None, moving=False, sag_deg=0.0, speed=None, spin=0.0,
-          stopper_off=(0.0, 0.0), plunger_at=None):
+          stopper_off=(0.0, 0.0), plunger_at=None, lift=0.0, swivel_deg=0.0):
     """The syringe's barrel centre at ``origin`` (seated by default), its plunger pushed in by ``pushed`` (m), sagging
     ``sag_deg`` in the bore and its stopper ``stopper_off`` (x, z, m) off the axis, and the driver's face ``gap`` (m)
     from the thumb disc's outermost point (at its start if None). ``plunger_at`` puts the plunger's stopper there
-    instead, upright along y, wherever that is."""
+    instead, upright along y, wherever that is. The barrel clamp's post at ``lift`` (m) and its arm swivelled
+    ``swivel_deg``: down on the barrel by default."""
     origin = np.array(M.SEAT if origin is None else origin, float)
     rot = np.eye(3) if rot is None else rot
     axis = rot @ np.array([0.0, 1.0, 0.0])
@@ -65,7 +66,8 @@ def scene(origin=None, rot=None, pushed=0.0, gap=None, moving=False, sag_deg=0.0
     slide = 0.0 if gap is None else (thumb_y + gap) - face_home
     pump = MechanismState(pos=np.array([*M.PUMP_XY, M.TOP]), quat_xyzw=np.array([0.0, 0.0, 0.0, 1.0]),
                           lin_vel=np.zeros(3), ang_vel=np.zeros(3), low=np.zeros(3), high=np.ones(3),
-                          joints={"driver_slide": slide})
+                          joints={"driver_slide": slide, "clamp_lift": lift,
+                                  "clamp_swivel": math.radians(swivel_deg)})
     return {"syringe": part(M._SC, origin, rot, speed, spin), "plunger": part(M._PC, p_origin, p_rot, speed),
             "pump": pump}
 
@@ -78,7 +80,7 @@ def sc(s):
 
 
 def on_stands():
-    return scene(origin=(M.STAND_XY[0], M.STAND_XY[1], M.START_Z))
+    return scene(origin=(M.STAND_XY[0], M.STAND_XY[1], M.START_Z), lift=M.CLAMP_DOWN)
 
 
 def seated_at(dx=0.0, dy=0.0, dz=0.0):
@@ -102,6 +104,41 @@ def test_credit_climbs_with_each_step():
     assert sc(scene()) == 0.5  # seated, driver still at its start
     assert sc(scene(gap=0.004)) == 0.75
     assert sc(scene(gap=0.0009)) == 0.9
+
+
+def test_the_clamp_must_be_down_on_the_barrel():
+    # the review: the barrel must be clamped. Unclamped, each driver state pays less than clamped
+    assert sc(scene(swivel_deg=90.0, lift=M.REST_ON)) == 0.4  # seated, the clamp still on the handle
+    assert sc(scene(swivel_deg=90.0, lift=M.REST_ON, gap=0.004)) == 0.5
+    assert sc(scene(swivel_deg=90.0, lift=M.REST_ON, gap=0.0005)) == 0.6
+    assert not M.success(scene(swivel_deg=90.0, lift=M.REST_ON, gap=0.0005))
+    assert sc(scene(lift=0.010, gap=0.0005)) == 0.6  # over the barrel but held up off it
+    assert sc(scene(gap=0.0005)) == 0.9  # turned back and down on it
+    assert sc(scene(origin=seated_at(dz=0.006), rot=_rx(8), gap=0.0005)) == 0.2  # clamped or not, cocked is 0.2
+
+
+def test_clamp_limits():
+    assert sc(scene(swivel_deg=4.9, gap=0.0005)) == 0.9
+    assert sc(scene(swivel_deg=-4.9, gap=0.0005)) == 0.9
+    assert sc(scene(swivel_deg=5.1, gap=0.0005)) == 0.6
+    assert sc(scene(lift=0.0014, gap=0.0005)) == 0.9
+    assert sc(scene(lift=0.0016, gap=0.0005)) == 0.6
+    assert sc(scene(lift=-0.0014, gap=0.0005)) == 0.9
+    assert sc(scene(lift=-0.0016, gap=0.0005)) == 0.6  # lower than a barrel allows: no barrel under the pad
+
+
+def test_a_moving_clamp_is_not_clamped():
+    M._clear_memory()
+    assert M.score(scene(lift=0.004, gap=0.0005)) == 0.6
+    s = scene(lift=0.0, gap=0.0005)  # 4 mm down in one step: still coming down
+    assert not M.success(s) and M.score(s) == 0.6
+    assert M.score(scene(lift=0.0, gap=0.0005)) == 0.9  # the next step, at rest on the barrel
+    M._clear_memory()
+    M.score(scene(swivel_deg=3.0, gap=0.0005))
+    assert M.score(scene(swivel_deg=0.0, gap=0.0005)) == 0.6  # turning 3 degrees a step
+    M._clear_memory()
+    M.score(scene(swivel_deg=0.5, gap=0.0005))
+    assert M.score(scene(swivel_deg=0.0, gap=0.0005)) == 0.9
 
 
 def test_driver_limits():
@@ -248,6 +285,26 @@ def test_layout():
     assert M.ROD_Y[1] <= M.SLIT_Y - M.SLIT_W / 2 - M.FUNNEL_R  # the rods stop before the slot's mouth
     assert M.DRIVER_FACE_Y - M.THUMB_FACE_Y == pytest.approx(M.DRIVER_HOME_GAP)
     assert M.DRIVER_TRAVEL * 1000 > M.DRIVER_HOME_GAP
+    # the clamp: at 0 its pad sits on a seated barrel's top; at its stop it hangs in the empty cradle, clear of the
+    # rods but in the barrel's way, so the syringe can't be seated without moving it
+    pad_low = M.PAD[0][2] - M.PAD[1][2] / 2
+    assert pad_low == pytest.approx(M.AXIS_Z + M.BARREL_R)
+    assert M.ROD_Z + M.ROD_R < pad_low + M.CLAMP_DOWN * 1000 < M.AXIS_Z + M.BARREL_R
+    assert abs(M.PAD[0][1] - M.POST_Y) < M.PAD[1][1] / 2 and abs(M.PAD[0][0]) < M.PAD[1][0] / 2  # over the barrel
+    # swivelled 90 degrees the pad lies over the handle, and the arm rests on it 12 mm up
+    reach = M.POST_X - M.PAD[0][0]
+    parked = (M.POST_X, M.POST_Y - reach)
+    (hx, hy, _), (hw, hl, hh) = M.HANDLE
+    assert abs(parked[0] - hx) + M.PAD[1][1] / 2 <= hw / 2 + 1.0 and abs(parked[1] - hy) + M.PAD[1][0] / 2 <= hl / 2
+    assert hh == pytest.approx(pad_low + M.REST_ON * 1000)
+    assert M.REST_ON < M.LIFT_TO < M.CLAMP_UP  # lifted, the pad clears the handle to swing on and off it
+    assert M.HANDLE[0][0] - M.HANDLE[1][0] / 2 >= 25.0  # the handle stands beside the pump's body, not in it
+    # a positive swivel turns the arm's tip from -x round to -y, away from the flange and the plunger (past y = 29.5 mm)
+    tip = M.POST_X - (M.ARM[0][0] - M.ARM[1][0] / 2)
+    for deg in range(0, 98, 7):
+        assert M.POST_Y - tip * math.sin(math.radians(deg)) + M.ARM[1][1] / 2 < M.SLIT_Y - M.SLIT_W / 2
+    # the closed fingertips (13 mm below the TCP) stay above the arm under the knob
+    assert (M.KNOB_TCP_Z - M.TOP) * 1000 - 13.0 > M.ARM_Z + M.ARM[1][2] / 2
     assert M.FUNNEL_R >= 5.0  # catches the 2 to 5 mm the arm wanders on the way down
     # the stopper stays inside the barrel and the rod clears the flange's bore
     assert M.STOPPER_AT + M.STOPPER_L / 2 < M.BARREL_L / 2 and 8.0 < 2 * (M.BARREL_R - 1.5)
@@ -276,7 +333,7 @@ def test_demo_reaches_and_fits_the_run_limit():
         for t in np.arange(0.0, plan.duration, 0.05):
             plan.action7(t)
         assert plan.worst_ik_mm < 2.0 and plan.worst_ik_deg < 2.0, arm
-        assert plan.duration < 1200 / 20 * 0.6
+        assert plan.duration < 1800 / 20 * 0.6
         late = ArmPlan(M.demo(delay=0.10)[arm], station.BASES[arm])
         assert late.duration == pytest.approx(plan.duration + 0.10)
     # aims 1.2 mm past touching a centred flange; the flange rests 0.3 mm short, so even with no lag the plunger moves

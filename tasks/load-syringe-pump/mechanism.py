@@ -1,4 +1,4 @@
-# This file is copied unchanged from robocurve/benchmark-tasks pull request #223 ("Open a panel held shut by a
+# This file is copied from robocurve/benchmark-tasks pull request #223 ("Open a panel held shut by a
 # spring plunger", tasks/spring-plunger-panel/mechanism.py), which is published under the MIT License:
 #
 #   MIT License
@@ -17,6 +17,9 @@
 #   WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
 #   OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 #   OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#
+# One change for this task, marked CHANGED: a joint may ride on another moving link (``parent``) instead of the base,
+# for the pump's barrel clamp, which lifts on its post and swivels about it.
 
 """A fixed mechanism with joints (a cabinet with a hinged panel and a spring plunger) for a yam_arena task file.
 
@@ -95,7 +98,8 @@ class Link:
 
 @dataclass(frozen=True)
 class Joint:
-    """A joint from the base to the link ``child``, through ``anchor`` (m, mechanism frame) along ``axis``.
+    """A joint from the base (CHANGED: or from ``parent``) to the link ``child``, through ``anchor`` (m, mechanism frame)
+    along ``axis``.
 
     ``kind`` "revolute" (positions in rad) or "prismatic" (m); positive positions turn or slide the child about or
     along the axis by the right-hand rule. ``lower`` and ``upper`` are hard stops. A spring of ``stiffness``
@@ -113,6 +117,7 @@ class Joint:
     damping: float = 0.0
     friction: float = 0.0
     target: float = 0.0
+    parent: str = ""  # CHANGED: the link the joint rides on; the base if empty
 
 
 @dataclass(frozen=True)
@@ -148,8 +153,16 @@ class Mechanism(Box):
                 raise ValueError(f"{self.name}: bad joint {joint.name!r}")
             if not joint.lower < joint.upper:
                 raise ValueError(f"{self.name}.{joint.name}: lower must be below upper")
+        parents = {j.child: j.parent for j in self.joints}  # CHANGED: a parent is a link, and no link rides on itself
+        for joint in self.joints:
+            seen, at = {joint.child}, joint.parent
+            while at:
+                if at not in parents or at in seen:
+                    raise ValueError(f"{self.name}.{joint.name}: parent {joint.parent!r} is not a link, or loops")
+                seen.add(at)
+                at = parents[at]
         if sorted(j.child for j in self.joints) != sorted(names[1:]):
-            raise ValueError(f"{self.name}: every moving link needs exactly one joint to the base")
+            raise ValueError(f"{self.name}: every moving link needs exactly one joint")
 
     def all_links(self) -> tuple[Link, ...]:
         return (self.base, *self.links)
@@ -263,7 +276,7 @@ def _spawn(prim_path: str, cfg, translation=None, orientation=None, **kwargs):
         revolute = joint.kind == "revolute"
         usd_joint = (UsdPhysics.RevoluteJoint if revolute else UsdPhysics.PrismaticJoint).Define(stage, path)
         usd_joint.CreateAxisAttr(joint.axis)
-        usd_joint.CreateBody0Rel().SetTargets([bodies[spec.base.name]])
+        usd_joint.CreateBody0Rel().SetTargets([bodies[joint.parent or spec.base.name]])  # CHANGED: or its parent
         usd_joint.CreateBody1Rel().SetTargets([bodies[joint.child]])
         # Both bodies' frames are the mechanism's frame at rest, so the anchor is the same point in each.
         usd_joint.CreateLocalPos0Attr(Gf.Vec3f(*joint.anchor))

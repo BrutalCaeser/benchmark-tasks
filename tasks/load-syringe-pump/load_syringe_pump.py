@@ -1,8 +1,11 @@
 """On the station table, 33 cm out and 2 cm left of the midline: a white syringe pump, its cradle (two white rods the
 barrel rests between) running left-right. At the cradle's left end is the narrow slot that takes the syringe's barrel
 flange, and past it, on its own track, the grey plunger driver, pulled back. To the right, nearer the arms, a filled syringe (a clear barrel 3 cm across with a
-flange at one end and a white plunger in it) lies on two black stands, flange to the left. Load it: barrel in the
-cradle with the flange down in its slot, then the driver up against the end of the plunger without pushing it in.
+flange at one end and a white plunger in it) lies on two black stands, flange to the left. Behind the cradle stands
+the barrel clamp: an arm on a sprung post, its pad resting down in the empty cradle, and beside it the pump's handle.
+Load it as the Medfusion 3500's card says: lift the clamp and swivel it away onto the handle, lay the barrel in the
+cradle with the flange down in its slot, bring the driver up against the end of the plunger without pushing it in,
+then turn the clamp back and lower it onto the barrel.
 """
 
 import math
@@ -62,6 +65,28 @@ PUMP_BASE = (
 )
 ROD_Y = (-75.0, near - FUNNEL_R)  # the rods run the body's length, up to the slot's mouth
 
+# the barrel clamp, behind the cradle (+x): a post that lifts against a spring, and on it an arm that swivels about the
+# post, with a pad under its tip that comes down on the barrel's top and a knob on the post to lift and turn it by.
+# Medfusion 3500 quick reference card: "Lift the syringe barrel clamp and swivel it away", "rest it on the handle", and
+# at the end "Turn and lower the barrel clamp onto the barrel of the syringe". Stand-in sizes [UNVERIFIED]: measure them on the real pump.
+POST_X, POST_Y = 40.0, -40.0  # the post's axis, behind the cradle, 2 cm toward the nose from the barrel's middle
+PAD_BOTTOM = AXIS_Z + BARREL_R  # the pad's underside with the clamp at 0: on a seated barrel's top (54.6 mm)
+ARM_T = 6.0  # the arm and its pad, one bar 6 mm thick
+ARM_Z = PAD_BOTTOM + ARM_T / 2
+PAD = ((0.0, POST_Y, ARM_Z), (16.0, 30.0, ARM_T))  # the arm's tip, over the barrel's axis
+ARM = (((POST_X + 6.0 + 8.0) / 2, POST_Y, ARM_Z), (POST_X + 6.0 - 8.0, 10.0, ARM_T))  # from the pad to the post
+KNOB_R, KNOB_H = 7.0, 24.0
+KNOB_Z = ARM_Z + ARM_T / 2 + KNOB_H / 2  # the knob's centre, on the arm at the post
+POST_ROD = ((POST_X, POST_Y, (10.0 + ARM_Z - ARM_T / 2) / 2), (4.0, ARM_Z - ARM_T / 2 - 10.0))  # centre, (radius, length)
+POST_BLOCK = ((POST_X, POST_Y, BODY_TOP / 2), (14.0, 14.0, BODY_TOP))
+CLAMP_DOWN, CLAMP_UP = -0.006, 0.020  # the post's travel (m): down to its stop in an empty cradle, up to its top
+# WHY a light spring (0.5 N on a barrel, with the clamp's own 0.3 N): the arm gives about 6 mm per newton, so a stiff
+# spring would leave the lifting hand short of clearing the barrel [UNVERIFIED: the real clamp's force isn't published]
+CLAMP_K, CLAMP_SET = 25.0, -0.020  # N/m, and the spring's target below the stop
+SWIVEL_MAX = math.radians(97.0)  # the arm swivels from over the cradle (0) to past the handle (90)
+HANDLE_TOP = PAD_BOTTOM - 4.6  # swivelled onto the handle, the arm rests 4.6 mm lower than on a barrel
+HANDLE = ((POST_X + 1.0, POST_Y - (POST_X - 0.0), HANDLE_TOP / 2), (30.0, 30.0, HANDLE_TOP))  # under the parked pad
+
 
 def _m(v):
     return tuple(x / 1000 for x in v)
@@ -76,6 +101,7 @@ def _pump_shapes():
     for x in (ROD_X, -ROD_X):  # the cradle's rods
         shapes.append(Shape("cylinder", _m((x, sum(ROD_Y) / 2, ROD_Z)), (ROD_R / 1000, (ROD_Y[1] - ROD_Y[0]) / 1000),
                             WHITE, axis="Y", contact_offset=0.001))
+    shapes.append(Shape("box", _m(POST_BLOCK[0]), _m(POST_BLOCK[1]), WHITE, contact_offset=0.001))  # the clamp's housing
     return tuple(shapes)
 
 
@@ -87,9 +113,20 @@ DRIVER_TRAVEL = 0.040
 PUMP = mechanism(
     "pump", (*PUMP_XY, TOP), base=Link("pump_body", 1.0, _pump_shapes()),
     links=(Link("driver", 0.05, (Shape("box", _m(DRIVER[0]), _m(DRIVER[1]), GREY, contact_offset=0.001),
-                                  Shape("box", _m(TAB[0]), _m(TAB[1]), DARK, contact_offset=0.001))),),
-    joints=(Joint("driver_slide", "prismatic", "driver", _m(DRIVER[0]), "Y", -DRIVER_TRAVEL, 0.0, damping=2.0),),
+                                  Shape("box", _m(TAB[0]), _m(TAB[1]), DARK, contact_offset=0.001))),
+           Link("clamp_post", 0.01, (Shape("cylinder", _m(POST_ROD[0]), _m(POST_ROD[1]), GREY, contact_offset=0.001),)),
+           Link("clamp_arm", 0.02, (Shape("box", _m(ARM[0]), _m(ARM[1]), WHITE, contact_offset=0.001),
+                                    Shape("box", _m(PAD[0]), _m(PAD[1]), DARK, contact_offset=0.001),
+                                    Shape("cylinder", _m((POST_X, POST_Y, KNOB_Z)), _m((KNOB_R, KNOB_H)), DARK,
+                                          contact_offset=0.001)))),
+    joints=(Joint("driver_slide", "prismatic", "driver", _m(DRIVER[0]), "Y", -DRIVER_TRAVEL, 0.0, damping=2.0),
+            Joint("clamp_lift", "prismatic", "clamp_post", _m((POST_X, POST_Y, BODY_TOP)), "Z", CLAMP_DOWN, CLAMP_UP,
+                  stiffness=CLAMP_K, damping=3.0, target=CLAMP_SET),
+            Joint("clamp_swivel", "revolute", "clamp_arm", _m((POST_X, POST_Y, ARM_Z)), "Z", -math.radians(3.0),
+                  SWIVEL_MAX, damping=0.01, parent="clamp_post")),
     materials={"default": (1.2, 1.0)})
+PUMP_HANDLE = Box("pump_handle", pos=(PUMP_XY[0] + HANDLE[0][0] / 1000, PUMP_XY[1] + HANDLE[0][1] / 1000,
+                                      TOP + HANDLE[0][2] / 1000), size=_m(HANDLE[1]), color=WHITE)
 
 # -- the syringe: barrel (frame: barrel centre, axis +y toward the flange), plunger (frame: stopper centre) -------
 _rm, _wall = BARREL_R - 0.75, 1.5
@@ -130,7 +167,7 @@ PLUNGER = Part("plunger", pos=(STAND_XY[0], STAND_XY[1] + STOPPER_AT / 1000, STA
                mass=0.012, color=PLUNGER_WHITE, pieces=PLUNGER_PIECES)
 STANDS = [Box(n, pos=(STAND_XY[0], STAND_XY[1] + dy, TOP + STAND_H / 2), size=(0.020, 0.010, STAND_H), color=STAND_BLACK)
           for n, dy in (("stand_a", -0.030), ("stand_b", 0.010))]
-OBJECTS = [PUMP, SYRINGE, PLUNGER, *STANDS]
+OBJECTS = [PUMP, PUMP_HANDLE, SYRINGE, PLUNGER, *STANDS]
 
 # -- scoring --------------------------------------------------------------------------------------------------------
 SUCCESS_HOLD_S = 1.0
@@ -154,6 +191,11 @@ PAST = 0.0002
 COMPLETE = 0.9  # score() for the complete state; 1.0 comes only from success() holding 1 s
 STILL, SPIN = 0.01, 0.5  # m/s, rad/s
 DRIVER_STILL = 0.0005  # the driver moved at most this in the last control step (0.01 m/s at 20 Hz)
+# clamped: the arm swung back over the cradle (within 5 degrees) and its pad down on the barrel's top (the post within
+# 1.5 mm of where the pad meets a seated barrel), not moving (as the driver). Held up off the barrel by a hand, or left on
+# the handle, the barrel is loose in the cradle.
+CLAMP_SWIVEL_DEG, CLAMP_ON = 5.0, 0.0015
+CLAMP_STILL = (0.0005, math.radians(1.0))  # the post's and the arm's change in a control step
 _SC, _, _ = _bbox_centre(SYRINGE_PIECES)
 _PC, _, _ = _bbox_centre(PLUNGER_PIECES)
 SEAT = np.array([PUMP_XY[0], PUMP_XY[1] + BARREL_SEAT_Y / 1000, TOP + AXIS_Z / 1000])  # the barrel's centre, seated
@@ -161,23 +203,26 @@ SLIT_W_Y = PUMP_XY[1] + SLIT_Y / 1000
 
 # the plunger's furthest travel in and out since the reset: a push or a pull that is later undone still counts
 _TRAVEL = {"in": 0.0, "out": 0.0}
-# the driver's position at the last control step and how far it moved in it. A joint reports no velocity, so motion is
-# the change between steps. success() and score() both see each step's states, so a step counts once: when the states
-# are new.
-_DRIVER = {"states": None, "at": None, "step": 0.0}
+# the pump's joints at the last control step and how far each moved in it. A joint reports no velocity, so motion is the
+# change between steps. success() and score() both see each step's states, so a step counts once: when the states are
+# new.
+_MOVED = ("driver_slide", "clamp_lift", "clamp_swivel")
+_JOINTS = {"states": None, "at": None, "step": dict.fromkeys(_MOVED, 0.0)}
 
 
 @on_reset
 def _clear_memory():
     _TRAVEL["in"] = _TRAVEL["out"] = 0.0
-    _DRIVER.update(states=None, at=None, step=0.0)
+    _JOINTS.update(states=None, at=None, step=dict.fromkeys(_MOVED, 0.0))
 
 
-def _driver_step(objects) -> float:
-    if objects is not _DRIVER["states"]:
-        at = float(objects["pump"].joints["driver_slide"])
-        _DRIVER.update(states=objects, step=0.0 if _DRIVER["at"] is None else abs(at - _DRIVER["at"]), at=at)
-    return _DRIVER["step"]
+def _joint_steps(objects) -> dict:
+    if objects is not _JOINTS["states"]:
+        at = {n: float(objects["pump"].joints[n]) for n in _MOVED}
+        last = _JOINTS["at"]
+        step = {n: 0.0 if last is None else abs(at[n] - last[n]) for n in _MOVED}
+        _JOINTS.update(states=objects, at=at, step=step)
+    return _JOINTS["step"]
 
 
 def _rot(q):
@@ -210,6 +255,8 @@ def measures(objects):
     _TRAVEL["in"], _TRAVEL["out"] = max(_TRAVEL["in"], pushed), max(_TRAVEL["out"], -pushed)
     radial = p_org - s_org - along * axis
     rod = p_r @ np.array([0.0, 1.0, 0.0])
+    joints = objects["pump"].joints
+    steps = _joint_steps(objects)
     return {
         "side": float(s_org[0] - SEAT[0]), "up": float(s_org[2] - SEAT[2]),
         "nose_side": float(nose[0] - nose_seat[0]), "nose_up": float(nose[2] - nose_seat[2]),
@@ -223,16 +270,23 @@ def measures(objects):
         "rod_angle": math.degrees(math.acos(max(-1.0, min(1.0, float(np.dot(rod, axis)))))),
         "gap": float(driver_face - thumb_out),
         "still": all(objects[n].resting(STILL, SPIN) for n in ("syringe", "plunger"))
-        and _driver_step(objects) <= DRIVER_STILL,
+        and steps["driver_slide"] <= DRIVER_STILL,
+        "clamp_swivel": math.degrees(float(joints["clamp_swivel"])), "clamp_lift": float(joints["clamp_lift"]),
+        "clamp_still": steps["clamp_lift"] <= CLAMP_STILL[0] and steps["clamp_swivel"] <= CLAMP_STILL[1],
     }
+
+
+def clamped(m) -> bool:
+    return abs(m["clamp_swivel"]) <= CLAMP_SWIVEL_DEG and abs(m["clamp_lift"]) <= CLAMP_ON and m["clamp_still"]
 
 
 def _grade(objects) -> float:
     """0 if the plunger was ever pushed in more than 1 mm (a dose) or drawn back more than 3 mm, if it isn't in its
     barrel, or if the syringe isn't in the cradle; 0.2 in the cradle but not seated (the flange out of its slot, the
-    syringe cocked); 0.5 seated (or the driver's face more than 0.2 mm past the thumb disc, holding nothing); 0.75
-    seated with the driver within 5 mm short of the disc; 1.0 seated, the driver from 1 mm short of the disc to 0.2 mm
-    into it, everything still (score() pays that 0.9 at a step; 1.0 is only for success() held 1 s)."""
+    syringe cocked). Seated, by the driver (its face within 5 mm short of the thumb disc: near; from 1 mm short to 0.2 mm
+    into it with everything still: flush; more than 0.2 mm past the disc, holding nothing, counts as not near) and the
+    clamp: unclamped 0.4, near 0.5, flush 0.6; clamped 0.5, near 0.75, flush 1.0 (score() pays that 0.9 at a step; 1.0
+    is only for success() held 1 s)."""
     m = measures(objects)
     if m["most_in"] > PUSHED or m["most_out"] > PULLED or m["radial"] > BORE[0] or m["rod_angle"] > BORE[1]:
         return 0.0
@@ -243,11 +297,8 @@ def _grade(objects) -> float:
         and m["yaw"] <= SEAT_YAW_DEG and abs(m["flange"]) <= FLANGE_IN
     if not seated:
         return 0.2
-    if not -PAST <= m["gap"] <= NEAR:
-        return 0.5
-    if m["gap"] > FLUSH or not m["still"]:
-        return 0.75
-    return 1.0
+    driver = 0 if not -PAST <= m["gap"] <= NEAR else 1 if m["gap"] > FLUSH or not m["still"] else 2
+    return (0.5, 0.75, 1.0)[driver] if clamped(m) else (0.4, 0.5, 0.6)[driver]
 
 
 def score(objects) -> float:
@@ -275,12 +326,52 @@ PINCH_TAB = -0.004  # across the tab's 12 mm
 FLANGE_SETTLE = 0.3  # mm short of the slot's centre, where the flange comes to rest
 SLIDE = -(DRIVER_HOME_GAP + 1.2) / 1000
 ACROSS_X = math.pi / 2
+KNOB_XY = (PUMP_XY[0] + POST_X / 1000, PUMP_XY[1] + POST_Y / 1000)  # the knob stays over the post however it swivels
+PINCH_KNOB = -0.005  # 10 mm between the fingers across the 14 mm knob
+# the TCP 4 mm above the knob's centre: the closed fingertips reach 13 mm below it, 3 mm clear of the arm
+KNOB_TCP_Z = TOP + KNOB_Z / 1000 + 0.004
+# WHY aim 11 mm up: the clamp must rise about 5 mm to clear a barrel's top, and the hand rides low under the spring and
+# the clamp's weight (about 1 N there)
+LIFT_TO = 0.011
+REST_ON = (HANDLE_TOP - PAD_BOTTOM) / 1000  # the post's height with the arm resting on the handle
+ON_BARREL_PUSH = 0.003  # lowering onto the barrel or the handle, the hand aims this far below the pad's resting place
+
+
+def _knob(q, up=0.0):
+    """The TCP at the knob with the clamp's post at ``q`` (m), ``up`` above that."""
+    return (*KNOB_XY, KNOB_TCP_Z + q + up)
+
+
+def _turn(q, yaw0, yaw1, total, label, n=8):
+    """The pinched knob turned from ``yaw0`` to ``yaw1`` in ``n`` short steps, the hand staying over the post."""
+    return [Waypoint(total / n, _knob(q), PINCH_KNOB, f"{label} ({k}/{n})", yaw0 + (yaw1 - yaw0) * k / n)
+            for k in range(1, n + 1)]
+
+
+def _lift(q0, q1, yaw, total, label, n=5):
+    return [Waypoint(total / n, _knob(q0 + (q1 - q0) * k / n), PINCH_KNOB, f"{label} ({k}/{n})", yaw)
+            for k in range(1, n + 1)]
 
 
 def demo(delay=0.0):
-    """``delay`` (s) holds both arms at their start first: the plan must not depend on starting at once."""
+    """``delay`` (s) holds both arms at their start first: the plan must not depend on starting at once. The order is
+    the Medfusion card's: clamp away onto the handle and syringe in (right arm), driver up to the plunger (left arm),
+    clamp turned back and lowered onto the barrel (right arm)."""
+    # WHY the right arm works the clamp: the knob, behind the cradle, is beyond the left arm's reach at these heights
+    # (IK scan, 2026-11-15)
+    over_cradle, parked = 0.0, math.pi / 2  # the hand's turn on the knob with the arm over the cradle / on the handle
     right = [
-        Waypoint(2.0 + delay, (*STAND_XY, START_Z + 0.06), FINGER_OPEN, "over the syringe", ACROSS_X),
+        Waypoint(2.0 + delay, _knob(CLAMP_DOWN, 0.015), FINGER_OPEN, "over the clamp's knob", over_cradle),
+        Waypoint(1.2, _knob(CLAMP_DOWN), FINGER_OPEN, "down round the knob", over_cradle),
+        Waypoint(0.4, _knob(CLAMP_DOWN), FINGER_OPEN, "settle", over_cradle),
+        Waypoint(0.6, _knob(CLAMP_DOWN), PINCH_KNOB, "pinch the knob", over_cradle),
+        *_lift(CLAMP_DOWN, LIFT_TO, over_cradle, 1.2, "lift the clamp"),
+        *_turn(LIFT_TO, over_cradle, parked, 2.4, "swivel it away"),
+        Waypoint(0.4, _knob(LIFT_TO), PINCH_KNOB, "settle over the handle", parked),
+        *_lift(LIFT_TO, REST_ON - ON_BARREL_PUSH, parked, 1.2, "lower it onto the handle"),
+        Waypoint(0.6, _knob(REST_ON - ON_BARREL_PUSH), FINGER_OPEN, "let go", parked),
+        Waypoint(1.0, _knob(REST_ON, 0.015), FINGER_OPEN, "up", parked),
+        Waypoint(2.0, (*STAND_XY, START_Z + 0.06), FINGER_OPEN, "over the syringe", ACROSS_X),
         Waypoint(1.5, (*STAND_XY, START_Z + GRIP_Z), FINGER_OPEN, "down to the barrel", ACROSS_X),
         Waypoint(0.8, (*STAND_XY, START_Z + GRIP_Z), SQUEEZE, "grip the barrel", ACROSS_X),
         Waypoint(1.5, (*STAND_XY, TOP + 0.12), SQUEEZE, "lift", ACROSS_X),
@@ -291,12 +382,13 @@ def demo(delay=0.0):
         Waypoint(1.5, (*TARGET, TOP + 0.12), RELEASE, "clear", ACROSS_X),
         Waypoint(2.0, (0.20, -0.25, TOP + 0.15), FINGER_OPEN, "out of the way", ACROSS_X),
     ]
-    # WHY the left arm waits high and away and pinches along x: with its fingers open along y over the pump, one
-    # finger knocked the plunger's thumb disc (official sim, 2026-11-05)
+    t_loaded = sum(w.duration for w in right) - 2.0  # the right hand is clear of the pump
+    # WHY the left arm waits high and away and pinches the driver along x: with its fingers open along y over the
+    # pump, one finger knocked the plunger's thumb disc (official sim, 2026-11-05)
     away = (TAB_TCP[0], TAB_TCP[1] + 0.07, TAB_TCP[2] + 0.10)
     left_across = -math.pi / 2  # the left arm turns this way for fingers along x (at +90 its wrist falls short here)
     left = [
-        Waypoint(19.0 + delay, away, FINGER_OPEN, "wait high and away", left_across),
+        Waypoint(t_loaded, away, FINGER_OPEN, "wait high and away", left_across),
         Waypoint(2.0, (TAB_TCP[0], TAB_TCP[1], TAB_TCP[2] + 0.03), FINGER_OPEN, "over the driver's grip", left_across),
         Waypoint(1.5, TAB_TCP, FINGER_OPEN, "down to the grip", left_across),
         Waypoint(0.8, TAB_TCP, PINCH_TAB, "pinch the grip", left_across),
@@ -304,5 +396,24 @@ def demo(delay=0.0):
         Waypoint(2.0, (TAB_TCP[0], TAB_TCP[1] + SLIDE, TAB_TCP[2]), PINCH_TAB, "creep up to the plunger", left_across),
         Waypoint(0.8, (TAB_TCP[0], TAB_TCP[1] + SLIDE, TAB_TCP[2]), FINGER_OPEN, "let go", left_across),
         Waypoint(1.5, (TAB_TCP[0], TAB_TCP[1] + SLIDE, TAB_TCP[2] + 0.05), FINGER_OPEN, "straight up", left_across),
+        Waypoint(1.5, away, FINGER_OPEN, "out of the way", left_across),
     ]
+    t_driven = sum(w.duration for w in left) - 1.5  # the left hand is up off the driver
+    right += [
+        Waypoint(t_driven - sum(w.duration for w in right), (0.20, -0.25, TOP + 0.15), FINGER_OPEN,
+                 "wait for the driver", ACROSS_X),
+        Waypoint(2.0, _knob(REST_ON, 0.015), FINGER_OPEN, "over the clamp's knob", parked),
+        Waypoint(1.2, _knob(REST_ON), FINGER_OPEN, "down round the knob", parked),
+        Waypoint(0.4, _knob(REST_ON), FINGER_OPEN, "settle", parked),
+        Waypoint(0.6, _knob(REST_ON), PINCH_KNOB, "pinch the knob", parked),
+        *_lift(REST_ON, LIFT_TO, parked, 1.0, "lift it off the handle"),
+        *_turn(LIFT_TO, parked, over_cradle, 2.4, "turn it back over the barrel"),
+        Waypoint(0.4, _knob(LIFT_TO), PINCH_KNOB, "settle over the barrel", over_cradle),
+        *_lift(LIFT_TO, -ON_BARREL_PUSH, over_cradle, 2.0, "lower it onto the barrel"),
+        Waypoint(0.6, _knob(-ON_BARREL_PUSH), FINGER_OPEN, "let go", over_cradle),
+        Waypoint(1.0, _knob(0.0, 0.015), FINGER_OPEN, "up", over_cradle),
+        Waypoint(1.5, (0.20, -0.25, TOP + 0.15), FINGER_OPEN, "out of the way", ACROSS_X),
+    ]
+    left.append(Waypoint(sum(w.duration for w in right) - sum(w.duration for w in left), away, FINGER_OPEN, "wait",
+                         left_across))
     return {"left": left, "right": right}
