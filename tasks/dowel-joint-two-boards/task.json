@@ -19,5 +19,6 @@
   "run_limit": "1,200 steps (1 minute at 20 Hz)",
   "reset_notes": "Nothing is consumed. Pull the boards apart and wipe the round sockets and dowels clean (dry fit, no glue). Set the pale board with its dowel end toward the middle and the dark board with its socket end toward the middle, centres at (0.36, -0.33) and (0.36, +0.33), edges square to the x axis on taped outlines, 0.51 m between the seam ends.",
   "fidelity": "Real boards and dowels at true size and mass. Real sockets are round 8.0 mm drilled holes gauged to 8.1 to 8.3 mm (slip fit); the simulated socket is a round bore 8.4 mm across built from 16 boxes, 0.05 to 0.15 mm a side looser than real because of contact offsets and 0.1 mm vision alignment, and press-fit friction and glue are not modelled; the wedge is geometric. Boards are rigid at one friction (0.25) on the bench, and the grip is a 1.5 mm squeeze of the 80 mm width.",
-  "scores": "Dream-1: 0.0 (seed 0, ended at the 1,200-step limit); scripted demo: 1.0 at step 880 of 1,200. Both on this task.py (SHA-256 prefix 3fa6450fe99c)."
+  "scores": "Dream-1: 0.0 (seed 0, ended at the 1,200-step limit); scripted demo: 1.0 at step 880 of 1,200. Both on this task.py (SHA-256 prefix 3fa6450fe99c).",
+  "media": "M-VW2BX5"
 }
