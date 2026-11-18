@@ -17,5 +17,6 @@
   "run_limit": "1,200 steps (1 minute at 20 Hz)",
   "reset_notes": "Push the pin back into the tag until the bolt clicks into the groove and the knob rests on the hem tab. Slide the tag into the cuff notch under the tab, lock dome toward +y, pin through the tab's hole. Place the detacher on the table with its nose rim centred at (0.190, 0.130) and its handle end toward +y, using taped corner marks. Check the latch: with the dome free, a spring scale on the knob must read at least 60 N before the pin moves; with the detacher seated on the dome (dome pressed in 1.5 mm), the pin must slide at 3 N or less, and must hold again once the dome is let out.",
   "fidelity": "Rigid bodies: the quilted cuff is one stiff piece (real fabric yields) and the pin hole is square in a rigid tab. The latch is a real spring-loaded plunger and bolt: the dome presses in, the bolt leaves the pin's groove, the spring closes it when the detacher leaves; no task rule holds or frees a body. The magnet is not modelled; the nose pressing the dome stands for its release. A palm-size detacher stands in for the larger counter unit; sizes are typical retail sizes.",
-  "scores": "Dream-1: 0.0 (seed 0, ended at the 1,200-step limit); scripted demo: 1.0 at step 621 of 1,200; late_pull cheat: 0.0. All on this task.py (SHA-256 prefix 4065a3fadc1c)."
+  "scores": "Dream-1: 0.0 (seed 0, ended at the 1,200-step limit); scripted demo: 1.0 at step 621 of 1,200; late_pull cheat: 0.0. All on this task.py (SHA-256 prefix 4065a3fadc1c).",
+  "media": "M-772KRA"
 }
