@@ -39,7 +39,16 @@ board set down off the pins rests on them and is not seated.
 
 ## Results
 
-RESULTS_PLACEHOLDER
+Both runs are on this task.py (SHA-256 prefix 24da1ad9817a) with this scoring.py (24088191f7a7), seed 0,
+`object_jitter=0`, 2,500-step limit; their logs are committed in `runs/`.
+
+| Run | Steps | Wall time | task_score | End | Log |
+|---|---|---|---|---|---|
+| Scripted demo (`./run.sh demo`) | 299 | about 2 min | 1.0 | `success`: all four pins engaged, seated, I/O housing in the opening, released and still for 1 s | `runs/demo_log.json` |
+| Dream-1 (`./run.sh dream`) | 2,500 | about 17 min | 0.0 | `max_steps` | `runs/dream_log.json` |
+
+The submitted demo video shows the top camera enlarged beside both wrist cameras; the setup screenshot is the demo's
+first top-camera frame. Runs of earlier revisions do not validate this one.
 
 ## Claimed revision
 
