@@ -17,5 +17,6 @@
   "run_limit": "1,200 steps (1 minute at 20 Hz)",
   "reset_notes": "Nothing is consumed. Pull the horn off the shaft (by hand, a servo-horn puller or a 4 mm bolt through the hub), lay it flat at (0.220, -0.220) with its arm 68 deg from +x (taped outline), and check with the 3.5 mm feeler gauge that a crest-on-crest horn stands proud again. The servo stays bolted.",
   "fidelity": "True-size MG996R and stock horn, 25 teeth at 14.4 deg. Measured by the team: crest-on-crest stand-off 3.5 mm, seating force 32 N; the simulation uses both (before: 1.5 mm, 3.6 N). Teeth are modelled as a ring sliding under 32 N joint friction, only when bore, tilt and arm angle align; it stays down once pressed. No pull-off force. Rigid.",
-  "scores": "Dream-1: 0.0 (seed 0, ended at the 1,200-step limit); scripted demo: 1.0 at step 649 of 1,200. Both on this task.py (SHA-256 prefix 86a0e579223b)."
+  "scores": "Dream-1: 0.0 (seed 0, ended at the 1,200-step limit); scripted demo: 1.0 at step 649 of 1,200. Both on this task.py (SHA-256 prefix 86a0e579223b).",
+  "media": "M-CLM9BP"
 }
