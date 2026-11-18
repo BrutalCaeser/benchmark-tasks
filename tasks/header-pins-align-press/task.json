@@ -22,5 +22,6 @@
   "run_limit": "1,200 steps (1 minute at 20 Hz)",
   "reset_notes": "Pull the board off with a puller (about 3 N), check each pin with a 10x loupe against a straight edge and replace the shield if any pin is bent, then set it level on the header by hand so that the pin tips rest on the header's top face (underside 6 mm above the header, verify with the protractor and a 6 mm gauge block laid beside it, then remove the block). Nothing else supports or props it. The carrier plate and controller need no reset. Verify mating force with a push-pull gauge on a spare pair: 2.5 to 4 N.",
   "fidelity": "Pins and sockets have no collision. The board rides a vertical slide and two tilt hinges, free once more than 0.3 mm above the 6 mm pin tips, so gravity drops a lifted board onto them. In the sockets a spring latch holds the slide where the board was pushed (3.3 N per further 1 mm), and with the pins 1.5 mm in a stiff spring resists rocking (6 N m/rad); a tilt rule at that depth stands for pin bending. Lateral play is not modelled, so in-plane alignment is assumed. Either arm can press.",
-  "scores": "Dream-1: 0.0 (seed 0, ended at the 1,200-step limit); scripted demo: 1.0 at step 249 of 1,200. Both on this task.py (SHA-256 prefix c36a929a5f7d)."
+  "scores": "Dream-1: 0.0 (seed 0, ended at the 1,200-step limit); scripted demo: 1.0 at step 249 of 1,200. Both on this task.py (SHA-256 prefix c36a929a5f7d).",
+  "media": "M-NRU8B6"
 }
