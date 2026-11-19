@@ -16,5 +16,6 @@
   "run_limit": "2,400 steps (2 minutes at 20 Hz)",
   "reset_notes": "Real trials use the printed cookie stand-ins (README, \"Cookie stand-in\"), made once and reused, each passing the acceptance checks (34 to 36 g; 76 mm across, 10 mm thick; holds 1.6 N and parts by 2.45 N in a 40 mm three-point bend; tilt-slide 33 to 37 degrees on the pan, 12 to 16 on the turner, 24.5 to 28.5 on the rack). Press any parted stand-in back together from its own two halves; re-check one dropped on the floor. Set four flat side down on the bare, dry trial pan at the marked places, joint along y. Put the pan and rack back on their tape marks and the turner on its rest, blade away from the robot.",
   "fidelity": "True-size rigid bodies in PhysX with real contact; the 0.6 mm blade is a collider. A cookie is one rigid body that breaks by a criterion on measured contact forces (0.02 N m bending, 3 N squeeze, 10 N press); it cannot crumble or bend. Its base edge curls up 1.5 mm, which lets the blade in. Friction is fixed (cookie on pan 0.7, on blade 0.25; real stand-ins are tested to these); cookies do not stick, the pan is not hot, the blade does not flex. The pan stays put, so one arm does the job.",
-  "scores": "Dream-1: 0.0 (seed 0, ended at the 2,400-step limit); scripted demo: 1.0 in 1,872 steps. Both on this task file (SHA-256 prefix 5bec6a6dc68e)."
+  "scores": "Dream-1: 0.0 (seed 0, ended at the 2,400-step limit); scripted demo: 1.0 in 1,872 steps. Both on this task file (SHA-256 prefix 5bec6a6dc68e).",
+  "media": "M-6XK87X"
 }
