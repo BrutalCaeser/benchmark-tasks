@@ -14,18 +14,24 @@ class Stock:
         self.progress=np.zeros((self.nx,self.ny),np.float64)
         self.cleared=np.zeros((self.nx,self.ny),np.int16)
         self.removed_last_step=False
-        # Per-column cumulative removal attributable to unclamped contact.
+        # Per-column cumulative removal attributable to unclamped contact (an audit record only).
         self.loose_progress=np.zeros_like(self.progress)
+        # Latched once any sawing stroke removes wood while the stock is unclamped: the visible veto (review TK-8BXEV6).
+        self.loose_stroke=False
 
     @property
     def unsafe_loose_cut(self):
-        return bool(np.any(self.loose_progress>=.0005-1e-12))
+        # Any stroke that cuts the wood while it is not clamped, as seen on the trial video: the teeth moving along the
+        # stock under load while the jaws are open. A saw resting on the wood without a stroke (no force or no travel)
+        # is not sawing.
+        return self.loose_stroke
 
     def remove(self,tooth0,tooth1,ds,fn,clamped=True):
         """Update teeth at their measured local pose, force and stroke.
 
         Attribute positive per-column depth increments to loose history only
-        while the measured clamp condition fails; clamping never clears it.
+        while the measured clamp condition fails, and latch ``loose_stroke`` on any such stroke; clamping never
+        clears it.
         """
         self.removed_last_step=False
         if fn<=.05 or ds<=1e-8:return False
@@ -57,6 +63,7 @@ class Stock:
             self.progress[i,j]=min(.020,self.progress[i,j]+min(inc,(old+1)*self.dz-self.progress[i,j]))
             if not clamped:
                 self.loose_progress[i,j]+=self.progress[i,j]-before
+                self.loose_stroke=True
             n=min(self.nz,int((self.progress[i,j]+1e-12)/self.dz))
             if n>old:self.cleared[i,j]=n;changed=True
         return changed

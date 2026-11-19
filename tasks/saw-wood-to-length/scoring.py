@@ -45,7 +45,7 @@ def saw_clear(saw_pose,wood_bodies,margin=.005):
 
 def end_score(geometry,clamp_ok,tool_clear,cut_before_clamp):
     # Every credited end state must be clamped, safe to measure, and have no
-    # measurable (>=0.5mm per column) cumulative removal while stock was loose.
+    # sawing stroke that cut the stock while it was unclamped (visible on video).
     if not clamp_ok or not tool_clear or cut_before_clamp:return 0.
     return float(geometry['stage_value'])
 

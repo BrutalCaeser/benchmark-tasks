@@ -65,45 +65,41 @@ class Stages(unittest.TestCase):
         s=groove();s.progress[:100,:]=.00049
         self.assertEqual(self.value(s),.5)
 
-    def test_accumulated_loose_contacts(self):
+    def test_any_cutting_stroke_while_unclamped_is_vetoed(self):
         s=Stock();a=[.150,-.01,.0198];b=[.150,.01,.0198]
-        # Physically driven removal, below one layer after one contact.
+        # One driven stroke that cuts the loose stock: the visible veto latches at once, below one layer of depth.
         s.remove(a,b,.0001,1.,clamped=False)
         self.assertGreater(s.loose_progress.max(),0.)
-        self.assertFalse(s.unsafe_loose_cut)
-        for _ in range(1000):
-            s.remove(a,b,.0001,1.,clamped=False)
-            if s.unsafe_loose_cut:break
+        self.assertEqual(s.cleared.max(),0)
         self.assertTrue(s.unsafe_loose_cut)
-        self.assertGreaterEqual(s.cleared.max(),1)
-        # Clamp does not erase earlier damage; a fresh stock resets history.
+        # Clamping afterwards does not clear it; a fresh stock starts clean.
         s.remove(a,b,.0001,1.,clamped=True)
         self.assertTrue(s.unsafe_loose_cut)
         self.assertFalse(Stock().unsafe_loose_cut)
-        # Independent loose episodes accumulate at the same column.
-        s=Stock();s.loose_progress[600,0]=.000249999
+
+    def test_resting_or_clamped_contact_is_not_vetoed(self):
+        a=[.150,-.01,.0198];b=[.150,.01,.0198]
+        s=Stock()
+        s.remove(a,b,0.,1.,clamped=False)  # saw resting on the loose stock, no stroke
+        s.remove(a,b,.0001,.01,clamped=False)  # a stroke with no load on the teeth
         self.assertFalse(s.unsafe_loose_cut)
-        s.loose_progress[600,0]+=.00025
+        for _ in range(50):
+            s.remove(a,b,.0001,1.,clamped=True)  # sawing the clamped stock
+        self.assertGreater(s.progress.max(),0.)
         self.assertFalse(s.unsafe_loose_cut)
-        s.loose_progress[600,0]+=.000000001
-        self.assertTrue(s.unsafe_loose_cut)
-        s.loose_progress[600,0]+=.0001
-        self.assertTrue(s.unsafe_loose_cut)
 
     def test_contact_accumulation_and_attribution(self):
         s=groove();a=[.100,-.01,.0198];b=[.100,.01,.0198]
-        for _ in range(3):s.remove(a,b,.0001,1.,clamped=False)
-        self.assertEqual(self.value(s),.5)
-        loose=s.loose_progress.copy()
+        # Clamped sawing is attributed to the cut, not to the loose audit record.
         for _ in range(3):s.remove(a,b,.0001,1.,clamped=True)
-        np.testing.assert_array_equal(loose,s.loose_progress)
-        self.assertFalse(s.unsafe_loose_cut)
-        # Separated contact episodes at the same columns still clear a layer.
-        for _ in range(1000):
-            s.remove(a,b,.0001,1.,clamped=False)
-            if s.cleared[400:404].any():break
-        self.assertEqual(self.value(s),0.)
-        # Broad sub-layer activity cannot synthesize the depth of one cut.
+        self.assertEqual(self.value(s),.5)
+        self.assertEqual(s.loose_progress.max(),0.)
+        # A few loose strokes, far too shallow to clear a layer, are seen on video and veto the trial.
+        for _ in range(3):s.remove(a,b,.0001,1.,clamped=False)
+        self.assertGreater(s.loose_progress.max(),0.)
+        self.assertTrue(s.unsafe_loose_cut)
+        self.assertEqual(self.value(s,loose_cut=s.unsafe_loose_cut),0.)
+        # The audit record alone does not veto: only a recorded loose stroke does.
         s=Stock();s.loose_progress[:,:]=.000499
         self.assertFalse(s.unsafe_loose_cut)
 

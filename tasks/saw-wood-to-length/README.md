@@ -88,12 +88,12 @@ The runner saves the final material array as well as poses and measurements.
 
 ## Validation
 
-Runs of this revision (task.py SHA-256 prefix dccdb9cb42d7: round handle, raised pedestal, steel rule), logs in `runs/`:
+Runs of this revision (task.py SHA-256 prefix dccdb9cb42d7, with the visible sawing-while-unclamped veto in `stock.py`), logs in `runs/`:
 
 - Scripted robot run (`python demo.py --mode full`): **1.0 in 2,370 actions**, two physical pieces, the retained piece
   149.25 mm (0.75 mm off, within the 1 mm tolerance), clamp closed and the saw clear (`runs/demo_result.json`).
 - Dream-1 (command above, seed 3): **0.0** at the 3,200-step limit (`runs/dream_log.json`, per-step records trimmed).
-- `test_*.py`: 17 passed.
+- `test_*.py`: 18 passed, including the new loose-stroke veto cases.
 
 The submitted videos are from these two runs. The results below were recorded on the earlier revision with a
 rectangular grip and are kept as the record of that revision.
@@ -159,10 +159,12 @@ The simulator conservatively measures clearance using box bounds of each saw
 part in each wood body's frame; the round handle and ferrule are bounded by the
 26 × 110 × 28 mm and 30 × 10 × 32 mm boxes that enclose them. A close diagonal pose can fail conservatively.
 
-Measurable cutting while unclamped permanently gives zero, even if the vise is
-tightened later. This means at least 0.5 mm cumulative removal attributable to
-unclamped contact at any one material column, summed across loose episodes;
-clamped contact does not erase the history. Off-target damage means at least one
+Sawing while unclamped permanently gives zero, even if the vise is tightened
+later: any stroke in which the loaded teeth travel along the stock and cut it
+while the vise does not hold it. This is checked from the uninterrupted trial
+video (teeth moving on the wood while the jaws are open or the strip shifts in
+them), not by measuring depth. A saw resting on the wood without a stroke is not
+sawing. Off-target damage means at least one
 cleared 0.5 mm layer outside the 149–154 mm work zone and gives zero. Sub-layer
 fractional accumulators alone are not removed physical geometry and cannot
 trigger either damage veto or earn cut-depth credit. Repeated contacts at the
@@ -184,10 +186,8 @@ hole or cuts covering separate width segments do not qualify. Check clamping
 from jaw measurements, a screw index mark, and top/side video throughout the
 cut. With the saw withdrawn, measure out-of-zone groove depth with a thin marked
 probe or depth gauge against the original top; 0.5 mm is the damage threshold.
-During any loose episodes, compare the depth at each cut location before and
-after that episode and sum the loose-only increments at the same location.
-At least 0.5 mm gives zero. This avoids trying to measure invisible accumulator
-values while retaining a measurable veto on cutting loose stock. Check saw clearance with a ruler and top/side images of both pieces.
+Review the top and side video for any sawing stroke made before the vise was
+closed or while the strip had shifted out of it; one such stroke gives zero. Check saw clearance with a ruler and top/side images of both pieces.
 Full credit still requires physical separation and the actual retained face
 measurements, never a stroke count or elapsed time.
 
@@ -229,6 +229,13 @@ does not modify the installed SDK. One layout is supplied; use
 
 No third-party object mesh, texture or photograph is bundled. The task does
 not load any object from the YAM SDK's station library.
+
+## Revision (review TK-8BXEV6)
+
+| Reviewer point | What changed |
+|---|---|
+| The cumulative 0.5 mm loose-cut depth veto cannot be checked from the trial video and end measurements; use a visible sawing-while-unclamped veto | `stock.py` latches `loose_stroke` on any stroke that cuts the stock while the measured clamp condition fails, and that alone zeroes the score; the per-column loose depth is kept only as an audit record. The real-trial check is the uninterrupted video. Tests: a single cutting stroke on loose stock is vetoed below one layer of depth; a resting saw, an unloaded stroke and sawing the clamped stock are not. |
+| Protect the shared gripper pads from the saw's teeth, including during failed grasps | Real trials: the pads wear clear cut-resistant sleeves (ANSI A4 or better) for the whole trial, and the saw rests in its rack teeth down and away from the grasp side, so a missed grasp closes on the handle, the ferrule or air. |
 
 ## Claimed revision
 
