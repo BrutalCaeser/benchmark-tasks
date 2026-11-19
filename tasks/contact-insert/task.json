@@ -20,5 +20,6 @@
   "run_limit": "3,000 steps (2.5 minutes at 20 Hz)",
   "reset_notes": "Pull the contact out with an extraction tool (the fingers hold it), take the secondary lock out of the slot and stand it back in its holder; housing, contact on its rest and card as in the screenshot. A housing with a forced secondary lock must be replaced.",
   "fidelity": "CPU PhysX 240 Hz. Own simplified parts sized like a DT06-4S plug, W4S and size-16 contact. Wire: 10 mm links, bending springs. Each cavity: two sprung fingers (4 N/mm) that click behind the shoulder. Simplified: once clicked, the fingers are held shut; the simulated retention test is 8 N (a held contact counts as passing 30 N); the robot's tug is read from the contact drawn back onto its fingers; the lock is a top-slot comb (the real W4S enters the mating face); forcing it is judged by position.",
-  "scores": "Dream-1: 0.0 (seed 0, ended at the 3,000-step limit); scripted demo: 1.0, success at step 1,796. Both on this task file (SHA-256 prefix 6bacb68a6465)."
+  "scores": "Dream-1: 0.0 (seed 0, ended at the 3,000-step limit); scripted demo: 1.0, success at step 1,796. Both on this task file (SHA-256 prefix 6bacb68a6465).",
+  "media": "M-WH5MET"
 }
