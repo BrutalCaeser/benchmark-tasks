@@ -1,0 +1,51 @@
+{
+  "variant": "hold_on",
+  "task_score": 0.75,
+  "success_step": null,
+  "steps": 3000,
+  "run_limit_steps": 3000,
+  "final": {
+    "cavity": 3,
+    "crimp_depth": 0.010849734043803511,
+    "seated": true,
+    "locked": true,
+    "latch_open": [
+      7.023320591770243e-08,
+      2.9282269053965138e-08,
+      8.598321414865495e-07,
+      4.709868761665348e-08
+    ],
+    "lock_in": true,
+    "lock_depth": 9.625158648317658e-06,
+    "forced": false,
+    "wrong_locked": false,
+    "tug": "passed",
+    "tug_moved": 0.0002590982941070557,
+    "mark_ok": true,
+    "robot_tug": true
+  },
+  "report": {
+    "_ik_bad": 0,
+    "stroke1": "done",
+    "after_stroke1_mm": -2.24,
+    "stroke2": "stalled",
+    "pushed": {
+      "crimp_mm": 11.17,
+      "cavity": 3,
+      "seated": true,
+      "step": 1168
+    },
+    "tug": {
+      "held_s": 1.0,
+      "max_back_mm": 0.301,
+      "robot_tug": true,
+      "step": 1218
+    },
+    "lock": {
+      "depth_mm": 0.01,
+      "in": true,
+      "forced": false
+    }
+  },
+  "wall_s": 518.7844743728638
+}
