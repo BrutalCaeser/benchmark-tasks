@@ -62,7 +62,7 @@ Runs of this revision (HDPE stand-in dice, task.py SHA-256 prefix 9d5904d206e6),
 | Run | Steps | Result | Log |
 |---|---|---|---|
 | Scripted demo | 540 | 1.0, `success` (net 7 or more dice turned, pan back on the burner, food not touched, all at rest for 1 s) | `runs/demo_log.json` |
-| Dream-1 | 464 of 1,200 | No score: after 464 steps the Dream API refused further requests (`DA-4000`, "unsafe instruction in this scene: tossing food in a pan requires jerking arms and flinging objects"), so Inspect Robots recorded the trial as errored. In those 464 steps Dream-1 moved both arms but never took the pan; the pan and dice are untouched in the video, the 0 band. A second attempt was also refused (DA-4000). | `runs/dream_log.json` |
+| Dream-1 | 1,200 | 0.0, ended at the step limit (`max_steps`). Two earlier attempts were refused part-way by the Dream API (`DA-4000`, unsafe instruction) and are not counted. | `runs/dream_log.json` |
 
 The original authors' Dream-1 run of the potato revision scored 0.0. The tables below are the original authors' runs
 of that revision (par-cooked potato dice, 2.4 g, restitution 0.1) and were not rerun.
