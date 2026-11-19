@@ -1,0 +1,20 @@
+{
+  "files": {
+    "LICENSE": "08d7d18417f03c19ccfdb200a578b698291c1daa7dd774931f19469911742f0e",
+    "README.md": "e93191a86911ceb7e343387913f2155f07fdcb4fef540823b9a971cbef256a4b",
+    "cutting_runtime.py": "443281caac4d1fc21931e687574507a0fab9c3a78a0bc108c42748a3f5d12789",
+    "demo.py": "e645a7f9bf94645f759a8dd96e510c8744553b494ec6df20f244b0b2186c8f7a",
+    "partkit.py": "bf669c23ca104ab796414a57121c447ff36d68587265dbee93aff4a3cc4cddde",
+    "provenance.json": "3902bccf682148110efb5b773b9e4771e03d793e21b56247ac07385c6aaad179",
+    "runtime.py": "8d19479ec942df019f90b853839c4acc82342bf6cd1df3d5b067eb05256f927d",
+    "scoring.py": "d81dbf80495aa6d1cb9ed2d7c18123634d049830de4354f84e80e51c5f5b5bc2",
+    "stock.py": "f0e54b66d7366cc18c8f3e3655a353fa789ebd02b54254b95e19fa6f62d27166",
+    "task.json": "5cee128f1b3b848ce3f34225e5c8fa02af265b9c1d76423967ffa313a8fef9c9",
+    "task.py": "dccdb9cb42d7dd5572c69fe03f16995e0e2ac5ab3af59f3e9b3aab68add80a5f",
+    "test_screw_angle.py": "0cb69100f28d1bbbefc4ab7d7a361ae89b67755687bbbb6beed19c13a1e256d8",
+    "test_stages.py": "117419310f04fa902af7d149982cfc3f46a76aec03b17caf464a5257e843c955",
+    "test_stock.py": "1d4963abbb29db8e7e9b608cd207028e72dd8ea530bf3659dcc7010247b85358"
+  },
+  "source_fingerprint": "a56ea8e3ef533faf06920f66c61a160c536b1ff6501392875fec780a09b1d00f",
+  "readiness": "Claimed revision (round handle, steel rule): robot demo, Dream-1, reset and media not run yet on this revision."
+}
