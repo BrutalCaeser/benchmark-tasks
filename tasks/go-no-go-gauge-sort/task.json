@@ -15,6 +15,5 @@
   "run_limit": "6,000 steps (5 minutes at 20 Hz)",
   "reset_notes": "Nothing is consumed. Set the next trial's layout: place each block, by the number on its underside, in that layout's start place, lying along x. Start a new video for the trial's checks.",
   "fidelity": "Approximate. Blocks, gauge and trays are rigid boxes with one friction (1.2 static, 1.0 dynamic). The tolerance is scaled up: each block clears or misses each gap by at least 1.5 mm, so simulated contacts resolve it; real gauges work to hundredths of a mm. Anvils have square edges. Support is read from poses: the block still with no gripper within 60 mm and no block within 5 mm; real trials judge on video the same untouched, unmoving rest.",
-  "scores": "Dream-1: 0.0 (layout 3, seed 0, all 6,000 steps); scripted demo: 1.0, success after 3,970 of 6,000 steps. Both on this task file (gauge_sort.py SHA-256 prefix 8d3a0117129d).",
-  "media": "M-ZLAR35"
+  "scores": "Dream-1: 0.0 (layout 3, seed 0, all 6,000 steps); scripted demo: 1.0, success after 3,970 of 6,000 steps. Both on this task file (gauge_sort.py SHA-256 prefix 8d3a0117129d)."
 }

@@ -264,7 +264,7 @@ Layout 3, `object_jitter=0`, `--seed 0`, 20 Hz, scored by `task_score`:
 Runs of this revision (gauge_sort.py SHA-256 prefix 8d3a0117129d), logs in `runs/`:
 
 - Scripted demo: **1.0**, success after 3,970 of 6,000 steps (`runs/demo_log.json`).
-- Dream-1: **0.0** over all 6,000 steps (`runs/dream_log.json`).
+- Dream-1: **0.0** over all 6,000 steps (`runs/dream_log.json`, trimmed: its per-step records are left out for size).
 - `check_demo.py` (all offline checks, including the new support cases): passes.
 
 The submitted videos are from these two runs (the demo video shows the top camera enlarged beside both wrist cameras).
