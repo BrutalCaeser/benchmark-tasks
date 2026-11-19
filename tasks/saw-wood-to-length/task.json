@@ -15,5 +15,6 @@
   "reset_notes": "Remove the offcut and replace any cut or damaged strip with a fresh intact 300 x 20 x 20 mm strip of the specified Scots pine. Place it back on the vise and support with the left end at x 200 mm and pencil line 150 mm from that end; open the moving jaw to 22.5 mm, reset the screw index to zero, put the saw upright in its rack and lay the steel rule back on its riser at its stated position. Confirm the strip is free before starting.",
   "fidelity": "Rigid pine proxy: 0.25 x 2 x 0.5 mm dexel grid; measured tooth pose, stroke and contact drive uncalibrated removal, rebuilt colliders and dynamic offcut. Real saw's 20 TPI teeth, push-only cutting, brass back, grain and splinters are unresolved. Vise: self-locking 6 mm/rev screw-jaw coupling, 100 N cap. Saw: 200 mm/150 g, round friction-held handle, thin box tooth collider. Rule: rigid plate, drawn graduations. No blade guide, fixed wood joint or stroke counter.",
   "run_limit": "3,200 actions at 20 Hz (160 s)",
-  "scores": "Dream-1: 0.0 (seed 3, ended at the 3,200-step limit); scripted demo: 1.0 in 2,370 actions, retained piece 149.25 mm. Both on this task file (task.py SHA-256 prefix dccdb9cb42d7)."
+  "scores": "Dream-1: 0.0 (seed 3, ended at the 3,200-step limit); scripted demo: 1.0 in 2,370 actions, retained piece 149.25 mm. Both on this task file (task.py SHA-256 prefix dccdb9cb42d7).",
+  "media": "M-2ZXQUG"
 }
