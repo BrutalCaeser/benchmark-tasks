@@ -17,5 +17,6 @@
   "run_limit": "1,200 steps (60 s at 20 Hz)",
   "fidelity": "Rigid-body sim, 20 Hz. Each finger is a slide joint held by a 200 N/m drive re-latched each step, slipping past 0.5 N (estimate, as are finger mass 1.6 g and the authored profile, made to drawing). Fingers 8 mm apart (real gauge about 1.5 mm), so 7-8 read the casing. Wall and casing fixed and cropped; the trace itself is not drawn.",
   "scores": "Dream-1 run: 0.0; demo: 1.0",
-  "reset_notes": "Push every finger of the gauge fully out and lay it flat on the floor at its mark (finger tips 100 mm in front of the wall, centred on the casing). The casing, wall and board stay fixed; erase nothing (no trace is drawn)."
+  "reset_notes": "Push every finger of the gauge fully out and lay it flat on the floor at its mark (finger tips 100 mm in front of the wall, centred on the casing). The casing, wall and board stay fixed; erase nothing (no trace is drawn).",
+  "media": "M-MKT3R6"
 }
