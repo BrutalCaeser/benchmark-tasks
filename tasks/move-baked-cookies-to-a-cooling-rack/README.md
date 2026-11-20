@@ -1,12 +1,26 @@
 # Move baked cookies from a sheet pan to a cooling rack with a turner
 
-Created 11_15_26 22:40 EST.
-
 Four brittle cookies sit on a quarter sheet pan. The robot takes an offset turner from its rest, gets the 0.6 mm blade
 under each cookie, carries it level over the pan's rim, lets it slide off onto a wire rack, and puts the turner back.
 No part of the robot may touch a cookie, and nothing is turned over. Real trials use a non-perishable cookie stand-in
 of the same size, mass and friction that comes apart in two when bent as hard as the simulated cookie breaks (see
 "Cookie stand-in" below).
+
+## Credit, and how the review is met
+
+This task takes up the idea of an earlier submission by GitHub user `bfefferm-pers`, "Move baked cookies from a sheet pan to a cooling rack with a turner, without touching or breaking them", reviewed as TK-67G3V5 and TK-7D26TA. The hold on the idea lapsed with no further revision. This version starts from that submission's files and answers each review point by point below.
+
+| Reviewer point | What changed |
+| --- | --- |
+| Specify a non-perishable stand-in for the cookies that keeps fidelity to the real context | New section "Cookie stand-in": a reusable printed PETG disc with the simulated cookie's size, shape (the curled base edge the blade gets under), mass and friction, made as two halves held by four small magnets so that it comes apart under the bending moment at which the simulated cookie breaks. Acceptance checks for each stand-in: mass, size, base curl, flatness, a three-point break test and tilt-slide tests on the pan, the turner's blade and the rack, each tied to the simulated value. "Real-world setup and safety", the measurement table, `task.json`'s setup, scoring and reset notes now use the stand-in instead of baked cookies. |
+| Earlier: change the domain to societal relatability | Kept. |
+| Earlier: a standard source and size for the cookies | Kept as the reference the stand-in copies (size and mass of the named baked cookie). |
+| Results on this revision | The scripted demo (1.0 in 1,872 steps) and Dream-1 (0.0 at the 2,400-step limit) were rerun on this revision's task file, and the 34 scorer tests passed. |
+
+The stand-in is specified to the simulated cookie's mass, size and friction, so the simulation parameters, the scorer,
+the scripted demo and the tests are unchanged. Whether a printed base reaches the simulated friction on the pan and on
+the blade together has not been measured; "Cookie stand-in" says what to change if it does not. The scripted demo
+and Dream-1 were rerun on this revision's task file (see "What was measured").
 
 ## Files
 
@@ -141,7 +155,6 @@ Objects as in `task.json`'s setup; all but the cookie stand-ins are ordinary bak
   turner back on their marks. The pan, blade and rack are wiped dry with a clean cloth once per session, since grease
   or dust changes the friction.
 
-
 | Quantity | In the simulator | In a real trial |
 |---|---|---|
 | Cookie on the rack, flat, wholly on the wires | pose of the cookie in the rack's frame | photo from above; a ruler for the overhang |
@@ -151,7 +164,6 @@ Objects as in `task.json`'s setup; all but the cookie stand-ins are ordinary bak
 | Pan in place, never tipped or lifted | pan pose every step | tape outline and a ruler at the end; video for tipping |
 | Turner on its rest | turner pose against its starting pose | photo; ruler against the tape mark |
 | Grippers clear, all still | fingertip midpoints 80 mm from the three objects' boxes; speeds | ruler; video |
-
 
 ## Cookie stand-in
 
@@ -217,24 +229,3 @@ simulation.
   at their force limit and the handle buzzes sideways in the simulator, which walks a cookie off the blade.
 - The cookies start on the far two thirds of the pan, so that the blade can be set down in front of each one. The layout
   is fixed; nothing is randomised.
-
-## Claimed revision
-
-This task builds on an earlier submission by GitHub user `bfefferm-pers`. It answers that submission's latest review and
-keeps the fixes made for the one before it.
-
-| Reviewer point | What changed |
-| --- | --- |
-| Specify a non-perishable stand-in for the cookies that keeps fidelity to the real context | New section "Cookie stand-in": a reusable printed PETG disc with the simulated cookie's size, shape (the curled base edge the blade gets under), mass and friction, made as two halves held by four small magnets so that it comes apart under the bending moment at which the simulated cookie breaks. Acceptance checks for each stand-in: mass, size, base curl, flatness, a three-point break test and tilt-slide tests on the pan, the turner's blade and the rack, each tied to the simulated value. "Real-world setup and safety", the measurement table, `task.json`'s setup, scoring and reset notes now use the stand-in instead of baked cookies. |
-| Earlier: change the domain to societal relatability | Kept. |
-| Earlier: a standard source and size for the cookies | Kept as the reference the stand-in copies (size and mass of the named baked cookie). |
-| Results on this revision | The scripted demo (1.0 in 1,872 steps) and Dream-1 (0.0 at the 2,400-step limit) were rerun on this revision's task file, and the 34 scorer tests passed. |
-
-The stand-in is specified to the simulated cookie's mass, size and friction, so the simulation parameters, the scorer,
-the scripted demo and the tests are unchanged. Whether a printed base reaches the simulated friction on the pan and on
-the blade together has not been measured; "Cookie stand-in" says what to change if it does not. The scripted demo
-and Dream-1 were rerun on this revision's task file (see "What was measured").
-
-## Origin
-
-This task builds on an earlier submission by GitHub user `bfefferm-pers`.
