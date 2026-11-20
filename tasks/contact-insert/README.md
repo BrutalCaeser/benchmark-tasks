@@ -13,6 +13,19 @@ behind the crimp (a wire pushed far back bends instead of driving the contact), 
 push and the tug, and fitting the secondary lock only after the contact is seated (pressed in over a contact short of
 the click, it damages the housing).
 
+## Credit, and how the review is met
+
+This task takes up the idea of an earlier submission by GitHub user `lweigelt`, `contact-insert`, reviewed as TK-8FNXAK. The hold on the idea lapsed with no further revision. This version starts from that submission's files (its parts, scene, bench and demo code, reused and extended) and answers the review point by point below. The scoring and the demo changed (code in `ct_parts.py`, `task.py`, `demo.py`), so every run was redone on this revision: the scripted demo, its seven variants and Dream-1 (`task.json` `scores`).
+
+| Reviewer point | What changed |
+| --- | --- |
+| Importance: the jobs category does not establish 500,000 US workers; if this is robot-building work, change the domain to Impact on AI timelines and describe a genuine robot-harness assembly application | `category` is `Impact on AI timelines`; `context` and *Why this matters for AI timelines* describe pinning, tugging and locking the sealed harness connectors that wire robots, with sources; the occupation claim is removed |
+| Clarity and reproducibility: specify an available housing, matching contact and secondary lock, or fabrication files | *Real-trial parts* and `task.json` `setup`: TE DEUTSCH DT06-4S plug, W4S wedgelock and 0462-201-16141 size-16 socket contact (sold as one kit), HDT-48-00 crimper, 18 AWG wire. The remaining difference (the W4S enters the mating face, the simulated comb a top slot) is stated in *Fidelity* and `task.json` `fidelity` |
+| Construct validity, scoring, feasibility: require the robot's own tug in the scoring and demonstrate it within the action limit; the independent retention test can remain | New latched `robot_tug` check (`ct_parts.wire_gripped` and the update step); `locked()` in `task.py` now needs it; the demo tugs after the click while the other hand holds the housing; new `no_tug` variant (0.25). The independent retention test is kept as check (c). Demo rerun on this revision: success at step 1,796 of 3,000; `no_tug` measured 0.25 |
+| Scoring: replace the concealed 0.3 mm contact-depth check with observable checks, and specify how the secondary lock's seating is checked | Score uses a white reference band on the wire (within 1.0 mm, a ruler), the robot's tug and the retention test; the 0.3 mm tolerance now only drives the simulated finger hold, not the score. Lock seating: simulation, tab on the top within 0.3 mm with every finger closed; real trial, W4S snapped in flush with the mating face (straightedge and 0.3 mm feeler gauge) |
+| Instruction | "into the slot on top of the housing" is now "into its slot in the housing", true for the simulated comb and for the real W4S |
+| Runs | Scripted demo, its seven variants and Dream-1 rerun on this revision's task file (SHA-256 prefix `6bacb68a6465`) |
+
 ## Why this matters for AI timelines: robots building robots
 
 Robot arms, mobile bases and humanoids are wired with harnesses: crimped contacts pinned into sealed connector housings,
@@ -277,22 +290,3 @@ reset); scores measured on this revision (`runs/variants/<variant>/result.json`)
   with an error. It must run before `yam_arena.scene` is first imported (true for `-E task=task.py`).
 - The scripted demo runs through `demo.py` (the same `YamArenaEmbodiment` and task-file scoring as `inspect-robots
   run`), not the CLI.
-
-## Claimed revision
-
-This task builds on an earlier submission by GitHub user `lweigelt`. The scoring and the demo
-changed (code in `ct_parts.py`, `task.py`, `demo.py`), so every run was redone on this revision: the scripted demo, its seven variants and Dream-1 (`task.json` `scores`).
-
-| Reviewer point | What changed |
-| --- | --- |
-| Importance: the jobs category does not establish 500,000 US workers; if this is robot-building work, change the domain to Impact on AI timelines and describe a genuine robot-harness assembly application | `category` is `Impact on AI timelines`; `context` and *Why this matters for AI timelines* describe pinning, tugging and locking the sealed harness connectors that wire robots, with sources; the occupation claim is removed |
-| Clarity and reproducibility: specify an available housing, matching contact and secondary lock, or fabrication files | *Real-trial parts* and `task.json` `setup`: TE DEUTSCH DT06-4S plug, W4S wedgelock and 0462-201-16141 size-16 socket contact (sold as one kit), HDT-48-00 crimper, 18 AWG wire. The remaining difference (the W4S enters the mating face, the simulated comb a top slot) is stated in *Fidelity* and `task.json` `fidelity` |
-| Construct validity, scoring, feasibility: require the robot's own tug in the scoring and demonstrate it within the action limit; the independent retention test can remain | New latched `robot_tug` check (`ct_parts.wire_gripped` and the update step); `locked()` in `task.py` now needs it; the demo tugs after the click while the other hand holds the housing; new `no_tug` variant (0.25). The independent retention test is kept as check (c). Demo rerun on this revision: success at step 1,796 of 3,000; `no_tug` measured 0.25 |
-| Scoring: replace the concealed 0.3 mm contact-depth check with observable checks, and specify how the secondary lock's seating is checked | Score uses a white reference band on the wire (within 1.0 mm, a ruler), the robot's tug and the retention test; the 0.3 mm tolerance now only drives the simulated finger hold, not the score. Lock seating: simulation, tab on the top within 0.3 mm with every finger closed; real trial, W4S snapped in flush with the mating face (straightedge and 0.3 mm feeler gauge) |
-| Instruction | "into the slot on top of the housing" is now "into its slot in the housing", true for the simulated comb and for the real W4S |
-| Runs | Scripted demo, its seven variants and Dream-1 rerun on this revision's task file (SHA-256 prefix `6bacb68a6465`) |
-
-## Origin
-
-Builds on an earlier submission by GitHub user `lweigelt`; the original parts, scene, bench and demo code are
-reused and extended as listed above.
