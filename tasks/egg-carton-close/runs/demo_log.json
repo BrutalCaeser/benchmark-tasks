@@ -2,7 +2,7 @@
   "error": null,
   "eval": {
     "benchmark": null,
-    "created": "2026-11-19T02:01:41.774895+00:00",
+    "created": "2026-11-20T01:24:36.168722+00:00",
     "embodiment": "yam_arena",
     "embodiment_info": {
       "capabilities": [
@@ -15,7 +15,7 @@
       "morphology": null
     },
     "environment_id": "isaaclab-arena-0.3.1-yam-bimanual-station-calibrated-task-egg_carton",
-    "environment_revision": "cf20f483bef0",
+    "environment_revision": "160654f75ce8",
     "git_commit": null,
     "grader": null,
     "grader_config": {},
@@ -6317,10 +6317,10 @@
         null
       ],
       "record_dirs": [
-        "records/20261119_020141_a8b3206c/scene-0-e0"
+        "records/20261120_012436_ceb934b3/scene-0-e0"
       ],
       "record_ids": [
-        "4bd37d5147774154b2f767dfcef3306e"
+        "b188292d05e04e779d5287c17440d42a"
       ],
       "reduced": {
         "task_score": 1.0
@@ -6345,18 +6345,18 @@
       ],
       "trial_metadata": [
         {
-          "actions": "actions/20261119_020141_a8b3206c/scene-0-e0.jsonl"
+          "actions": "actions/20261120_012436_ceb934b3/scene-0-e0.jsonl"
         }
       ]
     }
   ],
   "stats": {
-    "completed_at": "2026-11-19T02:03:11.680081+00:00",
-    "duration_s": 89.9033097160002,
-    "frames_dir": "demo_out/frames/20261119_020141_a8b3206c",
+    "completed_at": "2026-11-20T01:26:44.423624+00:00",
+    "duration_s": 128.25274930999876,
+    "frames_dir": "demo_out/frames/20261120_012436_ceb934b3",
     "mean_inference_latency_s": null,
-    "records_dir": "demo_out/records/20261119_020141_a8b3206c",
-    "started_at": "2026-11-19T02:01:41.776779+00:00",
+    "records_dir": "demo_out/records/20261120_012436_ceb934b3",
+    "started_at": "2026-11-20T01:24:36.170883+00:00",
     "total_steps": 366
   },
   "status": "success",

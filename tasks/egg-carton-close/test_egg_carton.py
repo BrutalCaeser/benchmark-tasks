@@ -33,10 +33,16 @@ def tilted(deg):
     return (math.sin(a), 0.0, 0.0, math.cos(a))
 
 
-def carton(lid, flap, dz=0.0, vz=0.0, quat=FLAT):
-    """Both halves at the start (raised dz, falling at -vz m/s), the lid lid degrees open, the flap flap degrees in."""
+def turned(deg):
+    a = math.radians(deg) / 2
+    return (0.0, 0.0, math.sin(a), math.cos(a))
+
+
+def carton(lid, flap, dz=0.0, vz=0.0, quat=FLAT, dx=0.0):
+    """Both halves at the start (raised dz, falling at -vz m/s, slid dx along x), the lid lid degrees open, the flap
+    flap degrees in."""
     def half(x, sliders):
-        return SimpleNamespace(pos=np.array((M.CX + x, 0.0, M.TOP + dz)), quat_xyzw=np.array(quat, float),
+        return SimpleNamespace(pos=np.array((M.CX + x + dx, 0.0, M.TOP + dz)), quat_xyzw=np.array(quat, float),
                                lin_vel=np.array((0.0, 0.0, vz)), sliders=sliders)
     return {"carton_back": half(0.0, {"lid": lid - M.OPEN}), "carton_front": half(0.0, {"flap": flap + M.REST})}
 
@@ -129,6 +135,31 @@ def test_dropping_the_carton_scores_zero():
         step(carton(100.0, -60.0))
     step(carton(100.0, -60.0, dz=0.02, vz=-1.2))
     assert "dropped" in M._S["damage"]
+
+
+def test_turning_the_carton_on_the_tabletop_is_not_tipping():
+    for _ in range(10):
+        step(carton(100.0, -60.0))
+    for _ in range(10):
+        step(carton(100.0, -60.0, quat=turned(40.0)))   # swung 40 degrees about the vertical, still flat
+    assert M._S["damage"] is None
+    assert M._tilt(turned(90.0), FLAT) < 1e-6
+    assert abs(M._tilt(tilted(25.0), FLAT) - 25.0) < 1e-6
+
+
+def test_a_closed_carton_slid_more_than_1_cm_still_scores_one():
+    s = 0.0
+    for _ in range(10):
+        s = step(carton(100.0, -60.0))
+    for _ in range(10):
+        s = step(carton(100.0, -60.0, dx=0.03))          # nudged 3 cm along the table before closing
+    for c in np.linspace(45.0, 6.0, 10):
+        s = step(carton(c, 1.0, dx=0.03), lid=2.0, flap=2.0)
+    for _ in range(2):
+        s = step(carton(2.2, 0.8, dx=0.03), lid=4.5, flap=0.5)
+    for _ in range(40):
+        s = step(carton(2.2, 0.8, dx=0.03), lid=0.3, flap=0.2)
+    assert s == 1.0 and M._S["damage"] is None
 
 
 def test_upending_the_carton_scores_zero():

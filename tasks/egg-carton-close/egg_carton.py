@@ -227,9 +227,16 @@ def _egg_gap(objects, flap=-REST):
     return best
 
 
+def _up(q) -> np.ndarray:
+    """The body's z axis in the world frame, from its quaternion (x, y, z, w)."""
+    x, y, z, w = (float(v) for v in q)
+    return np.array((2 * (x * z + w * y), 2 * (y * z - w * x), 1 - 2 * (x * x + y * y)))
+
+
 def _tilt(q, q0) -> float:
-    d = abs(float(np.dot(np.asarray(q, float), np.asarray(q0, float))))
-    return math.degrees(2 * math.acos(min(d, 1.0)))
+    """Tip (deg): the angle between the carton's vertical axis now and at the start. Turning the carton about the
+    vertical on the tabletop does not change it (review TK-3JWKR5); only tipping it off flat does."""
+    return math.degrees(math.acos(min(1.0, max(-1.0, float(np.dot(_up(q), _up(q0)))))))
 
 
 def _state(objects):
@@ -301,12 +308,13 @@ def _dump_bodies():
 
 def score(objects) -> float:
     """1.0: at the end the lid is within 5 degrees of shut with the flap within 6 degrees of upright (inside the
-    skirt, where its bead holds the lid), both carton halves within 1 cm of where they started, no finger tip within
-    3 cm of the carton, and the lid still (moved under 0.5 degrees) for the last second. 0.5: the same, but the carton
-    was pushed more than 1 cm. 0 otherwise, and 0 for the whole trial if at any time the lid was pressed more than
+    skirt, where its bead holds the lid), no finger tip within 3 cm of the carton, and the lid still (moved under
+    0.5 degrees) for the last second, wherever the carton has been slid or turned on the table (review TK-3JWKR5).
+    0 otherwise, and 0 for the whole trial if at any time the lid was pressed more than
     6 degrees past shut or the flap more than 16 degrees in (onto the eggs), more than 5 N was pressed through the lid
     and flap for 0.25 s once the carton was latched (onto the eggs; the press that latches it comes before), a finger
-    came within 5 mm of an egg, or the carton fell at over 1 m/s, tipped 20 degrees or its halves pulled 3 mm apart.
+    came within 5 mm of an egg, or the carton fell at over 1 m/s, tipped 20 degrees off flat (its vertical axis; a
+    turn on the tabletop is not a tip) or its halves pulled 3 mm apart.
     Lifting or nudging the carton gently is not damage."""
     if _S["scored"] == _S["step"]:
         return _S["last"]
@@ -330,7 +338,7 @@ def score(objects) -> float:
     r.append((lid, _clear()))
     del r[:-20]
     still = len(r) == 20 and all(abs(a - lid) < 0.5 and c for a, c in r)
-    s = 0.0 if damage else ((1.0 if moved <= 0.01 else 0.5) if (locked and still) else 0.0)
+    s = 0.0 if damage else (1.0 if (locked and still) else 0.0)  # moved is logged only
     _S["last"] = s
     dump = os.environ.get("EGG_BODIES", "")
     if dump and _S["step"] in [int(v) for v in dump.split(",")]:

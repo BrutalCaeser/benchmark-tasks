@@ -19,6 +19,13 @@ the same with the two arms.
 
 First proposed in pull request #2368 (reviewed as TK-MFPNK8, then TK-F84WBY); carried forward here with the changes below.
 
+## Revision (review TK-3JWKR5)
+
+| Reviewer point | What changed |
+|---|---|
+| A harmless carton rotation over 20 degrees triggers simulated damage; compute tilt from the carton's vertical axis | `_tilt` now measures the angle between the carton's vertical axis now and at the start, so turning it on the tabletop never counts; tipping off flat still does past 20 degrees. Tests: a 40-degree turn on the table is not damage, a 90-degree turn reads 0 tilt, a 25-degree tip reads 25 and is damage. |
+| A shift over 1 cm halves the score despite a successful closure; award the same score for an intact, latched carton | The 1 cm rule and the 0.5 tier are gone: an intact, latched, released carton scores 1.0 wherever it has been slid. Damage and real tipping keep their zeros. Test: a carton slid 3 cm and closed scores 1.0. |
+
 ## Claimed revision
 
 This revision builds on pull request #2368, whose hold lapsed without a revision. It answers the review of TK-F84WBY:
@@ -107,7 +114,7 @@ upright, positive when tucked in toward the eggs and -60 degrees as found.
     than 5 N is carried by the lid's and flap's hinges together for 0.25 s: the latched lid pushed down onto the eggs
     (a new dent in the pulp over any egg). The press that latches it comes before and is not counted;
   - a finger is within 5 mm of an egg's exposed part (a fingertip on an egg in the wrist-camera video);
-  - the carton falls faster than 1 m/s, a drop of about 5 cm (the video), or tips more than 20 degrees (an egg out
+  - the carton falls faster than 1 m/s, a drop of about 5 cm (the video), or tips more than 20 degrees off flat (its vertical axis; turning it on the table is not tipping) (an egg out
     of its cup, or the video);
   - the carton's two halves are pulled 3 mm apart (a tear in the tray, or a flap button, lid hole or hinge torn).
 
@@ -118,10 +125,8 @@ upright, positive when tucked in toward the eggs and -60 degrees as found.
 - **1.0**: no damage, and at the end:
   - the lid is within 5 degrees of shut (and no more than 6 degrees past it);
   - the flap is within 6 degrees of upright or further in (inside the skirt, where its bead holds the lid);
-  - the carton is within 1 cm of where it started;
   - no finger is within 3 cm of the carton's closed outline;
   - the lid has been still (moving under 0.5 degrees) for the last 1 s.
-- **0.5**: the same, but the carton was pushed more than 1 cm.
 - **0** otherwise.
 
 Without the flap inside, nothing holds the lid down, and the pulp hinge opens it again as soon as it is let go.
@@ -147,10 +152,16 @@ score 0.
 
 ## Results
 
-Runs of this revision (egg_carton.py SHA-256 prefix cf20f483bef0), seed 0, `object_jitter=0`, logs in `runs/`:
+Runs of this revision (egg_carton.py SHA-256 prefix 160654f75ce8: vertical-axis tilt, no shift penalty), seed 0,
+`object_jitter=0`, logs in `runs/`:
 
 - Scripted demo: **1.0** at step 366 of 2,400 (`runs/demo_log.json`); the lid locked, the damage record stayed clear.
-- Dream-1: **0.0** at the 2,400-step limit (`runs/dream_log.json`).
+- `test_egg_carton.py`: 12 passed, including a 40-degree turn on the table (no damage) and a closure after a 3 cm
+  slide (1.0).
+- Dream-1: **0.0** at the 2,400-step limit, from the previous revision's scorer (cf20f483bef0, `runs/dream_log.json`).
+  A rerun on this revision was refused by the Dream API (DA-1000, key disabled). In that run the lid never closed, so
+  it scores 0 under either scorer: this revision only stops counting a turn on the table as a tip and drops the 1 cm
+  shift penalty, and a closed, latched lid is still required for any credit.
 - `EGG_VARIANT=crush` rerun under the latched 0.25 s hold: **0**.
 
 The submitted videos are from these runs (the demo video shows the top camera enlarged beside both wrist cameras).
