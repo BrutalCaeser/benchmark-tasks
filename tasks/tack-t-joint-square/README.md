@@ -21,6 +21,18 @@ The score is printed as `task_score`. Use `--policy dream` for Dream-1.
 - **Shortcuts tried in the simulator** (`TACK_DEMO`, for checking the score; see Results): `none`, `one`, `lean`, `hover`, `held`, `stand` (the coupon is stood on the line and let go before tacking), `near` (the fingers open 4 mm clear of the coupon's ends and the hand stays round it, touching nothing, while it is tacked). `TACK_DEBUG=1` prints each step's measurements.
 - **Third-party assets:** none. Every part is built from boxes, cylinders and simple meshes in the task's own code. The torch is the same real torch body as in the seam-welding task in this repository (`tig-seam`), with the tungsten set at 8 mm stick-out, so both tasks can share the equipment.
 
+## Credit, and how the review is met
+
+This task takes up the idea of an earlier submission by GitHub user `bfefferm-pers`, "Tack-weld a T-joint square: hold a steel coupon on edge and TIG-tack it at three marks", reviewed as TK-W4UYUQ. The hold on the idea lapsed with no further revision. This version starts from that submission's files and answers the review point by point below.
+
+| Reviewer point | What changed |
+| --- | --- |
+| Add to the README a costed equipment list (welding cell, safety equipment, per-trial consumables) | New section "Equipment and cost": three tables (welding cell, safety equipment, per-trial consumables) with a named product and a price for each item, a total for a lab starting fresh (about $1,750) and the per-trial cost (about $2 to $6). Items not priced against a single listing are marked as estimates. The power-source line now says what happens to the downslope setting on the costed inverter. |
+| A line on how the robot and cameras are protected from high-frequency start interference | The "Electrical interference" item in "Real-world setup" is now "How the robot and cameras are protected from HF start interference": the arms are kept out of the welding and HF circuit (insulated grips, work clamp on the fixture), the inverter on its own branch circuit following IEC 60974-10, shielded cables with ferrites kept 30 cm from the torch lead, and a test strike before each session with stated pass conditions. |
+| Earlier: importance and feasibility (appeal) | Kept: the O*NET task citations in the context; the shared rig with `tig-seam` is now costed. |
+
+The scorer, tack model, scripted demo and tests are unchanged. `task.json` changes only in its setup and reset notes (pointing to the costs) and its scores. This revision was rerun in simulation: demo 1.0, Dream-1 0.0 (see Results).
+
 ## Results
 
 Simulator runs of 2026-11-15, made on the code of the earlier submission (this revision changes no code), all made with holding judged by contact force, each with the command above (`--seed 0`; shortcuts add `TACK_DEMO=<name>`). One Dream-1 run (`--policy dream`, 1,800 steps) scored 0.0.
@@ -144,19 +156,3 @@ The bands (numbers in `task.json`'s scoring): 0 with no sound tack, a part off t
 | A T on the joint at all (else 0) | Within 10 degrees of square (the square's blade within 12 mm of the coupon 70 mm up), within 10 mm of the line, an edge on the base plate. | The same from its pose. |
 | Torch back, hands clear and still | Ruler against marks on the rest: the grip's centre within 12 mm in plan and 6 mm in height of its rest position, tilted under 10 degrees, turned under 20 degrees; both grippers 6 cm from coupon and torch; nothing moving in the last 1 s of video. | The same numbers from the poses; at rest means under 1 cm/s and 0.5 rad/s. |
 | Not simulated | Porosity, crater cracks, arc strikes on bare plate and glare are real and are read as above; the simulation has none of them. The pull of a cooling tack is real and is measured by the square; the simulation applies it as the fixed 3 degree criterion above, only to a first tack on an unheld coupon (a held coupon's smaller spring-back is not modelled). A coupon set down untacked can stand in the simulation as long as nothing touches it; it scores 0 untacked. | |
-
-## Claimed revision
-
-This task builds on an earlier submission by GitHub user `bfefferm-pers`. It answers that submission's latest review.
-
-| Reviewer point | What changed |
-| --- | --- |
-| Add to the README a costed equipment list (welding cell, safety equipment, per-trial consumables) | New section "Equipment and cost": three tables (welding cell, safety equipment, per-trial consumables) with a named product and a price for each item, a total for a lab starting fresh (about $1,750) and the per-trial cost (about $2 to $6). Items not priced against a single listing are marked as estimates. The power-source line now says what happens to the downslope setting on the costed inverter. |
-| A line on how the robot and cameras are protected from high-frequency start interference | The "Electrical interference" item in "Real-world setup" is now "How the robot and cameras are protected from HF start interference": the arms are kept out of the welding and HF circuit (insulated grips, work clamp on the fixture), the inverter on its own branch circuit following IEC 60974-10, shielded cables with ferrites kept 30 cm from the torch lead, and a test strike before each session with stated pass conditions. |
-| Earlier: importance and feasibility (appeal) | Kept: the O*NET task citations in the context; the shared rig with `tig-seam` is now costed. |
-
-The scorer, tack model, scripted demo and tests are unchanged. `task.json` changes only in its setup and reset notes (pointing to the costs) and its scores. This revision was rerun in simulation: demo 1.0, Dream-1 0.0 (see Results).
-
-## Origin
-
-This task builds on an earlier submission by GitHub user `bfefferm-pers`.
