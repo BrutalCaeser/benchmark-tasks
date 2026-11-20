@@ -280,7 +280,7 @@ reset); scores measured on this revision (`runs/variants/<variant>/result.json`)
 
 ## Claimed revision
 
-This task builds on pull request #2696, whose 48-hour revision hold lapsed without a revision. The scoring and the demo
+This task builds on an earlier submission by GitHub user `lweigelt`. The scoring and the demo
 changed (code in `ct_parts.py`, `task.py`, `demo.py`), so every run was redone on this revision: the scripted demo, its seven variants and Dream-1 (`task.json` `scores`).
 
 | Reviewer point | What changed |
@@ -294,5 +294,5 @@ changed (code in `ct_parts.py`, `task.py`, `demo.py`), so every run was redone o
 
 ## Origin
 
-Claimed from pull request #2696 after its revision hold lapsed; the original parts, scene, bench and demo code are
+Builds on an earlier submission by GitHub user `lweigelt`; the original parts, scene, bench and demo code are
 reused and extended as listed above.
