@@ -18,6 +18,22 @@ embodiment: the standard `yam_arena` one, with the nail spawned as a solid part 
 label plate tilted on its holder and lettered, and the grippers' positions passed to the scorer for the final release check. `run.py` runs a trial. No installed
 package is modified.
 
+## Credit, and how the review is met
+
+This task takes up the idea of an earlier submission by GitHub user `smartdude2007`, "Stack scrap lumber on a pallet when one offcut has a nail sticking out of it", reviewed as TK-2XTRV5. The hold on the idea lapsed with no further revision. This version starts from that submission's files and answers the review point by point below.
+
+| Reviewer point | What changed |
+| --- | --- |
+| The DENAIL label renders as a blank yellow box; render its text and check it is visible in the robot camera views | The label is now lettered: DENAIL in black 5 x 7 block capitals, 49 mm tall with 7 mm strokes, on a yellow 260 x 70 mm plate. A label flat on the tote's near wall is seen almost edge on from the overhead camera, so the plate sits on an angled label holder along the near rim, tilted 45 degrees up toward the robot, as bin label holders are. The word is legible in the top camera's 320 x 176 view and in the uploaded setup image. The plate is a fixed collider; the lettering is thin visual boxes on its face (`task.py` `label_strokes()`, `runtime.py`). |
+| Flag: the nail is specified 50 mm from the board end, but the code places it 30 mm from that end | `NAIL_X` is now derived from the 220 mm board and `NAIL_FROM_END = 0.050`, so the nail is 50 mm from offcut e's +X end, as the setup says. The scripted grip on that board moved 20 mm the other way, so it is still 80 mm from the nail, and the drop over the tote is offset to match. |
+| Flag: protect the gripper pads from unintended nail contact in real trials | Real trials: clear cut-resistant sleeves (ANSI A4 or better) on the finger pads for the whole trial, and the trial stops if the nail is pinched between the pads (Building it for real). |
+
+The scoring is unchanged. New CPU checks cover the nail's position and grip distance, the label plate's
+tilt and placement (outside the tote, under its rim), that its lettering is every lit pixel of DENAIL once
+and reads left to right from the robot's side, and that the demo's arms stay at least 1 cm from the plate.
+The revised scene was run in simulation: the demo scores 1.0 in 1,026 actions and Dream-1 scores 0.0
+(Results).
+
 ## Runtime and installation
 
 Linux with an NVIDIA RTX GPU. Install the YAM adapter for Isaac Lab-Arena at the pinned commit, from the
@@ -176,24 +192,3 @@ demo's arms stay at least 1 cm from the label plate.
 - Station room, table, camera stand, lights and cameras: the pinned adapter and Isaac Lab-Arena
   (Apache-2.0); keep their notices.
 - Pallet, tote, boards and nail: primitive geometry in this folder; no third-party meshes or textures.
-
-## Claimed revision
-
-This task builds on an earlier submission by GitHub user `smartdude2007`. It answers that submission's
-latest review (TK-2XTRV5).
-
-| Reviewer point | What changed |
-| --- | --- |
-| The DENAIL label renders as a blank yellow box; render its text and check it is visible in the robot camera views | The label is now lettered: DENAIL in black 5 x 7 block capitals, 49 mm tall with 7 mm strokes, on a yellow 260 x 70 mm plate. A label flat on the tote's near wall is seen almost edge on from the overhead camera, so the plate sits on an angled label holder along the near rim, tilted 45 degrees up toward the robot, as bin label holders are. The word is legible in the top camera's 320 x 176 view and in the uploaded setup image. The plate is a fixed collider; the lettering is thin visual boxes on its face (`task.py` `label_strokes()`, `runtime.py`). |
-| Flag: the nail is specified 50 mm from the board end, but the code places it 30 mm from that end | `NAIL_X` is now derived from the 220 mm board and `NAIL_FROM_END = 0.050`, so the nail is 50 mm from offcut e's +X end, as the setup says. The scripted grip on that board moved 20 mm the other way, so it is still 80 mm from the nail, and the drop over the tote is offset to match. |
-| Flag: protect the gripper pads from unintended nail contact in real trials | Real trials: clear cut-resistant sleeves (ANSI A4 or better) on the finger pads for the whole trial, and the trial stops if the nail is pinched between the pads (Building it for real). |
-
-The scoring is unchanged. New CPU checks cover the nail's position and grip distance, the label plate's
-tilt and placement (outside the tote, under its rim), that its lettering is every lit pixel of DENAIL once
-and reads left to right from the robot's side, and that the demo's arms stay at least 1 cm from the plate.
-The revised scene was run in simulation: the demo scores 1.0 in 1,026 actions and Dream-1 scores 0.0
-(Results).
-
-## Origin
-
-This task builds on an earlier submission by GitHub user `smartdude2007`.
