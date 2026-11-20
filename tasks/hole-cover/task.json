@@ -16,5 +16,6 @@
   "run_limit": "3,000 control steps at 20 Hz (150 seconds of simulation time); full success ends the run early.",
   "reset_notes": "Nothing is consumed. Lay the wrench back on the subfloor under the opening's centre, along x, and seat the cover over the opening with its handle along x.",
   "fidelity": "Rigid-body PhysX at 240 Hz, 20 Hz control, objects at real size and mass. The cover is one rigid body with exact convex colliders (plate, handle, two chamfered cleats); deck and tote are fixed boxes; the wrench is a flat steel bar of a wrench's size and mass, without its open and ring ends. Friction estimated: cover 0.5/0.45, wrench 0.4/0.35, pads 0.5. Simplified: no HOLE stencil rendered (plain yellow cover); the subfloor is the table; the deck is solid, not on battens.",
-  "scores": "Scripted demo: 1.0 at step 900 of 3,000. Dream-1: 0.0 at the 3,000-step limit (the cover is never lifted)."
+  "scores": "Scripted demo: 1.0 at step 900 of 3,000. Dream-1: 0.0 at the 3,000-step limit (the cover is never lifted).",
+  "media": "M-T6UFDW"
 }
