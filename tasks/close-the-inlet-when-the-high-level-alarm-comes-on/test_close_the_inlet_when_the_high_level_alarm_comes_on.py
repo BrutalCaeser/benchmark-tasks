@@ -497,7 +497,7 @@ def test_task_json_matches_the_task_file():
         assert isinstance(spec[key], str) and spec[key].strip()
     assert 4 <= len(spec["keywords"]) <= 6
     assert len(spec["fidelity"]) <= 600 and len(spec["scores"]) <= 300
-    assert "media" not in spec
+    assert "media" not in spec or spec["media"].startswith("M-")  # added by tools/upload_media.py
     assert spec["fidelity"].startswith("Approximate.")
     assert "object_jitter=0" in spec["reset_notes"]
     assert (HERE / "README.md").read_text().count(M.INSTRUCTION) == 3  # both run commands and the revision table
