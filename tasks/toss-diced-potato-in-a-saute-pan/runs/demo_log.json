@@ -2,7 +2,7 @@
   "error": null,
   "eval": {
     "benchmark": null,
-    "created": "2026-11-18T22:57:31.389060+00:00",
+    "created": "2026-11-20T03:29:57.405509+00:00",
     "embodiment": "yam_arena",
     "embodiment_info": {
       "capabilities": [
@@ -16,7 +16,7 @@
       "morphology": null
     },
     "environment_id": "isaaclab-arena-0.3.1-yam-bimanual-station-calibrated-task-task",
-    "environment_revision": "9d5904d206e6",
+    "environment_revision": "8fbf5582113d",
     "git_commit": null,
     "grader": null,
     "grader_config": {},
@@ -9268,10 +9268,10 @@
         null
       ],
       "record_dirs": [
-        "records/20261118_225731_cbfa81a0/scene-0-e0"
+        "records/20261120_032957_6ccc14e1/scene-0-e0"
       ],
       "record_ids": [
-        "1399fc06bbb443d7bf8b14973f6aed99"
+        "199246b28c3b473187a69a05be53ff7b"
       ],
       "reduced": {
         "task_score": 1.0
@@ -9296,18 +9296,18 @@
       ],
       "trial_metadata": [
         {
-          "actions": "actions/20261118_225731_cbfa81a0/scene-0-e0.jsonl"
+          "actions": "actions/20261120_032957_6ccc14e1/scene-0-e0.jsonl"
         }
       ]
     }
   ],
   "stats": {
-    "completed_at": "2026-11-18T23:00:46.111231+00:00",
-    "duration_s": 194.719786031,
-    "frames_dir": "demo_out/frames/20261118_225731_cbfa81a0",
+    "completed_at": "2026-11-20T03:34:03.451072+00:00",
+    "duration_s": 246.0432908570001,
+    "frames_dir": "/tmp/run/c3045/demo/frames/20261120_032957_6ccc14e1",
     "mean_inference_latency_s": null,
-    "records_dir": "demo_out/records/20261118_225731_cbfa81a0",
-    "started_at": "2026-11-18T22:57:31.391454+00:00",
+    "records_dir": "/tmp/run/c3045/demo/records/20261120_032957_6ccc14e1",
+    "started_at": "2026-11-20T03:29:57.407792+00:00",
     "total_steps": 540
   },
   "status": "success",

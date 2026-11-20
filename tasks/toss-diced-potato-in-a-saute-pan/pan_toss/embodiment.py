@@ -239,12 +239,12 @@ class PanEmbodiment(YamArenaEmbodiment):
             p = st["pan"]
             print(f"PAN t={self._t:6.2f} pan {np.round(1000 * p.pos, 0).tolist()} tilt {m.tilt_deg(p):5.1f} turned {c['turned']} in {c['inside']} "
                   f"lost {c['lost']} touched {int(m.trial()['touched'])} home {int(m.pan_home(st))} clear {int(m.hands_clear(st))} "
-                  f"still {m.trial()['still']:.2f} tau {np.round(tau[:6], 1).tolist()} score {m.score(st):.2f}", flush=True)
+                  f"still {m.trial()['still']:.2f} aloft {m.aloft(st)}/{m.trial()['aloft']} tau {np.round(tau[:6], 1).tolist()} score {m.score(st):.2f}", flush=True)
         if self._log is not None:
             names = sorted(n for n in st if n.startswith("die_"))
             row = {"t": self._t, "pan": np.r_[st["pan"].pos, st["pan"].quat_xyzw], "dice": np.array([np.r_[st[n].pos, st[n].quat_xyzw] for n in names]),
                    "q": q, "tau": tau, "gripper": grip, "turned": c["turned"], "inside": c["inside"], "lost": c["lost"],
-                   "peak": self._contacts.peak, "score": m.score(st)}
+                   "peak": self._contacts.peak, "score": m.score(st), "aloft": m.aloft(st)}
             for k, v in row.items():
                 self._log.setdefault(k, []).append(v)
             if len(self._log["t"]) % 20 == 0:

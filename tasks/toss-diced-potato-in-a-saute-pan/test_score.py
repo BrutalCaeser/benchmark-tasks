@@ -47,8 +47,17 @@ def world(rolls=(DOWN,) * 12, pan_at=None, pan_tilt=0.0, hands=None, where=None,
     return w
 
 
-def play(w, seconds=1.5, touched=False):
-    """Let the record run on a fixed world: latches, and the at-rest timer."""
+def aloft_world(n=t.TOSS_K):
+    """The pan at rest on the burner with its first ``n`` dice in the air over it, centres 1 cm above the rim's plane."""
+    spots = {i: tuple(t.pan_to_world((P.DICE_START[i][0], P.DICE_START[i][1], P.DEPTH + 0.010))) for i in range(n)}
+    return world(where=spots)
+
+
+def play(w, seconds=1.5, touched=False, tossed=True):
+    """Let the record run on a fixed world: latches, and the at-rest timer. ``tossed`` first shows the record one step
+    with TOSS_K dice above the rim, as a real toss would."""
+    if tossed:
+        t.note_step(aloft_world(), DT)
     for _ in range(round(seconds / DT)):
         t.note_step(w, DT, touched=touched)
     return t.score(w)
@@ -68,6 +77,52 @@ def fresh():
 TABLE_SPOT = (t.PAN_XY[0], t.PAN_XY[1] - 0.25, t.TOP + P.DIE / 2)
 BURNER_SPOT = tuple(t.pan_to_world((0.0, 0.112, -P.T_WALL + P.DIE / 2)))  # on the burner's top, beside the pan
 HELD = (t.PAN_XY[0], t.PAN_XY[1], t.PAN_Z + 0.08)
+
+
+# -- the toss gate (review TK-HNGF9K) ---------------------------------------------------------------------------------
+def test_no_toss_scores_zero_however_many_dice_end_turned():
+    """Sliding or shaking the dice about, with none ever above the rim, earns nothing even if all twelve end turned."""
+    w = world(rolls(12))
+    assert play(w, tossed=False) == 0.0 and t.counts(w)["turned"] == 12 and not t.tossed()
+
+
+def test_toss_needs_enough_dice_above_the_rim_at_once():
+    for n in range(t.TOSS_K):
+        t.note_step(aloft_world(n), DT)
+    w = world(rolls(12))
+    assert play(w, tossed=False) == 0.0 and t.trial()["aloft"] == t.TOSS_K - 1
+    t.note_step(aloft_world(t.TOSS_K), DT)
+    assert play(w, tossed=False) == 1.0
+
+
+@pytest.mark.parametrize("z_mm", [6.5, 13.0, 30.0, 39.0])
+def test_dice_jostled_below_the_rim_are_not_a_toss(z_mm):
+    """The level shake lifts die centres to 13 mm above the cooking surface at most; nothing at or below the rim counts."""
+    spots = {i: tuple(t.pan_to_world((P.DICE_START[i][0], P.DICE_START[i][1], z_mm / 1000))) for i in range(12)}
+    t.note_step(world(where=spots), DT)
+    assert t.trial()["aloft"] == 0 and not t.tossed()
+
+
+def test_die_above_the_rim_plane_but_outside_the_pan_is_not_counted():
+    spots = {i: tuple(t.pan_to_world((P.R_RIM + 0.02, 0.0, P.DEPTH + 0.01 * (i + 1)))) for i in range(t.TOSS_K)}
+    t.note_step(world(where=spots), DT)
+    assert t.trial()["aloft"] == 0
+
+
+def test_toss_latch_survives_until_reset():
+    t.note_step(aloft_world(), DT)
+    for _ in range(40):
+        t.note_step(world(rolls(12)), DT)
+    assert t.tossed()
+    t.reset_trial()
+    assert not t.tossed() and t.trial()["aloft"] == 0
+
+
+def test_toss_with_the_pan_in_hand_counts():
+    hand = {**PARK, "left_tcp": tuple(np.array(HELD) + t._rz(t.HEADING) @ P.GRASP)}
+    spots = {i: tuple(np.array(HELD) + t._rz(t.HEADING) @ np.array((P.DICE_START[i][0], P.DICE_START[i][1], P.DEPTH + 0.02))) for i in range(t.TOSS_K)}
+    t.note_step(world(pan_at=HELD, hands=hand, where=spots), DT)
+    assert t.tossed() and not t.trial()["lost"].any()
 
 
 # -- the bands ---------------------------------------------------------------------------------------------------------

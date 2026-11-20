@@ -17,6 +17,8 @@ The pan, each die and both grippers are rigid bodies in real contact; nothing is
 - Lost: a die that touched the table, the burner or the floor at any time (latched), or that is not inside the pan at
   the end.
 - Food touched: any contact force between any robot link and any die, at any time (latched). The score is then 0.
+- Tossed: at some control step, at least TOSS_K dice are in the air over the pan with their centres above the rim's plane
+  (latched). Without it the score is 0, so sliding or shaking the dice about earns nothing however many end turned.
 """
 
 import json
@@ -85,12 +87,13 @@ HOME_BONUS = 0.2  # top band only: the pan back on the burner, level, let go
 HOME_XY, HOME_Z, HOME_TILT = 0.030, 0.005, math.radians(5.0)
 CLEAR = 0.08  # each fingertip midpoint this far from the pan and its handle
 LIN, ANG, STILL_S = 0.02, 1.0, 1.0  # at rest: under 2 cm/s and 1 rad/s, for the last second
+TOSS_K = 3  # dice at once over the pan with their centres above the rim's plane: a toss, seen in the side video
 SUCCESS_HOLD_S = 1.0
 SCORE_OVER = "end"
 
 
 def _fresh():
-    return {"touched": False, "lost": np.zeros(P.N_DICE, bool), "still": 0.0}
+    return {"touched": False, "lost": np.zeros(P.N_DICE, bool), "still": 0.0, "aloft": 0}
 
 
 _trial = _fresh()
@@ -133,6 +136,16 @@ def brown_nz(die):
     return float((_rot(die.quat_xyzw) @ P.BROWN_LOCAL)[2])
 
 
+def above_rim(objects, name):
+    """The die is in the air over the pan: its centre above the rim's plane and within the rim's circle, in the pan's frame."""
+    x, y, z = in_pan_frame(objects, objects[name].pos)
+    return bool(z > P.DEPTH and math.hypot(x, y) < P.R_RIM)
+
+
+def aloft(objects):
+    return sum(above_rim(objects, n) for n in DICE)
+
+
 def turned(objects, name):
     return brown_nz(objects[name]) >= TURNED_NZ
 
@@ -157,6 +170,7 @@ def note_step(objects, dt, touched=False):
     """Advance the trial's record by one control step: the latches, and how long everything has been at rest."""
     if touched:
         _trial["touched"] = True
+    _trial["aloft"] = max(_trial["aloft"], aloft(objects))
     for i, name in enumerate(DICE):
         if spilled(objects, name):
             _trial["lost"][i] = True
@@ -207,11 +221,15 @@ def band(net):
     return 0.0
 
 
+def tossed():
+    return _trial["aloft"] >= TOSS_K
+
+
 def score(objects):
-    """0 if the robot touched the food. Otherwise the band for net = dice turned - dice lost: under 3: 0; 3-4: 0.2;
+    """0 if the robot touched the food, or if no toss was seen (TOSS_K dice at once above the rim). Otherwise the band for net = dice turned - dice lost: under 3: 0; 3-4: 0.2;
     5-6: 0.4; 7 or more: 0.6. In the top band only, 0.8 with the pan back on the burner, level, let go and at rest, and
     1.0 when in addition no die is lost."""
-    if _trial["touched"]:
+    if _trial["touched"] or not tossed():
         return 0.0
     c = counts(objects)
     credit = band(c["net"])
