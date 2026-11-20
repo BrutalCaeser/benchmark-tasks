@@ -158,10 +158,8 @@ Runs of this revision (egg_carton.py SHA-256 prefix 160654f75ce8: vertical-axis 
 - Scripted demo: **1.0** at step 366 of 2,400 (`runs/demo_log.json`); the lid locked, the damage record stayed clear.
 - `test_egg_carton.py`: 12 passed, including a 40-degree turn on the table (no damage) and a closure after a 3 cm
   slide (1.0).
-- Dream-1: **0.0** at the 2,400-step limit, from the previous revision's scorer (cf20f483bef0, `runs/dream_log.json`).
-  A rerun on this revision was refused by the Dream API (DA-1000, key disabled). In that run the lid never closed, so
-  it scores 0 under either scorer: this revision only stops counting a turn on the table as a tip and drops the 1 cm
-  shift penalty, and a closed, latched lid is still required for any credit.
+- Dream-1: **0.0** at the 2,400-step limit, rerun on this revision (2026-11-20). The arms hover beside the carton and
+  the lid stays open; nothing is closed or latched.
 - `EGG_VARIANT=crush` rerun under the latched 0.25 s hold: **0**.
 
 The submitted videos are from these runs (the demo video shows the top camera enlarged beside both wrist cameras).
