@@ -18,5 +18,6 @@
   "run_limit": "2,400 steps (2 minutes at 20 Hz)",
   "reset_notes": "Open the lid back to 100 degrees and let the flap hang out; put any egg that moved back in its cup. A carton qualifies if its lid, shut over an untucked flap and released, springs back past 45 degrees within 2 s, and stays shut with no new dent over the eggs when latched over the tucked flap by hand. Replace the carton after 10 trials or at the first new dent or tear.",
   "fidelity": "Boxes and cylinders. The carton is two rigid halves welded by a fixed joint, so it moves as one 0.5 kg piece (two halves so the lid and flap can touch). Lid and flap are sprung hinges (0.02 and 0.0086 N m/rad, flap damped 0.1 N m s/rad), stopped by the eggs; the lock is two 2.5 to 4 mm beads. Eggs are 4.4 cm cylinders. Pulp denting and egg cracking are not simulated: angle, latched-press, finger, drop and tip limits stand in for them. Placed once at reset.",
-  "scores": "Scripted demo: 1.0 at step 366 of 2,400 on this task file (egg_carton.py SHA-256 prefix 160654f75ce8). Dream-1: 0.0 at the 2,400-step limit on the previous scorer (cf20f483bef0; the lid never closed, so 0 under either scorer); a rerun was refused by the Dream API (key disabled)."
+  "scores": "Scripted demo: 1.0 at step 366 of 2,400 on this task file (egg_carton.py SHA-256 prefix 160654f75ce8). Dream-1: 0.0 at the 2,400-step limit on the previous scorer (cf20f483bef0; the lid never closed, so 0 under either scorer); a rerun was refused by the Dream API (key disabled).",
+  "media": "M-E8DCAD"
 }
