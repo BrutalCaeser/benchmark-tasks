@@ -16,5 +16,6 @@
   "run_limit": "3,600 control steps at 20 Hz (180 seconds of simulation time); full success ends the run early.",
   "reset_notes": "Nothing is consumed. Lay the six boards back on their marks, the nailed one with its nail up; the pallet and tote are fixed.",
   "fidelity": "Rigid-body PhysX at 240 Hz, 20 Hz control, objects at real size and mass. The boards are boxes; the nailed board is one rigid body with the nail's shank and head as further colliders, so the nail is solid to the fingers and to other boards. Pallet, tote and label plate are fixed boxes; lettering is visual only. Friction estimated: wood on wood and on the table 0.5/0.4, finger pads 0.5. Simplified: boards square-edged and rigid; the nail cannot bend or pull out.",
-  "scores": "Dream-1 run (dreamlabs/dream-1-beta): 0.0; scripted demo (yam_scripted): 1.0"
+  "scores": "Dream-1 run (dreamlabs/dream-1-beta): 0.0; scripted demo (yam_scripted): 1.0",
+  "media": "M-9ZQRKW"
 }
