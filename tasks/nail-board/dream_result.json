@@ -1,0 +1,239 @@
+{
+  "policy": "dream",
+  "score": 0.0,
+  "steps": 3600,
+  "simulated_seconds": 180.0,
+  "elapsed_seconds": 2492.23,
+  "termination": [
+    "max_steps"
+  ],
+  "evaluation_seed": 0,
+  "errored_trials": 0,
+  "instruction": "Stack the offcut boards on the pallet.",
+  "nailed_board_ever_on_pallet": false,
+  "final_measurements": {
+    "step": 3600,
+    "time_s": 180.0,
+    "tcp": {
+      "left": [
+        0.20761283600194647,
+        0.3488526708271952,
+        0.8219907658593919
+      ],
+      "right": [
+        0.18617162887871197,
+        -0.20949908804034753,
+        0.8399670005524488
+      ]
+    },
+    "boards": {
+      "offcut_a": {
+        "flat": 1.0,
+        "over_deck": false,
+        "touching_deck": false,
+        "in_tote": false,
+        "bottom_m": 0.7475,
+        "top_m": 0.7855,
+        "on_pallet": false
+      },
+      "offcut_b": {
+        "flat": 1.0,
+        "over_deck": false,
+        "touching_deck": false,
+        "in_tote": false,
+        "bottom_m": 0.7475,
+        "top_m": 0.7855,
+        "on_pallet": false
+      },
+      "offcut_c": {
+        "flat": 1.0,
+        "over_deck": false,
+        "touching_deck": false,
+        "in_tote": false,
+        "bottom_m": 0.7475,
+        "top_m": 0.7855,
+        "on_pallet": false
+      },
+      "offcut_d": {
+        "flat": 1.0,
+        "over_deck": false,
+        "touching_deck": false,
+        "in_tote": false,
+        "bottom_m": 0.7475,
+        "top_m": 0.7855,
+        "on_pallet": false
+      },
+      "offcut_e": {
+        "flat": 1.0,
+        "over_deck": false,
+        "touching_deck": false,
+        "in_tote": false,
+        "bottom_m": 0.7475,
+        "top_m": 0.7855,
+        "on_pallet": false
+      },
+      "offcut_f": {
+        "flat": 1.0,
+        "over_deck": false,
+        "touching_deck": false,
+        "in_tote": false,
+        "bottom_m": 0.7475,
+        "top_m": 0.7855,
+        "on_pallet": false
+      }
+    },
+    "stacked": [],
+    "nailed_on_pallet": false,
+    "nailed_in_tote": false,
+    "grip_clearance_m": 0.03649113371655824,
+    "hands_clear": true,
+    "still": true,
+    "success_now": false,
+    "partial_score": 0.0
+  },
+  "final_object_poses": {
+    "offcut_a": {
+      "pos": [
+        0.17,
+        0.245,
+        0.7665
+      ],
+      "quat_xyzw": [
+        6e-06,
+        -1e-06,
+        -0.049979,
+        0.99875
+      ],
+      "low": [
+        0.067305,
+        0.203176,
+        0.747499
+      ],
+      "high": [
+        0.272695,
+        0.286823,
+        0.7855
+      ]
+    },
+    "offcut_b": {
+      "pos": [
+        0.4,
+        0.245,
+        0.7665
+      ],
+      "quat_xyzw": [
+        6e-06,
+        -0.0,
+        0.0,
+        1.0
+      ],
+      "low": [
+        0.28,
+        0.213,
+        0.747499
+      ],
+      "high": [
+        0.52,
+        0.277,
+        0.7855
+      ]
+    },
+    "offcut_c": {
+      "pos": [
+        0.32,
+        0.35,
+        0.7665
+      ],
+      "quat_xyzw": [
+        6e-06,
+        0.0,
+        0.039989,
+        0.9992
+      ],
+      "low": [
+        0.197827,
+        0.308512,
+        0.747499
+      ],
+      "high": [
+        0.442173,
+        0.391487,
+        0.7855
+      ]
+    },
+    "offcut_d": {
+      "pos": [
+        0.41,
+        -0.245,
+        0.7665
+      ],
+      "quat_xyzw": [
+        6e-06,
+        0.0,
+        0.024997,
+        0.999687
+      ],
+      "low": [
+        0.288551,
+        -0.282958,
+        0.747499
+      ],
+      "high": [
+        0.531449,
+        -0.207043,
+        0.7855
+      ]
+    },
+    "offcut_e": {
+      "pos": [
+        0.17,
+        -0.245001,
+        0.824
+      ],
+      "quat_xyzw": [
+        5e-06,
+        0.0,
+        0.07493,
+        0.997189
+      ],
+      "low": [
+        0.056453,
+        -0.29308,
+        0.747499
+      ],
+      "high": [
+        0.283547,
+        -0.196921,
+        0.9005
+      ]
+    },
+    "offcut_f": {
+      "pos": [
+        0.32,
+        -0.35,
+        0.7665
+      ],
+      "quat_xyzw": [
+        6e-06,
+        -0.0,
+        -0.0,
+        1.0
+      ],
+      "low": [
+        0.19,
+        -0.382,
+        0.747499
+      ],
+      "high": [
+        0.45,
+        -0.318,
+        0.7855
+      ]
+    }
+  },
+  "source_hashes": {
+    "run.py": "dfd685410f5998379ca44f3c51d51f99469b2f7b9f80ee742168c9aee517f38a",
+    "runtime.py": "b2a824fbb4c5c8dfb944f131becb831fb163eb2e004a30b8d44b70b24f0642b9",
+    "task.py": "8d33ddf79ff6db0387b770b3ddb8b29b50581dc1d9f863636c93f8e32aaf43ea"
+  }
+}
