@@ -179,7 +179,7 @@ demo's arms stay at least 1 cm from the label plate.
 
 ## Claimed revision
 
-This task builds on pull request #2594, whose revision hold lapsed without a revision. It answers the
+This task builds on an earlier submission by GitHub user `smartdude2007`. It answers that submission's
 latest review (TK-2XTRV5).
 
 | Reviewer point | What changed |
@@ -196,4 +196,4 @@ The revised scene was run in simulation: the demo scores 1.0 in 1,026 actions an
 
 ## Origin
 
-This task builds on pull request #2594 in `robocurve/benchmark-tasks`.
+This task builds on an earlier submission by GitHub user `smartdude2007`.
