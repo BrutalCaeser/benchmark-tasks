@@ -16,5 +16,6 @@
   "run_limit": "1,800 steps (90 seconds at 20 Hz)",
   "reset_notes": "Simulation: the coupon back flat on its block, the torch on its posts; tacks are cleared at reset. Real trial, consumed each time: a new coupon and a new base plate (or the old one with the tacks ground flush and the line, ticks and marks re-scribed and re-painted), both ground bright and degreased; check the tungsten with the loupe and regrind it after any contamination, keeping 8 mm of stick-out. Handle the parts with tongs until they read under 50 C. Consumables cost about $2 to $6 a trial (README).",
   "fidelity": "Rigid bodies with real contact for coupon, base plate, torch and hands. Arc and heat are not simulated: the arc is a tip-to-root distance window with the torch held; a tack is 1.5 s of it where the root gap is 1 mm or less, and becomes a real joint (pin plus 0.5 N m/deg bending spring, cracking at 2 degrees). Weld shrinkage is a criterion, not thermal simulation: a first tack on a coupon no gripper presses on (contact forces) sets 3 degrees toward its side. No glare, gas, cable drag or filler.",
-  "scores": "Scripted demo: 1.0 (833 steps). Dream-1: 0.0 at the 1,800-step limit (the arms never picked up the torch or the coupon)."
+  "scores": "Scripted demo: 1.0 (833 steps). Dream-1: 0.0 at the 1,800-step limit (the arms never picked up the torch or the coupon).",
+  "media": "M-BN3C7H"
 }
