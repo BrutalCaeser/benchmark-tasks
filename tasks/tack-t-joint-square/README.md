@@ -23,7 +23,7 @@ The score is printed as `task_score`. Use `--policy dream` for Dream-1.
 
 ## Results
 
-Simulator runs of 2026-11-15, made on the code of pull request #2308 (this revision changes no code), all made with holding judged by contact force, each with the command above (`--seed 0`; shortcuts add `TACK_DEMO=<name>`). One Dream-1 run (`--policy dream`, 1,800 steps) scored 0.0.
+Simulator runs of 2026-11-15, made on the code of the earlier submission (this revision changes no code), all made with holding judged by contact force, each with the command above (`--seed 0`; shortcuts add `TACK_DEMO=<name>`). One Dream-1 run (`--policy dream`, 1,800 steps) scored 0.0.
 
 Rerun on this revision on 2026-11-19 and 2026-11-20 (one trial each, `--seed 0`): the scripted demo scored 1.0 (833 steps) and Dream-1 scored 0.0 at the 1,800-step limit. In the Dream-1 run the arms moved toward the fixture but never picked up the torch or the coupon; nothing was tacked.
 
@@ -147,7 +147,7 @@ The bands (numbers in `task.json`'s scoring): 0 with no sound tack, a part off t
 
 ## Claimed revision
 
-This task builds on pull request #2308, whose revision hold lapsed without a revision. It answers the latest review.
+This task builds on an earlier submission by GitHub user `bfefferm-pers`. It answers that submission's latest review.
 
 | Reviewer point | What changed |
 | --- | --- |
@@ -159,4 +159,4 @@ The scorer, tack model, scripted demo and tests are unchanged. `task.json` chang
 
 ## Origin
 
-This task builds on pull request #2308 in `robocurve/benchmark-tasks`.
+This task builds on an earlier submission by GitHub user `bfefferm-pers`.
