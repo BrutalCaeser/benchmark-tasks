@@ -1,20 +1,5 @@
 # Get a wrench out from under a floor-hole cover and put it away
 
-This task builds on an earlier submission by GitHub user `smartdude2007`. The
-review's points are addressed below; everything else is the original task.
-
-## Claimed revision
-
-| Reviewer point | What changed |
-| --- | --- |
-| The simulator's tote check accepts a wrench held well above the tote floor and can award 1.0 | `wrench_report` in `task.py` now counts the wrench as put away only when, besides lying wholly inside the tote's walls, its lowest corner is within 3 mm of the tote's floor (`ON_FLOOR_TOLERANCE`). The old check only asked for its lowest corner to be 10 mm under the rim, so a wrench held up to 84 mm above the floor passed. A wrench standing on end or leaning on a wall still counts, since its lowest corner is on the floor. |
-| Add a test showing that holding the wrench above the floor inside the tote cannot earn full credit | `tests/test_task.py`: `test_wrench_held_above_the_tote_floor_cannot_earn_full_credit` holds the wrench 40 mm over the tote floor, in a gripper and let go of, with the hole covered (0.5, not 1.0) and with the hole open (0, not 0.25), and puts it 1 mm past the tolerance (not put away); `test_wrench_settling_on_the_tote_floor_counts` keeps 1.0 for a wrench 2 mm up, still settling. |
-| (scores and media) | The scorer changed, so the earlier trial results no longer describe this folder: `demo_result.json` and `dream_result.json` are removed. The demo and Dream-1 were rerun on this revision (see Results), and `task.json`'s `scores` and the media come from those runs. |
-
-The scripted demonstration is unchanged and should still pass: it lets the wrench go 12 mm over the rim
-above the tote's centre, and in the original run it came to rest flat with its underside on the floor
-(both at Z = 0.7535), inside the new 3 mm tolerance.
-
 A section of plywood floor deck, raised on battens, stands on the table. It has a 200 mm square opening
 with a plywood cover over it: painted yellow, a wooden handle on top, two cleats underneath that drop into
 the opening and locate it. A combination wrench, dropped into the opening during earlier work, lies on the subfloor 80 mm down under it. An open
@@ -32,6 +17,20 @@ nudge.
 four parts. `runtime.py` is the embodiment: the standard `yam_arena` one, with the cover built as one rigid
 body from those parts and the grippers' positions passed to the scorer for the release check. `run.py`
 runs a trial. No installed package is modified.
+
+## Credit, and how the review is met
+
+This task takes up the idea of an earlier submission by GitHub user `smartdude2007`, "Get a wrench out from under a floor-hole cover and put it away", reviewed as TK-CLYQG5. The hold on the idea lapsed with no further revision. This version starts from that submission's files and answers the review point by point below.
+
+| Reviewer point | What changed |
+| --- | --- |
+| The simulator's tote check accepts a wrench held well above the tote floor and can award 1.0 | `wrench_report` in `task.py` now counts the wrench as put away only when, besides lying wholly inside the tote's walls, its lowest corner is within 3 mm of the tote's floor (`ON_FLOOR_TOLERANCE`). The old check only asked for its lowest corner to be 10 mm under the rim, so a wrench held up to 84 mm above the floor passed. A wrench standing on end or leaning on a wall still counts, since its lowest corner is on the floor. |
+| Add a test showing that holding the wrench above the floor inside the tote cannot earn full credit | `tests/test_task.py`: `test_wrench_held_above_the_tote_floor_cannot_earn_full_credit` holds the wrench 40 mm over the tote floor, in a gripper and let go of, with the hole covered (0.5, not 1.0) and with the hole open (0, not 0.25), and puts it 1 mm past the tolerance (not put away); `test_wrench_settling_on_the_tote_floor_counts` keeps 1.0 for a wrench 2 mm up, still settling. |
+| (scores and media) | The scorer changed, so the earlier trial results no longer describe this folder: `demo_result.json` and `dream_result.json` are removed. The demo and Dream-1 were rerun on this revision (see Results), and `task.json`'s `scores` and the media come from those runs. |
+
+The scripted demonstration is unchanged and should still pass: it lets the wrench go 12 mm over the rim
+above the tote's centre, and in the original run it came to rest flat with its underside on the floor
+(both at Z = 0.7535), inside the new 3 mm tolerance.
 
 ## Runtime and installation
 
@@ -192,7 +191,3 @@ the gripper down the opening with room to spare, and ends inside the limit.
 - Station room, table, camera stand, lights and cameras: the pinned adapter and Isaac Lab-Arena
   (Apache-2.0); keep their notices.
 - Deck, cover, wrench and tote: primitive geometry in this folder; no third-party meshes or textures.
-
-## Origin
-
-Builds on an earlier submission by GitHub user `smartdude2007`, revised as described above.
