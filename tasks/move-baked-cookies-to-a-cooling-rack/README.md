@@ -77,7 +77,7 @@ rest of the tray is still good. Picking all four by hand therefore scores 0 (fou
 | shove the cookies with the blade held 4 mm off the pan | `COOKIE_VARIANT=shove` | 0.0 | the blade never got under; the cookies and the loose pan were pushed 23 cm; nothing reached the rack and the pan left its place |
 | tip the cookies off from 40 mm above the wires | `COOKIE_VARIANT=drop` | 0.0 | all four landed flat on the rack, three broke on landing (bending up to 0.025 N m): one good, three spoiled |
 
-These runs were made on earlier revisions of pull request #2311.
+These runs were made on earlier revisions of this task.
 
 Earlier revision (cookie mass 30 g to 35 g, to match the maker's specification): the demo was rerun twice on the L40S and
 scored 1.0 both times, and one Dream-1 run (`--policy dream`, 2,400 steps, on the aarch64 host) scored 0.0: the arms
@@ -220,7 +220,7 @@ simulation.
 
 ## Claimed revision
 
-This task builds on pull request #2311, whose revision hold lapsed without a revision. It answers the latest review and
+This task builds on an earlier submission by GitHub user `bfefferm-pers`. It answers that submission's latest review and
 keeps the fixes made for the one before it.
 
 | Reviewer point | What changed |
@@ -237,4 +237,4 @@ and Dream-1 were rerun on this revision's task file (see "What was measured").
 
 ## Origin
 
-This task builds on pull request #2311 in `robocurve/benchmark-tasks`.
+This task builds on an earlier submission by GitHub user `bfefferm-pers`.
