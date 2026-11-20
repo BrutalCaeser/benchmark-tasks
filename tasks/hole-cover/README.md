@@ -1,6 +1,6 @@
 # Get a wrench out from under a floor-hole cover and put it away
 
-This task builds on pull request #2593, whose 48-hour revision hold lapsed without a revision. The
+This task builds on an earlier submission by GitHub user `smartdude2007`. The
 review's points are addressed below; everything else is the original task.
 
 ## Claimed revision
@@ -195,4 +195,4 @@ the gripper down the opening with room to spare, and ends inside the limit.
 
 ## Origin
 
-Builds on pull request #2593 to robocurve/benchmark-tasks, revised after its revision hold lapsed.
+Builds on an earlier submission by GitHub user `smartdude2007`, revised as described above.
