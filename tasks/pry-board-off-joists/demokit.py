@@ -94,16 +94,16 @@ def down(yaw_deg: float = 0.0) -> Grip:
     return _as_grip(_plain_grip(math.radians(yaw_deg)))
 
 
-def tilted(theta_deg: float, phi_deg: float, flip: bool = False) -> Grip:
-    """Tilted `theta_deg` from straight down towards the direction `phi_deg` from +x, the fingers closing across that direction. `flip` turns the gripper over about its own axis."""
-    phi = math.radians(phi_deg)
-    r = axis_angle_matrix(np.array([math.sin(phi), -math.cos(phi), 0.0]), math.radians(theta_deg)) @ _plain_grip(phi)
+def tilted(theta_deg: float, dir_deg: float, flip: bool = False) -> Grip:
+    """Tilted `theta_deg` from straight down towards the direction `dir_deg` from +x, the fingers closing across that direction. `flip` turns the gripper over about its own axis."""
+    dir_rad = math.radians(dir_deg)
+    r = axis_angle_matrix(np.array([math.sin(dir_rad), -math.cos(dir_rad), 0.0]), math.radians(theta_deg)) @ _plain_grip(dir_rad)
     return _as_grip(r @ axis_angle_matrix(np.array([0.0, 0.0, 1.0]), math.pi) if flip else r)
 
 
-def level(phi_deg: float, flip: bool = False) -> Grip:
-    """Fingers level, pointing along `phi_deg` from +x and closing across it, with the palm beside the object and its top open."""
-    return tilted(90.0, phi_deg, flip)
+def level(dir_deg: float, flip: bool = False) -> Grip:
+    """Fingers level, pointing along `dir_deg` from +x and closing across it, with the palm beside the object and its top open."""
+    return tilted(90.0, dir_deg, flip)
 
 
 # -- one arm -------------------------------------------------------------------------------
@@ -583,7 +583,7 @@ def run(task: str, out: str, modes: list[str], *, cameras: bool = True, record: 
 def reach(x: float, y: float, height: float) -> None:
     """Which grips each arm can hold here. IK from the ready pose, within 2 mm and 2 degrees. No collisions."""
     top = TABLE_TOP
-    phis = list(range(-90, 181, 30))
+    dirs = list(range(-90, 181, 30))
 
     def holds(side: str, grip: Grip) -> bool:
         plan = ArmPlan([Waypoint(2.0, (x, y, top + height), FINGER_OPEN, "go", grip)], station.BASES[side])
@@ -596,7 +596,7 @@ def reach(x: float, y: float, height: float) -> None:
     for side in ("left", "right"):
         print(f"  {side}: down, yaw " + " ".join(str(a) for a in range(-120, 121, 30) if holds(side, down(a))))
         for theta in (45, 60, 90):
-            print(f"  {side}: tilt {theta}, phi " + " ".join(str(p) for p in phis if holds(side, tilted(theta, p))) + "  flipped " + " ".join(str(p) for p in phis if holds(side, tilted(theta, p, True))))
+            print(f"  {side}: tilt {theta}, dir " + " ".join(str(p) for p in dirs if holds(side, tilted(theta, p))) + "  flipped " + " ".join(str(p) for p in dirs if holds(side, tilted(theta, p, True))))
 
 
 def _size(text: str) -> tuple[int, int]:

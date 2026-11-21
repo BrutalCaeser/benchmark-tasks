@@ -203,8 +203,8 @@ def lift_board(ctx, arm, local_y: float = -0.09):
     right of its middle: within reach), lifts it straight up off the joists and the bar's blade, carries it toward the
     robot and lays it flat on the table, clear of the bar's handle, then lets go."""
     rb = ctx.state("board").rotation()
-    phi = math.degrees(math.atan2(rb[1, 0], rb[0, 0]))  # the board's width axis, from +x: the fingers close along it
-    grip = down(90.0 + phi)
+    w_yaw = math.degrees(math.atan2(rb[1, 0], rb[0, 0]))  # the board's width axis, from +x: the fingers close along it
+    grip = down(90.0 + w_yaw)
     z = PAD - 0.006  # pads round the board's mid-thickness
 
     def at(up=0.0):
@@ -212,7 +212,7 @@ def lift_board(ctx, arm, local_y: float = -0.09):
         return S.board_to_world(b.rotation(), b.origin, (0.0, local_y, 0.0)) + np.array([0.0, 0.0, z + up])
 
     b = ctx.state("board")
-    print(f"[demo] board at {np.round(b.origin, 3)} (width axis {phi:.1f} deg, tilt {math.degrees(b.tilt()):.1f} deg); "
+    print(f"[demo] board at {np.round(b.origin, 3)} (width axis {w_yaw:.1f} deg, tilt {math.degrees(b.tilt()):.1f} deg); "
           f"grip at {np.round(at(), 3)}", flush=True)
     yield from arm.move(at(0.02), grip=grip, finger=-0.04695, t=2.5, label="over the board")
     yield from arm.servo(lambda _t: at(0.02), timeout=1.0, label="over the board")

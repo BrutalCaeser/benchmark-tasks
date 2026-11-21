@@ -1,5 +1,11 @@
 # Pry a nailed 1x4 off two joists with a flat bar
 
+This task builds on an earlier submission, whose 48-hour revision hold lapsed without a revision. This version answers that submission's review (TK-JBZFMC):
+
+| Review point | What changed |
+|---|---|
+| "specify the make and model of pry bar" | The bar is now named: a DEWALT DWHT55160 15 in (380 mm) Spring Steel Flat Bar, with the maker's listing linked and the dimensions it states compared with the simulated bar (see "The pry bar for a real trial" below, and `task.json` setup). The simulated bar is unchanged: it matches the named bar's length and, within 4%, its mass; it is 3.6 mm narrower and its far end is drawn as a curled claw (that end is never used). |
+
 Instruction given to the policy: `Pry the board off the joists with the pry bar and lay it flat on the table.`
 
 A 600 mm length of 1x4 pine is nailed across two 2x4 joists standing on edge (a piece of floor or deck framing, its
@@ -42,7 +48,7 @@ or defective parts or sections of structures and repair or replace, using hand t
 | `demo.py` | The scripted demo (closed loop on the bar's and the board's poses) |
 | `tests/test_scoring.py` | Offline tests (32), no simulator |
 | `setup.png` | The setup image (top camera, arms at their ready pose) |
-| `mechkit.py`, `rigstate.py`, `demokit.py` | Shared helpers, copied unchanged (see below) |
+| `mechkit.py`, `rigstate.py`, `demokit.py` | Shared helpers, copied (see below) |
 
 ## The scene
 
@@ -52,9 +58,31 @@ or defective parts or sections of structures and repair or replace, using hand t
 | C-clamps | Two 6 in C-clamps hold the rim to the table's back edge, 12 cm either side of the middle (pad on the rim's top edge, fixed jaw under the table top). Nothing is screwed into the robot's table; while the bar levers, a joist is pushed down overall (the heel presses harder than the nail pulls), so the clamps only keep the frame in place |
 | Board (nailed) | 600 mm of 1x4 common pine (19.05 x 88.9 mm, S4S, eased edges), 0.46 kg, flat across the joists' tops, centred 40 cm out, ends overhanging 78 mm |
 | Nails | Two 3d box nails (1-1/4 in, 0.076 in shank, 7/32 in head, bright), one into each joist through the board's centre line, heads flush; 12.7 mm in the joist. The cleat is tacked lightly, as temporary cleats often are (about 150 N to pull a nail). Heavier nailing would be beyond what the arm can lever; the skill (seating the blade, levering on the joist, re-setting deeper) is the same |
-| Pry bar (loose) | 15 in flat pry bar, 32 x 6 mm spring steel, 0.57 kg; flat chisel blade 48 mm long bent 15 deg, ground on its top face to a 1.6 mm edge; curved nail claw at the other end. Any common 15 in flat bar of these proportions serves |
+| Pry bar (loose) | 15 in flat pry bar, 32 x 6 mm spring steel, 0.57 kg; flat chisel blade 48 mm long bent 15 deg, ground on its top face to a 1.6 mm edge; curved nail claw at the other end. For a real trial: a DEWALT DWHT55160 15 in spring steel flat bar (see below) |
 
 Nothing else is on the table. Coordinates for every object are in `task.json` (setup) and `layout.py`.
+
+## The pry bar for a real trial
+
+Use a **DEWALT DWHT55160, 15 in (380 mm) Spring Steel Flat Bar**:
+https://www.dewalt.com/product/dwht55160/15-380-mm-spring-steel-flat-bar (DEWALT's own product page; returned HTTP 200
+to curl on 2026-11-21). The page shows a yellow, powder-coated spring steel flat bar with a bevelled chisel end
+carrying a nail slot at one end and a wider, sharply bent prying end at the other, and lists these specifications:
+
+| | DWHT55160 (as listed) | Simulated bar |
+|---|---|---|
+| Length | 15.0 in (381 mm) | 380 mm |
+| Width | 1.4 in (35.6 mm) | 32 mm |
+| Weight | 1.3 lb (0.59 kg) | 0.57 kg |
+| Material, finish | spring steel, powder coated | spring steel, blue powder coat |
+| Thickness, blade bend | not listed | 6 mm, 15 deg (our estimates) |
+
+The bar's working end in this task is the chisel end: its blade goes into the joint and its bend rests on the joist.
+Length and mass agree; the real bar is 3.6 mm wider and its far end is a
+wide bent prying end rather than the drawn curled claw. The far end is never used here: the demo holds the bar by
+its shaft only. The thickness and blade bend are not on the listing; ours are estimates of a typical 15 in flat bar.
+The simulated bar was not re-drawn to the DEWALT outline;
+widening it to 35.6 mm and drawing the far end as the bent prying end would be the closer match.
 
 ## Scoring (scoring.py)
 
@@ -156,8 +184,9 @@ the bar, clear of the board; in a real trial it would then put the bar down.
 ## Third-party code and assets
 
 No meshes, scans or other assets: every object is built from boxes and cylinders here. `mechkit.py`, `rigstate.py`
-and `demokit.py` are shared helpers copied unchanged from accepted tasks in this repository
+and `demokit.py` are shared helpers copied from accepted tasks in this repository
 (`tasks/shim-sleeper-to-level/mechkit.py`, `tasks/casement-stay-last-hole/rigstate.py`,
-`tasks/alaris-set-load/demokit.py`, the last under the MIT licence as that task states). The O*NET task statements
+`tasks/alaris-set-load/demokit.py`, the last under the MIT licence as that task states), unchanged except that a few angle
+variables in `demokit.py` were renamed. The O*NET task statements
 quoted above are from O*NET OnLine (USDOL/ETA), used under CC BY 4.0. The withdrawal formula is from the USDA Forest
 Products Laboratory's Wood Handbook (FPL-GTR-282, chapter 8), a US government work.
