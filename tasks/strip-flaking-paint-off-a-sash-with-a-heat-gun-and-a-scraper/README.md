@@ -10,8 +10,16 @@ that submission's review (TK-ZN85NF):
 | Clarity: no reproducible paint, preparation or curing | Named lead-free alkyd gloss enamel, brushed on replaceable pine slips in two coats and cured before use; three slips are swapped in for each trial (see *Real trials*) |
 | Feasibility: heat gun running near a cotton sheet, no fire or fume procedure | The cotton dust sheet is replaced by a fibreglass welding blanket on a cement backer board; the gun's stand is steel, screwed to that board, its nozzle pointing across the board away from the robot and the glass; ventilation, a mains kill switch and a shutdown and cool-down procedure are given (see *Real trials*) |
 
+This pull request's own review (TK-R7NTSZ) is answered here:
+
+| Review point | What changed |
+|---|---|
+| Importance: not shown to be regular work for over 500,000 workers | The category is now Societal relatability, and the context explains the task as a familiar household job: peeling paint on old wooden windows, stripped with the heat gun and scraper sold in any hardware store |
+| Feasibility: the shutdown rule (off whenever the gun points anywhere but a slip) conflicts with carrying it to and from its stand | The shutdown procedure now lets the gun run while it is carried over the cement board or aimed at a slip, and lists when the operator switches it off: dropped, aimed at the glass, the robot, a person or off the board, within 5 cm of anything but a slip, held on bare wood for over 5 s, or smoke (see *Real trials*) |
+| Note: protect the grippers from the nozzle and exhaust | Silicone sleeves on the finger pads, a heat-shield band behind the nozzle, a pre-trial infrared check that the gripped surfaces stay below 50 C, and the gun set down nozzle first, away from the arms (see *Protecting the grippers*) |
+
 A wooden window sash lies flat on a fibreglass welding blanket, its glass pane in the middle. It has been stripped to bare wood except
-for three patches of old, cracked cream paint along its near rail. To the left an orange heat gun stands on its wire
+for three patches of old, cracked cream paint along its near rail. To the left an orange heat gun stands on its steel
 stand, already running; to the right lies a paint scraper, its handle on a little wooden rest. One hand takes the heat
 gun and aims it, nose down, at the first patch from a few centimetres away; once the paint blisters, the other hand sets
 the scraper's blade down on the near side of the patch and pushes it through the hot paint toward the gun while the
@@ -88,10 +96,26 @@ the nozzle. The gun's stand is bent steel, screwed to the cement board. On its s
 right across the cement board, away from the glass and with nothing within 30 cm of the nozzle. Keep a CO2 or dry-powder
 extinguisher within reach.
 
-**Shutdown.** The gun's mains lead runs through a switched power strip in the operator's hand: the operator switches it
-off at once if the gun is dropped, points at the glass or at anything but the slips, or the robot stops holding it. At
-the end of each trial the operator switches the gun off at the strip, leaves it on its stand to cool for 10 minutes
-before anyone touches its nozzle, and waits for the slips and the sash to cool before the reset.
+**Shutdown.** The gun's mains lead runs through a switched power strip in the operator's hand. Carrying the gun is part
+of the task, so it stays on while the robot lifts it off its stand, carries it to the slips, moves it from patch to
+patch and puts it back, as long as the nozzle points down or forward over the cement board or at a slip. The operator
+switches it off at once if the gun is dropped or twists in the hand; if the nozzle points at the glass, at either of
+the robot's arms or grippers, at a person or at anything off the cement board; if the nozzle comes within 5 cm of
+anything but a slip; if the gun stays aimed at one place on the bare wood for more than 5 s; or at any smoke or smell of
+scorching wood. At the end of each trial the operator switches the gun off at the strip, leaves it on its stand to cool
+for 10 minutes before anyone touches its nozzle, and waits for the slips and the sash to cool before the reset.
+
+**Protecting the grippers.** The left hand holds the gun by its plastic housing, which is made to be held by a bare hand
+while the gun runs; the hot parts are the 3.1 cm steel nozzle and the air leaving it. Before the first trial:
+
+- Slip a heat-resistant silicone sleeve (rated to at least 200 C) over each finger pad of both grippers, and wrap the
+  gun's housing just behind the nozzle with a 4 cm band of fibreglass heat-shield tape so the hand cannot touch the nozzle
+  even if it slips forward.
+- Check the heat at the grippers: run the gun on its stand for two minutes, then hold it as the robot does, nose down
+  8 cm above a scrap pine board, for two minutes. With an infrared thermometer, the housing where the fingers close and
+  the scraper's handle 9 cm behind its blade must both stay below 50 C. If not, do not run trials.
+- During a trial the scraper hand stays behind the blade, pushing the paint toward the gun, so the hot air blows away
+  from it. When the gun goes back, it is set down nozzle first, pointing away from both arms, before the fingers open.
 
 ## Run and score a trial
 
