@@ -1,13 +1,24 @@
 # Open a flat static-shielding bag, slide a circuit board into it and put the filled bag in a tote
 
+This task builds on an earlier submission, whose 48-hour revision hold lapsed without a revision. This version answers
+that submission's review (TK-BAE5ZL):
+
+| Review point | What changed |
+|---|---|
+| Importance (not met): bagging electronics boards is a specialized operation, and the stated packing occupations do not establish that 500,000 US workers regularly do it; change the category to Societal relatability and explain the familiar challenge of opening a flat bag and inserting an item | The category is now Societal relatability. The context (`task.json`) and the motivation below are rewritten around the everyday challenge of opening a flat, clinging bag (a produce bag, a sandwich bag, a mailer) and sliding an item in without crumpling it, with the static-shielding bag as one instance. All job-count, occupation and ESD-programme claims are removed. The task itself (scene, scoring, demo) is unchanged. |
+
 An empty static-shielding bag (SCS 10035, 3 x 5 in, open top) lies flat and shut on an ESD bench mat, its mouth
 towards the robot. A Raspberry Pi Zero 2 W board lies beside it, and a conductive tote stands on the robot's left.
 The robot must get the board into the bag and put the filled bag in the tote.
 
-Under ESD control programs (ANSI/ESD S20.20), every static-sensitive board that leaves the protected bench is packed in
-a static-shielding bag. Electronics assemblers, repair technicians and returns packers bag boards many times a shift.
+Opening a flat bag and sliding something into it is a chore almost everyone knows: a produce bag at the grocery
+store, a sandwich bag in the kitchen, a padded mailer at the post office. The challenge is the same each time. A new
+bag lies flat with its films clinging together, so its mouth is shut, and an item pushed at it rides up onto the bag
+or crumples it. People open the mouth with one hand, often by squeezing the bag's sides so it bows open, hold it open
+while the other hand slides the item in, then pick up the filled, floppy bag and put it away. This task is one
+instance of that: the bag is a small static-shielding bag, the item a circuit board.
 
-A new bag lies flat with its films touching, so the mouth is shut: the board's leading edge only rides up onto it. One
+Here the bag lies flat with its films touching, so the mouth is shut: the board's leading edge only rides up onto it. One
 hand must open the bag and keep it open: squeezing the bag's two side seams together stands its edges up and arches
 the top film into an open mouth. The other hand slides the board in and pushes it home. Then the filled bag, a
 floppy, light object, must be picked up and laid in the tote. The task tests two hands working together on a
@@ -111,14 +122,18 @@ The layout is fixed (`-E object_jitter=0`); there are no seeds to choose.
   PhysX), and the bag weighs 6 g (a real one about 1.5 g: lighter strips are unstable). The film is drawn opaque.
 - **Our estimates:** the frictions (film 0.4, mat 0.6, board 0.4, tote 0.5) and the spring. Sizes are the products':
   the bag 3 x 5 in (SCS 10035), the board 65 x 30 x 5.3 mm and 10 g (Raspberry Pi Zero 2 W), the tote 276 x 210 x
-  89 mm outside and 233 x 167 x 76 mm inside (Quantum DG91035-CON).
+  89 mm outside and 233 x 167 x 76 mm inside (Quantum DG91035CO).
 - **Geometry.** Rigid bodies built from boxes; the board has its main packages and connectors as boxes.
 
 ## Real-world build
 
-- An SCS 10035 Metal-In static-shielding bag, 3 x 5 in, open top (a pack of 100 is about $8), new and flat.
-- A Raspberry Pi Zero 2 W without headers (about $15; any 65 x 30 mm board works).
-- A Quantum DG91035-CON conductive grid container, no dividers (sold in packs of 20; one tote is enough).
+- An SCS 10035 Metal-In static-shielding bag, 3 x 5 in, open top (a pack of 100 is about $8), new and flat
+  ([Ellsworth product page](https://www.ellsworth.com/products/static-control-materials-equipment/static-control-bags/scs-10035-1000-series-metal-in-static-shielding-bag-3-in-x-5-in/):
+  the SCS 10035 1000 Series Metal-In bag, 3 x 5 in). Any flat 3 x 5 in open-top bag of similar film poses the same challenge.
+- A Raspberry Pi Zero 2 W without headers (about $15; any 65 x 30 mm board works)
+  ([Adafruit product page](https://www.adafruit.com/product/5291): the Raspberry Pi Zero 2 W).
+- A Quantum DG91035CO conductive dividable grid container, no dividers (sold in packs of 20; one tote is enough)
+  ([Quantum Storage product page](https://www.quantumstorage.com/dg91035co): the DG91035CO conductive dividable grid container).
 - A dissipative rubber bench mat, cut to 30 x 36 cm and taped down.
 
 Positions are in `task.json`.
