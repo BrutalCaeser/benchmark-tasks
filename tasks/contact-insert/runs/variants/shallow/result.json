@@ -2,21 +2,21 @@
   "variant": "shallow",
   "task_score": 0.25,
   "success_step": null,
-  "steps": 869,
+  "steps": 892,
   "run_limit_steps": 3000,
   "final": {
     "cavity": 3,
-    "crimp_depth": 0.007403433956736171,
+    "crimp_depth": 0.007548533420044785,
     "seated": false,
     "locked": false,
     "latch_open": [
-      2.5015189919486147e-08,
-      3.6799491454075905e-08,
-      1.803747977646708e-06,
-      3.16301722591561e-08
+      4.08960687536819e-08,
+      4.064623837507497e-08,
+      1.0328110420232406e-06,
+      4.1235633574387975e-08
     ],
     "lock_in": false,
-    "lock_depth": -0.0020003670915008966,
+    "lock_depth": 0.10897049082588503,
     "forced": false,
     "wrong_locked": false,
     "tug": "none",
@@ -27,14 +27,24 @@
   "report": {
     "_ik_bad": 0,
     "stroke1": "done",
-    "after_stroke1_mm": -2.64,
+    "after_stroke1_mm": -2.69,
     "stroke2": "done",
     "pushed": {
-      "crimp_mm": 8.0,
+      "crimp_mm": 8.03,
       "cavity": 3,
       "seated": false,
-      "step": 656
-    }
+      "step": 652
+    },
+    "lock_end_in_housing_mm": [
+      -82.82,
+      148.97,
+      14.0
+    ],
+    "lock_end_axis": [
+      -0.0,
+      0.0,
+      1.0
+    ]
   },
-  "wall_s": 166.6818335056305
+  "wall_s": 147.5983555316925
 }

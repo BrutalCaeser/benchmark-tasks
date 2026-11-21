@@ -1,6 +1,6 @@
 """The contact-insert task's own parts: a sealed 4-way connector housing with a sprung locking finger (lance) in each
-cavity, a crimped size-16 socket contact on a short wire, a secondary lock (a comb with two prongs) in a small holder,
-and a pinout card. All geometry is our own simplified design (sized like common sealed 4-way connectors with
+cavity, a crimped size-16 socket contact on a short wire, a secondary lock (a wedgelock: a face plate with four wedge
+blades, pushed into the housing's mating face) in a small holder, and a pinout card. All geometry is our own simplified design (sized like common sealed 4-way connectors with
 size-16 contacts); no manufacturer CAD or product names are used.
 
 yam_arena task files support single primitives and library assets only, so this module is the task's own minimal
@@ -19,16 +19,19 @@ Parts (mm in comments, metres in code). Every part is built in its own frame:
   contact's shoulder stops on it). In each cavity, on its outer side (+x for #2/#3, -x for #1/#4), a locking finger
   (prismatic joint along x, spring) reaches 0.6 mm into the cavity at 12.8-14.1 mm deep; a contact's shoulder pushes
   it aside (the click) and it springs back behind the shoulder: pulled back, the shoulder meets its flat face.
-  A slot across the top (12.6-14.3 mm deep) lets the secondary lock's prongs drop in beside the fingers: only a
-  closed finger leaves room for them (as on real sealed connectors, the secondary lock backs up the lances).
+  Beside each column of cavities, on both sides, a channel (SLOT_X from the column's axis, the column's full height)
+  runs from the mating face (y = H_L) back to the fingers: the secondary lock's wedge blades slide in along it from
+  the mating face and end beside the fingers, where only a closed finger leaves room for them (as on a DEUTSCH DT
+  plug, whose wedgelock goes into the mating face after the contacts and backs up their locking fingers).
 - contact (a free articulation): a socket contact, crimp end at the frame's origin, pointing along -x: nose (r 1.2),
   shoulder (r 1.7, 2 mm long, 9 mm behind the nose's tip... see CONTACT_PROFILE), neck, crimp barrel (r 1.6, 6 mm);
   then the wire along +x: WIRE_LINKS links of WIRE_LINK, insulation r 1.3, joined by two bending joints and a
   twisting joint each (springs): pushed far behind the crimp, the wire bends sideways.
-- lock (a free articulation): the secondary lock, a comb: an 8 mm tall bar (24 x 1.2 mm) with two prongs (0.8 x 1.3 x
-  19 mm) 16.2 mm apart, each on a stiff spring (prismatic along z): pressed onto a finger that a half-seated contact
-  holds open, a prong gives; giving more than LOCK_FORCE_DEFL means it was forced (the housing damaged).
-- holder (fixed): a block the secondary lock stands in, prongs down.
+- lock (a free articulation): the secondary lock, a wedgelock: a 26 x 22 mm face plate (6 mm thick) with four wedge
+  blades (0.8 mm thick, 19 mm wide, 22 mm long) along its -z, each on a stiff spring (prismatic along z): pressed
+  onto a finger that a half-seated contact holds open, a blade gives; loaded LOCK_FORCE or more, it was forced (the
+  housing damaged). In the housing its +z points along the cavities (+y), the plate on the mating face.
+- holder (fixed): a block the secondary lock stands in, blades down in its pocket, the plate on its rim.
 - card (fixed): the pinout card: the 4 cavities as seen from the rear, cavity 3 marked.
 """
 
@@ -79,9 +82,8 @@ LAT_K = 4.0e3  # N/m (the shoulder lifts it 0.85 mm: ~3.4 N on the finger; at 6 
 # gripped wire stalled just short of the click in some runs, demo 6)
 LAT_D = 20.0
 LAT_ARMATURE = 0.02  # kg (with LATCH_MASS: a 1 g finger with no armature jittered 0.8 mm, bench 10)
-Y_SLOT = (17.8 * MM, 20.0 * MM)  # the secondary lock's slot, along the cavities
+Y_SLOT = (17.8 * MM, 20.0 * MM)  # the fingers' window along the cavities (where the lock's blades end, beside them)
 SLOT_X = (2.55 * MM, 3.65 * MM)  # the slot beside each column, from the column's axis outward
-SLOT_FLOOR = -10 * MM  # (housing frame z) the slot ends on the bottom shell
 
 # -- contact and wire --------------------------------------------------------------------------------------------------
 # (x from, x to, radius from, radius to) along the contact, crimp end at 0, nose toward -x
@@ -112,19 +114,24 @@ WIRE_MASS = 0.0015  # per 10 mm link (simulation; real 1.0 mm2 wire ~0.15 g; at 
 GIMBAL_MASS = 0.0005  # bench 22)
 
 # -- secondary lock ---------------------------------------------------------------------------------------------------
-LOCK_BAR = (24 * MM, 5 * MM, 8 * MM)  # (its grip tab; 1.2 mm thin, the hand didn't pick it up, demo 1)
-PRONG_X = (-8.1 * MM, -1.9 * MM, 1.9 * MM, 8.1 * MM)  # the four prongs' centres (5 +- 3.1 mm: beside each finger)
-LOCK_PRONG = (0.8 * MM, 1.3 * MM, 19 * MM)
+LOCK_BAR = (26 * MM, 22 * MM, 6 * MM)  # the wedgelock's face plate (x, y, z: z out of the mating face); 1 mm wider than
+# the housing on each side, so that the fingers holding it by its side edges pass beside the housing
+PRONG_X = (-8.1 * MM, -1.9 * MM, 1.9 * MM, 8.1 * MM)  # the four blades' centres (5 +- 3.1 mm: beside each finger)
+LOCK_PRONG = (0.8 * MM, 16 * MM, 22 * MM)  # a blade: thick (x), wide across both rows' fingers (y), long (z): its tip
+# 18 mm from the rear face, beside the fingers, with the plate on the mating face
+CHANNEL_MOUTH = (3.0 * MM, 0.6 * MM)  # the channels' lead-in at the mating face: this long, each side this much wider
 LOCK_K = 1.0e4  # N/m: a prong's give
 LOCK_D = 5.0
 LOCK_TRAVEL = 3.0 * MM
 LOCK_FORCE = 20.0  # N: a prong loaded this hard: the lock forced over an open finger (housing damaged, latched)
 LOCK_MASS, PRONG_MASS = 0.02, 0.002
-Y_LOCK = (Y_SLOT[0] + Y_SLOT[1]) / 2  # the lock's centre along the cavities when in
+Y_LOCK = H_L  # the lock's plate (its underside) on the mating face when in
 HOUSING_MASS = 0.2  # kg (simulation; a real one ~10 g: heavier, the fingers and contacts solve steadily, bench 19)
 LATCH_MASS = 0.02  # (simulation)
 LINK_ARMATURE = 1.0e-4
-HOLDER_SIZE = (40 * MM, 16 * MM, 22 * MM)
+HOLDER_SIZE = (24 * MM, 34 * MM, 26 * MM)  # (narrower than the plate across x: the tilted pads' lower ends pass beside
+# it; 34 mm wide, they landed on its rim and the hand never closed on the plate, demo p1)
+HOLDER_POCKET = (9.0 * MM, 10.0 * MM, 24 * MM)  # half x, half y, depth: the blades stand in it, the plate on the rim
 REST_H = 20 * MM  # the lead's rest: two blocks this tall along the wire (frame: the contact's crimp end above it, x along
 REST_A = (-24 * MM, -2 * MM)  # the wire): the contact lies on the first, the wire on the second, and over the gap
 REST_B = (36 * MM, 80 * MM)  # between them (right behind the crimp) a gripper's fingers close round the wire
@@ -137,9 +144,13 @@ IN_RADIAL = 1.0 * MM  # within this) and pointing in (within IN_ANGLE)
 IN_ANGLE = 20.0
 SEATED_TOL = 0.3 * MM  # seated: the crimp end within this of its seated depth
 LATCH_CLOSED = 0.1 * MM  # the finger at most this far open
-LOCK_IN_TOL = 0.3 * MM  # the secondary lock fully in: its bar within this of the housing's top
+LOCK_IN_TOL = 0.3 * MM  # the secondary lock fully in: its plate within this of the mating face ...
+LOCK_Z_PLAY = 2.2 * MM  # ... and its centre within this up or down (the blades' play in the channels: 16 mm blades in the
+# 20 mm columns; released, the lock settled 0.7 mm low, demo p10)
+SNAP_FORCE = 3.0  # N: once home, the wedgelock is held onto the mating face with this (its snap; see update)
 LOCK_FORCE_S = 0.1  # (0.25: the contact blew out of a forced cavity first, bench 33)
-FORCE_DEPTH = 13 * MM  # the lock's bar this near the housing's top: its prongs reach the fingers' height. Pressed this far
+FORCE_DEPTH = Y_LAT[1] + LOCK_PRONG[2] - H_L + 0.2 * MM  # the plate this near the mating face: the blades' tips reach the
+# fingers (2.0 mm). Pressed this far
 FORCE_OPEN = 0.3 * MM  # while a finger is this far open, or a contact half in (its shoulder at the fingers, not past):
 # forced (latched; the prongs pushed an open finger shut, and the contact back, rather than stopping, bench 32)
 HELD_PLAY = 0.1 * MM  # (simulation) a cavity's fingers, once snapped in behind a seated shoulder, are held to this opening
@@ -158,7 +169,8 @@ HANDS_OFF_WIRE = 25 * MM  # no fingertip this near the contact or the first WIRE
 WIRE_NEAR = 60 * MM
 HANDS_OFF_S = 1.0
 HANDS_OFF_ALL = 20 * MM  # ... and for the end: none this near the housing, the contact, the wire or the lock
-TUG_INVALID_MOVE = 0.3 * MM
+TUG_INVALID_MOVE = 0.5 * MM  # (a passed test is redone if the contact moves more than this since: at 0.3 mm the
+# contact settling back onto its step when the other hand took the housing reset it, demo p9)
 ROBOT_TUG_NEAR = 8 * MM  # the robot's own tug: every fingertip of one hand this near the crimp barrel or the first
 # WIRE_NEAR of wire (the hand closed on it) ...
 ROBOT_TUG_PULL = 0.15 * MM  # ... while the clicked contact in cavity 3 is drawn back at least this far from its seated
@@ -248,18 +260,22 @@ def _frustum_x(body, look, material, x0, x1, r0, r1, n=16, visible=True) -> Shap
 # -- the housing ------------------------------------------------------------------------------------------------------
 
 
-def _cell_walls(xc, zc, y0, y1, h0, h1, look="housing", material="pa", window=False):
+def _cell_walls(xc, zc, y0, y1, h0, h1, look="housing", material="pa", window=False, channel=False):
     """The four walls of one cavity's 10 x 10 mm cell between y0 and y1, the square hole's half-width going from h0
     to h1 (a funnel if they differ). ``window``: the fingers' section: on both sides the wall is open between BORE
     and SLOT_X[1] at the fingers' height (their window and the lock's slot behind it), kept above and below them
-    up to SLOT_X[0] (open full height, the shoulder slid sideways into it and jammed, bench 17)."""
+    up to SLOT_X[0] (open full height, the shoulder slid sideways into it and jammed, bench 17). ``channel``: the x
+    walls leave SLOT_X[0]-SLOT_X[1] open over the cell's full height (the lock's blades slide along it)."""
     c = PITCH / 2
     out = []
     if abs(h0 - h1) < 1e-12:  # a straight section: boxes
         h = h0
         for side in (-1.0, 1.0):
-            a = SLOT_X[1] if window else h
+            a = SLOT_X[1] if (window or channel) else h
             out.append(_box("base", look, material, *sorted((xc + side * a, xc + side * c)), y0, y1, zc - c, zc + c))
+            if channel:
+                out.append(_box("base", look, material, *sorted((xc + side * h, xc + side * SLOT_X[0])), y0, y1,
+                                zc - c, zc + c))
             out.append(_box("base", look, material, xc - h, xc + h, y0, y1, *sorted((zc + side * h, zc + side * c))))
             if window:
                 xa, xb = sorted((xc + side * h, xc + side * SLOT_X[0]))
@@ -269,16 +285,37 @@ def _cell_walls(xc, zc, y0, y1, h0, h1, look="housing", material="pa", window=Fa
         return out
     for side in (-1.0, 1.0):  # x walls (full cell height)
         p = []
+        outer = SLOT_X[0] if channel else c
         for y, h in ((y0, h0), (y1, h1)):
             for z in (zc - c, zc + c):
-                p += [(xc + side * h, y, z), (xc + side * c, y, z)]
+                p += [(xc + side * h, y, z), (xc + side * outer, y, z)]
         out.append(_hull("base", look, material, p))
+        if channel:
+            out.append(_box("base", look, material, *sorted((xc + side * SLOT_X[1], xc + side * c)), y0, y1,
+                            zc - c, zc + c))
     for side in (-1.0, 1.0):  # z walls (between the x walls)
         p = []
         for y, h in ((y0, h0), (y1, h1)):
             for x in (xc - h, xc + h):
                 p += [(x, y, zc + side * h), (x, y, zc + side * c)]
         out.append(_hull("base", look, material, p))
+    return out
+
+
+def _channel_mouth(xc, zc, y0, y1, look="housing", material="pa"):
+    """The cell's walls at the mating face, like ``_cell_walls(..., EXIT, EXIT, channel=True)`` but with each blade
+    channel widening by CHANNEL_MOUTH[1] a side toward the face (a lead-in for the wedgelock's blades)."""
+    c = PITCH / 2
+    w = CHANNEL_MOUTH[1]
+    out = []
+    for side in (-1.0, 1.0):
+        out.append(_box("base", look, material, xc - EXIT, xc + EXIT, y0, y1, *sorted((zc + side * EXIT, zc + side * c))))
+        inner, outer = [], []
+        for y, d in ((y0, 0.0), (y1, w)):
+            for z in (zc - c, zc + c):
+                inner += [(xc + side * EXIT, y, z), (xc + side * (SLOT_X[0] - d), y, z)]
+                outer += [(xc + side * (SLOT_X[1] + d), y, z), (xc + side * c, y, z)]
+        out += [_hull("base", look, material, inner), _hull("base", look, material, outer)]
     return out
 
 
@@ -295,22 +332,19 @@ def housing_shapes() -> list[Shape]:
     out = []
     hx, hz = H_W / 2, H_H / 2
     inner = PITCH  # the cells span +-10 mm
-    # shell: sides, bottom, top (the top cut where the lock's prongs pass)
+    # shell: sides, bottom, top
     out.append(_box("base", "housing", "shell", -hx, -inner, 0.0, H_L, -hz, hz))
     out.append(_box("base", "housing", "shell", inner, hx, 0.0, H_L, -hz, hz))
     out.append(_box("base", "housing", "shell", -inner, inner, 0.0, H_L, -hz, -inner))
-    out.append(_box("base", "housing", "pa", -inner, inner, 0.0, Y_SLOT[0], inner, hz))
-    out.append(_box("base", "housing", "pa", -inner, inner, Y_SLOT[1], H_L, inner, hz))
-    edges = [-inner] + [v for r in slot_ranges() for v in r] + [inner]  # the top cut where the prongs pass
-    for xa, xb in zip(edges[0::2], edges[1::2], strict=True):
-        out.append(_box("base", "housing", "pa", xa, xb, Y_SLOT[0], Y_SLOT[1], inner, hz))
+    out.append(_box("base", "housing", "pa", -inner, inner, 0.0, H_L, inner, hz))
     for c, (xc, zc) in CAVITIES.items():
         out += _cell_walls(xc, zc, 0.0, FUNNEL_L, FUNNEL, BORE, look="seal", material="seal")
         out += _cell_walls(xc, zc, FUNNEL_L, Y_SLOT[0], BORE, BORE)
         out += _cell_walls(xc, zc, Y_SLOT[0], Y_SLOT[1], BORE, BORE, window=True)
-        out += _cell_walls(xc, zc, Y_SLOT[1], Y_STEP, BORE, BORE)
-        out += _cell_walls(xc, zc, Y_STEP, Y_STEP + STEP_L, BORE, EXIT)
-        out += _cell_walls(xc, zc, Y_STEP + STEP_L, H_L, EXIT, EXIT)
+        out += _cell_walls(xc, zc, Y_SLOT[1], Y_STEP, BORE, BORE, channel=True)  # the blades' channels, from the
+        out += _cell_walls(xc, zc, Y_STEP, Y_STEP + STEP_L, BORE, EXIT, channel=True)  # mating face back to the
+        out += _cell_walls(xc, zc, Y_STEP + STEP_L, H_L - CHANNEL_MOUTH[0], EXIT, EXIT, channel=True)  # fingers' window
+        out += _channel_mouth(xc, zc, H_L - CHANNEL_MOUTH[0], H_L)
         # the cavity's number, moulded on the rear face (dots: 1-4)
         sx, sz = (1.0 if xc > 0 else -1.0), (1.0 if zc > 0 else -1.0)
         for k in range(c):
@@ -405,10 +439,11 @@ def lock_bodies():
 
 
 def lock_shapes() -> list[Shape]:
-    """Frame: the bar's underside centre (in the housing: on the housing's top, over the slot); prongs down."""
+    """Frame: the plate's underside centre (in the housing: on the mating face, its +z along the cavities); the
+    blades along -z."""
     bx, by, bz = LOCK_BAR
     px, py, pz = LOCK_PRONG
-    out = [_box("bar", "lock", "shell", -bx / 2, bx / 2, -by / 2, by / 2, 0.0, bz)]  # (a textured grip tab)
+    out = [_box("bar", "lock", "shell", -bx / 2, bx / 2, -by / 2, by / 2, 0.0, bz)]  # (textured: gripped by its edges)
     for k, x in enumerate(PRONG_X):
         out.append(_box(f"p{k}", "lock", "pa", x - px / 2, x + px / 2, -py / 2, py / 2, -pz, -0.2 * MM))
     return out
@@ -428,13 +463,14 @@ def lock_masses():
 
 
 def holder_shapes() -> list[Shape]:
-    """A block (origin: the centre of its top face) with a slot the lock's prongs stand in (the bar on top)."""
+    """A block (origin: the centre of its top face) with a pocket the lock's blades stand in (the plate on its rim)."""
     hx, hy, hz = HOLDER_SIZE[0] / 2, HOLDER_SIZE[1] / 2, HOLDER_SIZE[2]
-    out = [_box("holder", "grey", "steel", -hx, hx, -hy, -1.0 * MM, -hz, 0.0),
-           _box("holder", "grey", "steel", -hx, hx, 1.0 * MM, hy, -hz, 0.0),
-           _box("holder", "grey", "steel", -hx, -10 * MM, -1.0 * MM, 1.0 * MM, -hz, 0.0),
-           _box("holder", "grey", "steel", 10 * MM, hx, -1.0 * MM, 1.0 * MM, -hz, 0.0),
-           _box("holder", "grey", "steel", -10 * MM, 10 * MM, -1.0 * MM, 1.0 * MM, -hz, -hz + 2 * MM)]
+    px, py, pd = HOLDER_POCKET
+    out = [_box("holder", "grey", "steel", -hx, hx, -hy, -py, -hz, 0.0),
+           _box("holder", "grey", "steel", -hx, hx, py, hy, -hz, 0.0),
+           _box("holder", "grey", "steel", -hx, -px, -py, py, -hz, 0.0),
+           _box("holder", "grey", "steel", px, hx, -py, py, -hz, 0.0),
+           _box("holder", "grey", "steel", -px, px, -py, py, -hz, -pd)]
     return out
 
 
@@ -876,12 +912,12 @@ def geometry(base) -> dict:
     if "lock" in _NAMES:
         lp = body_poses(base, _NAMES["lock"])
         l_p, l_r = lp["bar"]
-        lb = h_r.T @ (l_p - h_p)  # the bar's underside centre, housing frame
-        up = h_r.T @ l_r[:, 2]
+        lb = h_r.T @ (l_p - h_p)  # the plate's underside centre, housing frame
+        out = h_r.T @ l_r[:, 2]  # the lock's +z: along the cavities (+y) when in
         lq = joints(base, _NAMES["lock"])
-        lock["depth"] = float(lb[2] - H_H / 2)
-        lock["aligned"] = bool(abs(lb[0]) < 1.0 * MM and abs(lb[1] - Y_LOCK) < 0.6 * MM and up[2] > 0.99)
-        lock["over"] = bool(abs(lb[0]) < 3.0 * MM and abs(lb[1] - Y_LOCK) < 2.0 * MM and up[2] > 0.9)  # (forced check)
+        lock["depth"] = float(lb[1] - Y_LOCK)  # the plate's underside out from the mating face
+        lock["aligned"] = bool(abs(lb[0]) < 1.0 * MM and abs(lb[2]) < LOCK_Z_PLAY and out[1] > 0.99)
+        lock["over"] = bool(abs(lb[0]) < 3.0 * MM and abs(lb[2]) < LOCK_Z_PLAY + 2.0 * MM and out[1] > 0.9)  # (forced)
         lock["force"] = LOCK_K * max(lq.values())
     return {"h_p": h_p, "h_r": h_r, "crimp": crimp, "nose": nose, "axis": axis, "cavity": cavity, "radial": radial,
             "latch_open": latch_open, "lock": lock, "contact_poses": cp}
@@ -1032,6 +1068,8 @@ class _Track:
     tug_cavity: int = 0
     robot_tug: bool = False
     robot_tug_steps: int = 0
+    tug_force: float = 0.0
+    snapped: bool = False  # the wedgelock went home and snapped in: the task holds it on the face (SNAP_FORCE)
     last: dict = field(default_factory=dict)  # body -> (pos, rot) at the previous control step
     speeds: dict = field(default_factory=dict)  # part -> (lin m/s, ang rad/s) from the pose change
     log: list = field(default_factory=list)
@@ -1045,17 +1083,26 @@ _EPISODE_STEP: list = [None]
 def _set_tug(base, force: float, geo=None) -> None:
     """The tug: ``force`` on the contact out of the housing along the cavity (a hand pulling the wire), the same back on
     the housing (the other hand holding it); 0 ends it."""
+    import numpy as np
     import torch
 
-    for kind in ("contact", "housing"):
+    _TRACK.tug_force = force if geo is not None else 0.0
+    snap = _TRACK.snapped and "lock" in _NAMES and geo is not None
+    kinds = ("contact", "housing") + (("lock",) if "lock" in _NAMES else ())
+    for kind in kinds:
         art = base.scene.articulations[_NAMES[kind]]
         n = len(art.body_names)
         forces = torch.zeros((1, n, 3), dtype=torch.float32, device=base.device)
-        if force > 0 and geo is not None:
+        f = np.zeros(3)
+        if force > 0 and geo is not None and kind != "lock":
             out = geo["h_r"] @ [0.0, -1.0, 0.0]  # out of the cavity (housing -y)
-            sign = 1.0 if kind == "contact" else -1.0
-            body = list(art.body_names).index(TUG_BODY if kind == "contact" else "base")
-            forces[0, body] = torch.tensor((sign * force * out).tolist(), dtype=torch.float32, device=base.device)
+            f += (1.0 if kind == "contact" else -1.0) * force * out
+        if snap and kind != "contact":  # the snap: the lock pressed onto the face, the housing pressed back
+            into = geo["h_r"] @ [0.0, -1.0, 0.0]
+            f += (1.0 if kind == "lock" else -1.0) * SNAP_FORCE * into
+        if np.any(f):
+            body = list(art.body_names).index({"contact": TUG_BODY, "housing": "base", "lock": "bar"}[kind])
+            forces[0, body] = torch.tensor(f.tolist(), dtype=torch.float32, device=base.device)
         art.permanent_wrench_composer.set_forces_and_torques_index(forces=forces, torques=torch.zeros_like(forces),
                                                                    body_ids=list(range(n)), is_global=True)
 
@@ -1140,6 +1187,13 @@ def update(base) -> None:
             tr.forced = True
     else:
         tr.forced_steps_open = 0
+    # the wedgelock home over closed fingers: it snaps in (latched; the task then holds it on the face, see SNAP_FORCE)
+    if (not tr.snapped and not tr.forced and lock["aligned"] and lock["depth"] < LOCK_IN_TOL
+            and max(geo["latch_open"]) < LATCH_CLOSED):
+        tr.snapped = True
+        tr.log.append((step, "snapped", lock["depth"]))
+    if tr.snapped and tr.tug != "running":
+        _set_tug(base, 0.0, geo)  # (refreshes the snap's forces as the housing moves; a running tug does it below)
     # a seated contact whose fingers have snapped in: held (see HELD_PLAY)
     if locked and geo["cavity"] not in tr.held:
         _hold_fingers(base, geo["cavity"], True)
@@ -1162,16 +1216,16 @@ def update(base) -> None:
         tr.tug = "none"
     if tr.tug == "running":
         if tr.off_wire == 0:
-            _set_tug(base, 0.0)
+            _set_tug(base, 0.0, geo)
             tr.tug = "none"
         else:
             tr.tug_step += 1
             tr.tug_moved = max(tr.tug_moved, tr.tug_y0 - crimp_y)
             if tr.tug_moved >= TUG_MAX_MOVE:
-                _set_tug(base, 0.0)
+                _set_tug(base, 0.0, geo)
                 tr.tug = "failed"
             elif tr.tug_step >= n(TUG_S):
-                _set_tug(base, 0.0)
+                _set_tug(base, 0.0, geo)
                 tr.tug = "passed" if geo["cavity"] in tr.held else "failed"  # the fingers snapped in behind the shoulder
             else:
                 _set_tug(base, TUG_FORCE_SIM * min(1.0, (tr.tug_step + 1) / n(TUG_RAMP_S)), geo)

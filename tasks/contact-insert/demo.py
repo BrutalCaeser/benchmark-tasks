@@ -11,8 +11,11 @@
    until the contact clicks (seated); still gripping the wire, tugs it (draws it back along the cavity until the
    contact comes back onto its locking fingers, holds 1 s, eases off); lets go and moves away;
 3. the left hand lets go of the housing and moves away (hands off: the task's independent retention test tugs the wire);
-4. right arm: takes the secondary lock out of its holder, sets its prongs over the slots (closed loop on the measured
-   lock), presses it in, lets go and moves home.
+4. right arm: grips the housing's rear half from above and holds it on the table;
+5. left arm: takes the secondary lock (a wedgelock) out of its holder by the edges of its face plate, turns it so its
+   blades point back along the cavities, lines them up with the channels in the mating face (closed loop on the
+   measured lock), pushes it in until the plate is on the mating face, lets go and moves home;
+6. the right hand lets go of the housing and moves home.
 
 Writes ``result.json``, ``steps.jsonl`` and (unless ``--no-video``) one H.264 video per camera to ``--out``.
 """
@@ -23,8 +26,6 @@ import argparse
 import ast
 import json
 import math
-import shutil
-import subprocess
 import sys
 import time
 from pathlib import Path
@@ -36,7 +37,7 @@ TASK = HERE / "task.py"
 INSTRUCTION = (
     "Push the crimped contact into cavity 3 of the connector, as on the pinout card, from the wire side, until it "
     "clicks; hold the housing with one hand and push the wire close behind the crimp with the other. Tug the wire "
-    "lightly to check it is locked, then press the secondary lock fully into its slot in the housing. Then let go of "
+    "lightly to check it is locked, then push the secondary lock fully into the housing's mating face. Then let go of "
     "everything."
 )
 VARIANTS = ("full", "hold_on", "no_lock", "no_tug", "shallow", "forced", "wrong_cavity")
@@ -79,12 +80,20 @@ TUG_LEAD = 12 * MM  # ... at most this far behind where the hand was
 TUG_PULL_TO = 0.2 * MM  # until the crimp end is this far short of its seated depth (the shoulder on the fingers)
 TUG_TOO_FAR = 0.8 * MM  # (a light tug: the fingers hold the shoulder 0.26 mm back; beyond this, stop pulling)
 TUG_HOLD_S, TUG_MAX_S = 1.0, 6.0
-# -- the secondary lock
-OPEN_L, GRIP_L = 0.30, 0.0
-L_TIPS_ABOVE_BAR = 1.5 * MM  # the pads' tips this far above the bar's underside
-L_CARRY = 30 * MM  # the prongs' tips above the housing's top while carried over
-L_PRESS = 8 * MM  # pressing (gripped; the bar's grip tab textured: smooth, it slid up between the pads, demo 4; let go
-# and pressed with the closing fingertips, it was knocked away, demo 6)
+# -- the second housing grip (the right hand, while the lock goes in)
+H_GRIP_REAR_Y = 15 * MM  # the grip's centre along the housing (from its rear face; rear half)
+TUG_WAIT_MAX_S = 6.0  # wait at most this long for the task's retention test before gripping the housing again
+# -- the secondary lock (a wedgelock: gripped by its plate's two side edges, the pads running along its blades' width)
+OPEN_L, GRIP_L = 0.45, 0.0
+L_TIPS_ABOVE_BAR = 1.5 * MM  # the pads' tips this far above the plate's underside (off the mating face when it is in)
+L_PAD_OFFSET = 1 * MM  # the grip point this far along the plate's y from its centre. Tilted, the fingers reach back
+# from it along -y (toward the wrist): at -8 to -13 mm they overlapped the plate's edge by 3 mm or less and slipped
+# (demos p2, p5-p7, fingertips logged in the lock's frame)
+L_TILT = math.radians(35.0)  # (a level push into the face put the left wrist on its joint-4 limit: IK 10 mm short;
+# at 40 degrees the IK lost the arm on the way to the holder, demo p3)
+L_LIFT = 45 * MM  # lifted this far out of the holder before it is turned
+L_STAGE = 12 * MM  # the blades' tips this far out from the mating face while lining up
+L_PRESS = 6 * MM  # pushed this far past flush (gripped)
 PUSH_RETRIES = 3  # a push that stalls before the click: back off and push again
 SETTLE_TOL, SETTLE_MAX_S = 0.6 * MM, 2.0
 AFTER_SUCCESS_S = 3.0
@@ -259,8 +268,12 @@ def run(variant: str, out: Path, video: bool, max_steps: int, emb=None) -> dict:
         yield from wait_for(arm, "contact_in", "hold the housing")
         yield from move(arm, arm.pos, 0.6, grip=OPEN_H, label="let go of the housing")
         yield from move(arm, arm.pos + (0, 0, 0.06), 1.0, label="up")
-        yield from move(arm, home, 2.0, rot=home_rot, label="home")
         flags["left_away"] = True
+        if press_lock:
+            yield from move(arm, home, 2.0, rot=home_rot, label="home first")  # (straight from the housing to the tilted
+            # grip over the holder the IK lost the arm, demos p3-p4)
+            yield from fit_lock(arm)
+        yield from move(arm, home, 2.0, rot=home_rot, label="home")
         flags["left_done"] = True
         phase["left"] = "done"
         while True:
@@ -391,57 +404,117 @@ def run(variant: str, out: Path, video: bool, max_steps: int, emb=None) -> dict:
         flags["contact_in"] = True
         yield from move(arm, home, 2.0, rot=home_rot, label="home (the tug)")
         yield from wait_for(arm, "left_away", "wait for the other hand")
-        yield from wait(arm, 3.0, "wait for the tug")
+        phase[arm.side] = "wait for the tug"
+        for _ in range(round(TUG_WAIT_MAX_S / DT)):  # the task's retention test runs with both hands off the wire
+            if world["states"]["housing"].tug in ("passed", "failed"):
+                break
+            yield
         if press_lock:
-            yield from fit_lock(arm)
+            yield from wait_for(arm, "lock_lifted", "wait for the lock")  # (moving in while the other hand took the
+            # lock out of its holder, the arms met and knocked it out of the grip, demo v_forced)
+            yield from hold_rear(arm)
+            yield from wait_for(arm, "lock_done", "hold the housing")
+            yield from move(arm, arm.pos, 0.6, grip=OPEN_H, label="let go of the housing")
+            yield from move(arm, arm.pos + (0, 0, 0.06), 1.0, label="up")
         yield from move(arm, home, 2.5, rot=home_rot, label="home")
         flags["right_done"] = True
         phase["right"] = "done"
         while True:
             yield
 
+    def hold_rear(arm):
+        """Grip the housing's rear half from above (the wrist leaning back toward the wire's side) and hold it."""
+        h_p, h_r = housing()
+        along = h_r @ np.array([0.0, 1.0, 0.0])
+        rot = hand_rot(arm, along, -along)
+        grip_at = h_p + h_r @ np.array([0.0, H_GRIP_REAR_Y, 0.0])
+        grip_at[2] = task.TOP + H_TIPS_Z
+        tcp = tcp_for_tips(arm, grip_at, rot)
+        yield from move(arm, tcp + (0, 0, 0.06), 2.0, grip=OPEN_H, rot=rot, label="over the housing's rear")
+        yield from move(arm, tcp, 1.5, label="down round the housing")
+        yield from settle_at(arm, "settle")
+        yield from move(arm, arm.pos - (0, 0, 2 * MM), 0.8, grip=GRIP_H, label="grip the housing")
+        flags["rear_held"] = True
+
     def fit_lock(arm):
         l_p, l_r = lock()
-        along = l_r @ np.array([0.0, 1.0, 0.0])  # the bar's thin direction: the fingers close along it
-        across = l_r @ np.array([1.0, 0.0, 0.0])
-        rot = hand_rot(arm, across, across, tilt=0.0)  # fingers across the thin bar, straight down (tilted 30 degrees
-        # about the bar's length its pads pinched an edge and the lock slipped out, demo 2)
-        tips = l_p + l_r @ np.array([0.0, 0.0, L_TIPS_ABOVE_BAR])
+        along = l_r @ np.array([0.0, 1.0, 0.0])  # the pads run along the plate's y; the fingers close on its x edges
+        _, h_r = housing()
+        rot = hand_rot(arm, along, -(h_r @ np.array([0.0, 1.0, 0.0])), tilt=L_TILT)  # tilted about the closing axis,
+        # the wrist leaning toward the housing's rear: turned, the hand comes down onto the mating face at L_TILT
+        tips = l_p + l_r @ np.array([0.0, L_PAD_OFFSET, L_TIPS_ABOVE_BAR])
         tcp = tcp_for_tips(arm, tips, rot)
         yield from move(arm, tcp + (0, 0, 0.05), 2.5, grip=OPEN_L, rot=rot, label="over the lock")
         yield from move(arm, tcp, 1.2, label="down to the lock")
         yield from settle_at(arm, "settle")
         yield from move(arm, arm.pos, 0.6, grip=GRIP_L, label="grip the lock")
-        yield from move(arm, arm.pos + (0, 0, 0.035), 1.2, label="lift it out")
+        l_p, l_r = lock()  # (where the fingertips are, in the lock's frame: for tuning the grasp)
+        dbg = {}
+        for art_name, art in base_env.scene.articulations.items():
+            if art_name in ct._NAMES.values():
+                continue
+            poses_r = ct.body_poses(base_env, art_name)
+            for b in (n for n in art.body_names if n.startswith("tip")):
+                p, r = poses_r[b]
+                q = (ct.finger_points(b) @ r.T + p - l_p) @ l_r
+                if np.linalg.norm(q.mean(axis=0)) < 0.08:
+                    dbg[f"{art_name}/{b}"] = [[round(float(v) / MM, 1) for v in q.min(axis=0)],
+                                              [round(float(v) / MM, 1) for v in q.max(axis=0)]]
+        report["grip_fingers_in_lock_mm"] = dbg
+        z0 = float(lock()[0][2])
+        yield from move(arm, arm.pos + (0, 0, L_LIFT), 1.2, label="lift it out")
+        yield from wait(arm, 0.3, "lifted")
+        report["lock_lifted_mm"] = round((float(lock()[0][2]) - z0) / MM, 1)
+        if report["lock_lifted_mm"] < 0.5 * L_LIFT / MM:  # not in the hand: stop rather than wave the arm about
+            phase[arm.side] = "the lock is not in the hand"
+            while True:
+                yield
+        flags["lock_lifted"] = True
+        yield from wait_for(arm, "rear_held", "wait for the housing to be held")
         h_p, h_r = housing()
-        seat_at = h_p + h_r @ np.array([0.0, ct.Y_LOCK, ct.H_H / 2])
+        out = h_r @ np.array([0.0, 1.0, 0.0])  # the mating face's outward normal
+        turn = rot_axis(np.cross((0.0, 0.0, 1.0), out), math.pi / 2)  # the lock's +z (up) turned onto it
+        stage = h_p + h_r @ np.array([0.0, ct.Y_LOCK + ct.LOCK_PRONG[2] + L_STAGE, 0.0])
         l_p, _ = lock()
-        yield from move(arm, arm.pos + (seat_at + (0, 0, L_CARRY + ct.LOCK_PRONG[2]) - l_p), 2.5, label="over the slot")
-        for k in range(ALIGN_STEPS):  # closed loop: the bar over the slot
+        tcp = stage - turn @ (l_p - arm.pos)  # (the lock turns with the hand about the TCP)
+        yield from move(arm, tcp + (0, 0, 0.04), 3.0, rot=turn @ arm.rot, label="turn it to the face")
+        yield from move(arm, tcp, 1.2, label="down in front of the face")
+        yield from settle_at(arm, "settle")
+        for k in range(ALIGN_STEPS * 2):  # closed loop: the plate square to the face, its centre on the housing's axis
             h_p, h_r = housing()
-            seat_at = h_p + h_r @ np.array([0.0, ct.Y_LOCK, ct.H_H / 2])
-            l_p, _ = lock()
-            err = seat_at - l_p
-            err[2] = 0.0
-            phase[arm.side] = f"lock over the slot ({np.linalg.norm(err) / MM:.1f} mm)"
-            if np.linalg.norm(err) < 0.25 * MM and k > 5:
+            stage = h_p + h_r @ np.array([0.0, ct.Y_LOCK + ct.LOCK_PRONG[2] + L_STAGE, 0.0])
+            l_p, l_r = lock()
+            err = stage - l_p
+            ang = np.cross(l_r[:, 2], h_r @ np.array([0.0, 1.0, 0.0]))  # small rotation turning the lock's z onto +y
+            phase[arm.side] = f"line up the lock ({np.linalg.norm(err) / MM:.1f} mm, {math.degrees(np.linalg.norm(ang)):.1f} deg)"
+            if np.linalg.norm(err) < 0.25 * MM and np.linalg.norm(ang) < math.radians(0.5) and k > 5:
                 break
-            arm.pos = arm.pos + ALIGN_GAIN * err
+            step_ = ALIGN_GAIN * err
+            arm.pos = arm.pos + step_ * min(1.0, 3 * MM / max(np.linalg.norm(step_), 1e-9))
+            meas = tcp_measured(arm)  # (never wind the command up more than 4 mm past the measured hand)
+            lag = arm.pos - meas
+            if np.linalg.norm(lag) > 4 * MM:
+                arm.pos = meas + lag * (4 * MM / np.linalg.norm(lag))
+            if 1e-6 < np.linalg.norm(ang) < math.sin(math.radians(15.0)):  # (small corrections only)
+                arm.rot = rot_axis(ang, ALIGN_GAIN * math.asin(min(1.0, np.linalg.norm(ang)))) @ arm.rot
             for _ in range(4):
                 yield
-        l_p, _ = lock()
-        yield from move(arm, arm.pos - (0, 0, float(l_p[2] - seat_at[2]) - 2 * MM), 2.5, label="prongs into the slots")
-        l_p, _ = lock()
-        yield from move(arm, arm.pos - (0, 0, float(l_p[2] - seat_at[2]) + L_PRESS), 1.5, label="press the lock in")
-        yield from wait(arm, 1.0, "pressed")
+        h_p, h_r = housing()
+        d = h_r @ np.array([0.0, 1.0, 0.0])
+        yield from move(arm, arm.pos - d * (ct.LOCK_PRONG[2] + L_STAGE - 2 * MM), 2.5, label="blades into the channels")
+        yield from move(arm, arm.pos - d * (2 * MM + L_PRESS), 1.5, label="push the lock in")
+        yield from wait(arm, 1.0, "pushed")
         st = world["states"]["housing"]
-        report["lock"] = {"depth_mm": round(st.lock_depth / MM, 2), "in": st.lock_in, "forced": st.forced}
+        report["lock"] = {"depth_mm": round(st.lock_depth / MM, 2), "in": st.lock_in, "forced": st.forced,
+                          "step": world["step"]}
         if not let_go_lock:
             phase[arm.side] = "keep holding the lock"
             while True:
                 yield
-        yield from move(arm, arm.pos + (0, 0, L_PRESS), 0.6, label="ease off")
+        yield from move(arm, arm.pos + d * L_PRESS, 0.6, label="ease off")
         yield from move(arm, arm.pos, 0.5, grip=OPEN_L, label="let go of the lock")
+        yield from move(arm, arm.pos + d * 0.05, 1.2, label="back off")
+        flags["lock_done"] = True
         yield from move(arm, arm.pos + (0, 0, 0.05), 1.0, label="up")
 
     scripts = {"left": left_script(), "right": right_script()}
@@ -503,6 +576,11 @@ def run(variant: str, out: Path, video: bool, max_steps: int, emb=None) -> dict:
         if success_step is None and flags.get("left_done") and flags.get("right_done") and h.hands_off_steps >= 120:
             break
     live.close()
+    if "lock" in ct._NAMES:  # where the lock ended, in the housing's frame (for tuning)
+        h_p, h_r = housing()
+        l_p, l_r = lock()
+        report["lock_end_in_housing_mm"] = [round(float(v) / MM, 2) for v in h_r.T @ (l_p - h_p)]
+        report["lock_end_axis"] = [round(float(v), 4) for v in h_r.T @ l_r[:, 2]]
     (out / "steps_live.jsonl").unlink()
     h = world["states"]["housing"]
     summary = {
@@ -531,24 +609,20 @@ def run(variant: str, out: Path, video: bool, max_steps: int, emb=None) -> dict:
 
 
 def write_videos(frames: dict, out: Path, variant: str) -> None:
-    import cv2
+    """One H.264 MP4 per camera, written through imageio-ffmpeg (OpenCV's MJPG writer failed on the L40S box)."""
+    import imageio_ffmpeg
 
     for cam, imgs in frames.items():
         if not imgs:
             continue
         h, w = imgs[0].shape[:2]
-        raw = out / f"_{cam}.avi"
-        writer = cv2.VideoWriter(str(raw), cv2.VideoWriter_fourcc(*"MJPG"), CONTROL_HZ, (w, h))
-        for im in imgs:
-            writer.write(np.ascontiguousarray(im[..., ::-1]))
-        writer.release()
         name = out / (f"demo_{cam}.mp4" if variant == "full" else f"demo_{variant}_{cam}.mp4")
-        if shutil.which("ffmpeg"):
-            subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(raw), "-c:v", "libx264", "-pix_fmt",
-                            "yuv420p", "-movflags", "+faststart", str(name)], check=True)
-            raw.unlink()
-        else:
-            raw.rename(name.with_suffix(".avi"))
+        writer = imageio_ffmpeg.write_frames(str(name), (w, h), fps=CONTROL_HZ, codec="libx264", macro_block_size=8,
+                                             output_params=["-pix_fmt", "yuv420p", "-movflags", "+faststart"])
+        writer.send(None)
+        for im in imgs:
+            writer.send(np.ascontiguousarray(im))
+        writer.close()
 
 
 def main(argv=None) -> int:

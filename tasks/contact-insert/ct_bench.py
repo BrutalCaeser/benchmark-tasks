@@ -180,8 +180,10 @@ def run(emb, case: str) -> dict:
                 if case == "forced":
                     events["settled"]["note"] = "the contact pushed back under the finger for the press"
                 if case in ("lock", "forced"):
-                    lp = h0_p + h0_r @ np.array([0.0, ct.Y_LOCK, ct.H_H / 2 + 1.5e-3])
-                    place("lock", lp, h0_r)
+                    # the wedgelock square to the mating face, its blades' tips at the channels' mouths
+                    lp = h0_p + h0_r @ np.array([0.0, ct.Y_LOCK + ct.LOCK_PRONG[2] + 1.5e-3, 0.0])
+                    to_face = np.array([[1.0, 0.0, 0.0], [0.0, 0.0, 1.0], [0.0, -1.0, 0.0]])  # its +z onto +y
+                    place("lock", lp, h0_r @ to_face)
                     phase, t_phase = "press", t
                 else:
                     ct.HANDS_ON[0] = False
@@ -192,7 +194,7 @@ def run(emb, case: str) -> dict:
             keep = HALF_HOLD if case == "forced" else 0.0  # (forced: the contact kept under the open finger)
             hold_housing(-keep * axis_in)
             wrench("contact", {"contact": keep * axis_in})
-            wrench("lock", {"bar": (0.0, 0.0, -f)})
+            wrench("lock", {"bar": tuple(h0_r @ np.array([0.0, -f, 0.0]))})  # into the mating face
             if t - t_phase >= 2.0:
                 events["pressed"] = {"t": round(t, 3), "lock_depth_mm": round(h.lock_depth * 1e3, 3),
                                      "lock_in": bool(h.lock_in), "lock_force_N": round(h.lock_force, 2),

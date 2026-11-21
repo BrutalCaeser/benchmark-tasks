@@ -1,16 +1,17 @@
 """On the station table, in front of the arms: a black sealed 4-way connector housing (24 x 24 x 40 mm, glass-filled
 nylon) lies on its side, its rear face (the wire side, four square cavities numbered 1-4 by moulded dots) toward the
 right arm. Beside it, on a two-block rest (20 mm high, a 38 mm gap behind the crimp), lies a crimped size-16 socket contact
-(21 mm, gold) on a 140 mm red 1.0 mm2 wire, its nose pointing at the housing. An orange secondary lock (a comb: a 24 x 8 mm bar with two prongs) stands in a grey holder,
+(21 mm, gold) on a 140 mm red 1.0 mm2 wire, its nose pointing at the housing. An orange secondary lock (a wedgelock: a 26 x 22 mm face plate with four wedge blades) stands blades-down in a grey holder,
 and a white pinout card shows the four cavities as seen from the rear, cavity 3 marked red.
 
 The contact goes into a cavity from the rear; pushed in about 11 mm past the rear face, its shoulder passes the
-cavity's sprung locking finger, which snaps in behind it (the click). The secondary lock is pressed down into the slot
-across the top of the housing; it only goes fully in when every locking finger is closed.
+cavity's sprung locking finger, which snaps in behind it (the click). The secondary lock is pushed into the housing's
+mating face (the face opposite the wire side), its blades sliding back along channels beside the cavities to the
+locking fingers; it only goes fully in, flat on the mating face, when every locking finger is closed.
 
 Task: push the crimped contact into cavity 3 of the connector, as on the pinout card, from the wire side, until it
 clicks; hold the housing with one hand and push the wire close behind the crimp with the other. Tug the wire lightly to
-check it is locked, then press the secondary lock fully into its slot in the housing. Then let go of everything.
+check it is locked, then push the secondary lock fully into the housing's mating face. Then let go of everything.
 
 Scoring needs the robot's own tug (a hand closed on the wire draws the clicked contact back onto its fingers) besides
 the task's independent retention test, and checks the depth by a reference mark on the wire (within 1 mm).
@@ -40,8 +41,8 @@ HOUSING_POS = (0.30, 0.02, TOP + ct.H_H / 2 + 0.1 * MM)  # the rear face's centr
 CONTACT_YAW = math.radians(-90.0)  # the contact's nose toward +y (the housing), its wire along -y
 REST_POS = (0.305, -0.09, TOP + ct.REST_H)  # the lead's rest, under the crimp end
 CONTACT_POS = (REST_POS[0], REST_POS[1], REST_POS[2] + ct.SHOULDER_R + 0.1 * MM)  # the crimp end
-HOLDER_POS = (0.20, -0.06, TOP + ct.HOLDER_SIZE[2])  # the holder's top face's centre
-LOCK_POS = (HOLDER_POS[0], HOLDER_POS[1], HOLDER_POS[2] + 0.1 * MM)  # the lock's bar on the holder
+HOLDER_POS = (0.22, 0.17, TOP + ct.HOLDER_SIZE[2])  # the holder's top face's centre (left of the housing)
+LOCK_POS = (HOLDER_POS[0], HOLDER_POS[1], HOLDER_POS[2] + 0.1 * MM)  # the lock's plate on the holder's rim
 CARD_POS = (0.19, 0.10, TOP)
 
 OBJECTS = [
