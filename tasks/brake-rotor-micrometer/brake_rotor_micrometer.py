@@ -1,9 +1,10 @@
-"""In an installed front wheel well: a worn, in-service Brembo 09.7012.11 280 mm vented brake rotor (22.0 mm new, 21.50 mm measured
-at the inspection band here, 19 mm discard, ~5.74 kg worn) is bolted to its wheel hub and steering knuckle, with the caliper
-unbolted and its carrier bracket still on the knuckle. Eight scribe marks at radius 135 mm on the outboard friction face show the
-inspection points, a 6 mm paint dot marking the thinnest one (135 mm from the hub axis, 10 deg above the 9 o'clock line, facing the
-robot). To its left, lying across a bench rest, is a 0-25 mm outside micrometer (Mitutoyo 103-137 class: 175 g, ratchet stop, lock
-lever) with its spindle run out to the full 25 mm.
+"""In an installed front wheel well: a worn, in-service Brembo 09.7012.11 280 mm vented brake rotor (22.0 mm new, 21.50 mm measured at the
+inspection band here, 19 mm discard, ~5.74 kg worn) is bolted to its wheel hub and steering knuckle, with the caliper unbolted and its
+carrier bracket still on the knuckle. Eight inspection positions are marked on the rotor's outer edge (radius 140 mm, outside both
+micrometer contact areas): 1.5 mm ticks, and a 3.5 mm dot at the thinnest one (10 deg above the 9 o'clock line, facing the robot). The
+measured spot is the clean, unpainted friction face at radius 135 mm directly inboard of that edge dot; nothing is painted on either
+friction face. To its left, lying across a bench rest, is a 0-25 mm outside micrometer (Mitutoyo 103-137 class: 175 g, ratchet stop,
+lock lever) with its spindle run out to the full 25 mm.
 
 The robot has to measure the rotor the way a mechanic does: one hand holds the micrometer by its frame and slips it over the rotor's
 outer edge so the two measuring faces sit square on the friction band and rocks the frame slightly across the face, the other hand turns
@@ -11,10 +12,10 @@ the ratchet knob until it clicks (the ratchet slips at the measuring force: 5-10
 10 N), then the micrometer is taken off with the reading kept on the thimble and put back on its rest. The lock lever works but is not
 scored and the instruction does not ask for it.
 
-The rotor is an in-service part being inspected for wear: the simulator's worn thickness at the marked spot is 21.50 mm (the part
-was 22.0 mm new and is discarded at 19 mm). A real trial first scans the eight inspection points to find the thinnest, marks it,
-and scores the robot's reading against that spot's thickness measured with a calibrated micrometer (README: eight points, then five
-readings at the thinnest, median, repeatability <= 0.005 mm, +-0.02 mm band).
+The rotor is an in-service part being inspected for wear: the simulator's worn thickness at the marked spot is 21.50 mm (the part was
+22.0 mm new and is discarded at 19 mm). A real trial first scans the eight inspection points to find the thinnest, marks it on the
+outer edge (the faces stay clean and unpainted), and scores the robot's reading against that spot's thickness measured with a
+calibrated micrometer (README: eight points, then five readings at the thinnest, median, repeatability <= 0.005 mm, +-0.02 mm band).
 
 The micrometer is a real articulation: the frame is a free root; the spindle slides along the measuring axis on a prismatic joint whose
 drive is limited to 10 N (the top of the real 5-10 N measuring force); the thimble and the ratchet knob turn about that axis on revolute joints; the lock lever turns
@@ -230,15 +231,15 @@ REFERENCE_TOL_MM = 0.02  # the simulator's reading band; a real trial uses it wh
 REFERENCE_REPEAT_MM = 0.005  # the real reference's five-reading spread must stay within this
 INSPECTION_R = 0.135  # radius of the eight real-trial inspection points (m; 5 mm inboard of the 140 mm friction rim)
 INSPECTION_N = 8  # eight equally spaced circumferential points (every 45 deg) on each friction face
-DOT_ANG = math.radians(10.0)  # the marked thinnest inspection point: 10 deg above the 9 o'clock line
+DOT_ANG = math.radians(10.0)  # the thinnest inspection point (its dot is on the outer edge): 10 deg above the 9 o'clock line
 THICK = REFERENCE_MM * MM  # the simulator's reference thickness (the real rotor's is measured per trial; README)
 G_OPEN = 25.0 * MM
 PITCH = 0.5 * MM
 ROT_R = 0.140
 XC, YR = XM + INSPECTION_R * math.cos(DOT_ANG), YA - 1.5 * MM - THICK / 2  # hub centre (axis along y at ZA): the faces sit 5 mm inside the 140 mm rim
 BAND_LO, BAND_HI = 0.100, 0.136  # the faces' centre lies on the friction band between these radii (m from the hub axis)
-DOT_X, DOT_Z = XM, TOP + ZA + INSPECTION_R * math.sin(DOT_ANG)  # 135 mm from the hub axis, on the outboard face
-DOT_TOL = 0.005  # the anvil face centre must be this close to the dot (m), so the reference and the reading are the same spot
+DOT_X, DOT_Z = XM, TOP + ZA + INSPECTION_R * math.sin(DOT_ANG)  # the measured spot: clean, unpainted face at 135 mm, directly inboard of the edge dot
+DOT_TOL = 0.005  # the anvil face centre must be this close to the measured spot (m), so the reference and the reading are the same clean spot
 READ_LO, READ_HI = -REFERENCE_TOL_MM * MM, REFERENCE_TOL_MM * MM  # a reading counts when it is within this of the measured thickness (MuJoCo's soft contact sinks the faces a few hundredths of a mm at 6 N; PhysX sinks almost nothing)
 MIC_START = np.array([XS, YS, TOP + ZA + 0.0003])
 MIC = UsdPart("mic", asset="micrometer", xy=(XS, YS), extent=0.06, mass=0.176, usd_path=str(ASSETS / "micrometer.usda"),
@@ -307,7 +308,8 @@ def reading_ok(objects) -> bool:
 
 def on_rotor(objects) -> bool:
     """Both faces sit on the rotor's friction band, square: the anvil face centre on the band (BAND_LO .. BAND_HI from the hub axis) and
-    within DOT_TOL of the reference dot (135 mm from the hub axis, 10 deg above 9 o'clock), the anvil face on the rotor's +y face (within
+    within DOT_TOL of the measured spot (the clean, unpainted face 135 mm from the hub axis, 10 deg above 9 o'clock, directly inboard
+    of the dot on the rotor's outer edge; the marks are on the edge, outside both contact areas), the anvil face on the rotor's +y face (within
     1 mm), the measuring axis within 5 degrees of the hub axis."""
     s = objects["mic"]
     p = np.asarray(s.pos, float)

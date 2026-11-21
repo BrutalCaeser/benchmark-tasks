@@ -422,8 +422,10 @@ def lathe_y(profile, n=96):
 #                     (the anvil at +y, the thimble end toward -y), the frame's throat opens toward +x, z up.
 #   rotor.usda      : a worn Brembo 09.7012.11 280 mm dia front brake rotor (22.0 mm new, 21.50 mm at the inspection
 #                     band in the sim, 19 mm discard; 5.74 kg estimated worn mass) installed on its hub, axis along y
-#                     (fixed). Origin: the middle of the rotor's thickness, on its axis. Eight scribe marks at radius
-#                     135 mm show the inspection points; the 6 mm dot marks the thinnest one.
+#                     (fixed). Origin: the middle of the rotor's thickness, on its axis. Eight inspection
+#                     positions are marked on the outboard plate's outer edge (radius 140 mm, outside both contact areas):
+#                     1.5 mm ticks and a 3.5 mm dot at the thinnest. The measured spot is the clean, unpainted friction face
+#                     at radius 135 mm directly inboard of the dot; nothing is painted on either friction face.
 #   hub_knuckle.usda: the front wheel hub, bearing boss, steering knuckle and five wheel studs (fixed context).
 #                     Origin: the rotor's hub centre, same as rotor.usda.
 #   caliper_bracket.usda: the caliper carrier still bolted to the knuckle at the bottom of the rotor (fixed context);
@@ -559,8 +561,10 @@ def rotor(fname):
     a = Asset(fname, "Rotor", "A worn in-service Brembo 09.7012.11 280 mm dia internally vented front brake rotor (22.0 mm new, "
               "21.50 mm at the eight inspection points in the sim, 19 mm discard, 65 mm centre bore, 5 x 100 mm stud holes, "
               "5.74 kg estimated grey cast iron), installed on a wheel hub and steering knuckle. Axis along y (the hat toward -y); "
-              "fixed. Origin: the middle of the rotor's thickness, on its axis. Eight 2 mm scribe marks and one 6 mm paint dot at "
-              "radius 135 mm show the inspection points; the dot marks the thinnest one. The hat outer diameter and 36 vanes are "
+              "fixed. Origin: the middle of the rotor's thickness, on its axis. Eight inspection positions are marked on the outboard "
+              "plate's outer edge (radius 140 mm, outside both micrometer contact areas): 1.5 mm paint-pen ticks and a 3.5 mm dot at "
+              "the thinnest one. The measured spot is the clean, unpainted friction face at radius 135 mm directly inboard of the "
+              "dot; nothing is painted on either friction face. The hat outer diameter and 36 vanes are "
               "visual approximations.", 5.74, com=(0, 0, 0), inertia=(0.028, 0.028, 0.055))
     f = (0.40, 0.30)
     h = THICK / 2
@@ -578,13 +582,20 @@ def rotor(fname):
         yf = sgn * (h + 0.000025)
         pts, tris = lathe_y([(0.100, yf - 0.000025), (0.140, yf - 0.000025), (0.140, yf + 0.000025), (0.100, yf + 0.000025)])
         a.vmesh("WearTrack", pts, tris, IRON_WEAR)
-    # eight circumferential inspection points at radius 135 mm: the thinnest (10 deg above the 9 o'clock line) is the 6 mm paint dot
+    # eight circumferential inspection positions, marked on the outboard plate's outer cylindrical edge (radius 140 mm, the flat
+    # edge between the chamfers, y = h - 5 .. h - 1 mm; marks centred at y = h - 3 mm), outside both micrometer contact areas.
+    # The thinnest (10 deg above the 9 o'clock line) is the 3.5 mm dot; the measured spot is the clean, unpainted friction face at
+    # radius 135 mm directly inboard of it (both faces). Nothing is drawn on either friction face.
     for k in range(8):
         ph = math.radians(170.0 - 45.0 * k)  # 170 deg = 10 deg above 9 o'clock
-        c = (INSPECTION_R * math.cos(ph), h + 0.00006, INSPECTION_R * math.sin(ph))
-        rr = 3.0 * MM if k == 0 else 1.0 * MM
-        pts, tris = disc(rr, 0.0, 0.00005, 96, "Y")
-        a.vmesh("RefDot" if k == 0 else "InspectMark", pts, tris, (0.05, 0.05, 0.05) if k == 0 else (0.18, 0.18, 0.18), center=c)
+        rr = 1.75 * MM if k == 0 else 0.75 * MM
+        pts, tris = disc(rr, ROT_R - 0.0001, ROT_R + 0.00006, 96, "Z")
+        t = math.pi / 2 - ph  # rotate about y so +z points radially out along (cos ph, 0, sin ph)
+        ct, st = math.cos(t), math.sin(t)
+        pts = [(x * ct + z * st, y, -x * st + z * ct) for x, y, z in pts]
+        # vmesh names a prim name + a.n (not bumped per call), so each mark gets its own name or the seven would share one path
+        a.vmesh("RefDot" if k == 0 else f"InspectMark{k}_", pts, tris, (0.05, 0.05, 0.05) if k == 0 else (0.18, 0.18, 0.18),
+                center=(0.0, h - 3.0 * MM, 0.0))
     hat = [(BORE_R, -h - HAT_D), (HUB_R, -h - HAT_D), (HUB_R, -h + PLATE_T), (BORE_R, -h + PLATE_T)]
     pts, tris = lathe_y(hat)
     a.vmesh("Hat", pts, tris, IRON_HAT)
