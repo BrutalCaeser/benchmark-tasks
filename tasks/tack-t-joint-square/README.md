@@ -23,15 +23,18 @@ The score is printed as `task_score`. Use `--policy dream` for Dream-1.
 
 ## Credit, and how the review is met
 
-This task takes up the idea of an earlier submission by GitHub user `bfefferm-pers`, "Tack-weld a T-joint square: hold a steel coupon on edge and TIG-tack it at three marks", reviewed as TK-W4UYUQ. The hold on the idea lapsed with no further revision. This version starts from that submission's files and answers the review point by point below.
+This task takes up the idea of an earlier submission, "Tack-weld a T-joint square: hold a steel coupon on edge and TIG-tack it at three marks", reviewed as TK-W4UYUQ. The hold on the idea lapsed with no further revision. This version starts from that submission's files and answers its review, and then the review of this version (TK-2CK257), point by point below.
 
 | Reviewer point | What changed |
 | --- | --- |
 | Add to the README a costed equipment list (welding cell, safety equipment, per-trial consumables) | New section "Equipment and cost": three tables (welding cell, safety equipment, per-trial consumables) with a named product and a price for each item, a total for a lab starting fresh (about $1,750) and the per-trial cost (about $2 to $6). Items not priced against a single listing are marked as estimates. The power-source line now says what happens to the downslope setting on the costed inverter. |
 | A line on how the robot and cameras are protected from high-frequency start interference | The "Electrical interference" item in "Real-world setup" is now "How the robot and cameras are protected from HF start interference": the arms are kept out of the welding and HF circuit (insulated grips, work clamp on the fixture), the inverter on its own branch circuit following IEC 60974-10, shielded cables with ferrites kept 30 cm from the torch lead, and a test strike before each session with stated pass conditions. |
-| Earlier: importance and feasibility (appeal) | Kept: the O*NET task citations in the context; the shared rig with `tig-seam` is now costed. |
+| Earlier: importance and feasibility (appeal) | The domain is now Societal relatability (next row); the shared rig with `tig-seam` is costed. |
+| TK-2CK257, importance: change the domain to Societal relatability and say why viewers will recognize the task and its difficulty | `task.json`'s category is now Societal relatability, and its context is rewritten around what a viewer sees and why it is hard (two hands doing different things at once, by feel, inches from a bright arc, with a result anyone can judge at a glance). The jobs figures are dropped. |
+| TK-2CK257, feasibility: a concrete affordable route to the real welding cell | New subsection "Lower-cost route: a shared makerspace hot shop" under "Equipment and cost": one month's membership of a public makerspace whose hot shop has DC TIG welders with HF start, plus only what the robot cell adds. About $760 to $1,170 in all, against about $1,750 from scratch, with the same settings and safety measures. What the shop must provide, and what to bring if it does not, is listed. |
+| TK-2CK257, blind review: remove the username and other identifying attribution | Removed. The earlier submission is credited by its title and review ID only. |
 
-The scorer, tack model, scripted demo and tests are unchanged. `task.json` changes only in its setup and reset notes (pointing to the costs) and its scores. This revision was rerun in simulation: demo 1.0, Dream-1 0.0 (see Results).
+The scorer, tack model, scripted demo and tests are unchanged. `task.json` changes only in its category, context, setup and reset notes (pointing to the costs) and its scores; the TK-2CK257 revision changes no code, so the simulator results below still apply. This revision was rerun in simulation: demo 1.0, Dream-1 0.0 (see Results).
 
 ## Results
 
@@ -124,6 +127,27 @@ US prices seen online in November 2026, rounded, before tax and shipping. "Estim
 **Measuring tools** (machinist's square, feeler gauges, steel ruler, weld gauge, 10x loupe, scriber, lamp, multimeter): about $100 (estimate).
 
 **Total for a lab starting fresh: about $1,750**, of which the inverter, argon and safety items are shared with the seam-welding task.
+
+**Lower-cost route: a shared makerspace hot shop**
+
+A lab without a welding cell can run the trials in a public makerspace's hot shop instead of building one. Example: Maker Nexus (Sunnyvale, California) lists full shop access, including its "Hot Shop - MIG, TIG, and Stick Welding" area, for $160 a month (Hobbyist membership), and its hot shop has two Miller 220 multiprocess welders (Stick, MIG and TIG) (https://www.makernexus.org/, https://www.makernexus.org/facilities-and-tools). The Miller Multimatic 220 AC/DC has high-frequency (non-contact) arc start for DC TIG, selected on its front panel (https://www.millerwelds.com/en-us/equipment/welders/multiprocess/multimatic/multimatic-220-m30190). Members must pass the shop's training on large equipment before using it independently (https://www.makernexus.org/faq). The person who holds the arc switch is that trained member; the robots never switch the welder.
+
+The shop must have, or the lab brings: a DC TIG welder with HF start and a hold-to-run control (the welder's foot or hand remote, held by the supervisor, works as the arc switch: releasing it stops the arc); a steel welding table or bench; local fume extraction and general ventilation; welding curtains or screens to EN ISO 25980 on every open side; a fire extinguisher. Settings, safety measures and checks are unchanged from "Real-world setup". The torch must be an air-cooled 17-series head (or the trial's 150 A class torch fitted to the welder) so that the grip block and the cup and tungsten in `task.json` fit.
+
+| Item | Price |
+|---|---|
+| Makerspace membership, one month, one member | $160 |
+| Shop training on the welder | about $35 to $50 (estimate: the shop's listed member price for a typical 2-hour class is $35) |
+| Gas lens kit and tungsten (as above) | $45 to $72 |
+| Pure argon, 80 cu ft cylinder, if the shop does not supply gas | $0 or $230 to $325 |
+| Fixture-table top, strap clamps, coupon block, torch rest, insulating pads (as above) | about $120 (estimate) |
+| Emergency stop for the robots plus an inline contactor box between the welder's plug and the outlet (as above) | $176 |
+| Camera filters and cover lenses, supervisor's filter, aluminised sleeves, ferrites (as above) | about $80 |
+| IR thermometer, tongs and gloves (as above) | $45 to $85 |
+| Measuring tools (as above) | about $100 (estimate) |
+| **Total** | **about $760 to $1,170** |
+
+If the shop lacks curtains or local extraction, add them from the safety table above (about $150 and $139). Per-trial consumables are as below. The cell takes about an hour to set up in the shop (fixture table on its pads, work clamp, curtains closed round the robot station, cameras filtered, test strike).
 
 **Per-trial consumables**
 
