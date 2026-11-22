@@ -34,6 +34,13 @@ CLIP_WINDOW_HALF_HEIGHT = 0.0093 - 0.0028 / 2
 SUCCESS_HOLD_S = 2.0
 SUCCESS_DRIFT = 0.0015
 SUCCESS_ANGLE_COS = math.cos(math.radians(5) / 2)
+# The modelled gathered neck is 45 mm of film width. Partial credit uses the
+# measured share of that width held inside the clip jaws, read as a neck gap on
+# the prepared 20 mm opening, so sim and real trials share one threshold.
+NECK_WIDTH = N_FOLDS * FOLD_WIDTH
+NECK_OPENING_MM = 20.0
+PARTIAL_GAP_MM = 12.0
+CLOSED_GAP_MM = 2.0
 NECK_CREASE = np.array((NECK[0] - 0.019, NECK[1] - FOLD_HALF_LENGTH, NECK[2]))
 
 OBJECTS = [
@@ -136,14 +143,15 @@ def closure(objects):
     leading = [fold.pos - span for fold, span in zip(folds, half_spans)]
     trailing = [fold.pos + span for fold, span in zip(folds, half_spans)]
     if any(np.linalg.norm(a - b) > 0.005 for a, b in zip([anchor, *trailing[:-1]], leading)):
-        return 0, False
-    in_clip = sum(film_in_clip(clip, fold) for fold in folds)
+        return NECK_OPENING_MM, False
+    captured = sum(FOLD_WIDTH for fold in folds if film_in_clip(clip, fold))
+    gap_mm = round(NECK_OPENING_MM * (1 - captured / NECK_WIDTH), 3)
     rear = loaf_basis @ (0, -0.120, 0) + loaf.pos
     on_bench = abs(loaf.pos[2] - LOAF[2]) < 0.006 and loaf_basis[2, 2] > math.cos(math.radians(10))
     intact = rear[1] - clip.pos[1] > 0.024 and on_bench
     release = len(tips) == 2 and all(np.linalg.norm(tip - clip.pos) > 0.060 for tip in tips.values())
-    secured = in_clip == N_FOLDS and intact and release
-    return in_clip, secured
+    secured = gap_mm < CLOSED_GAP_MM and intact and release
+    return gap_mm, secured
 
 
 def score(objects):
@@ -152,7 +160,7 @@ def score(objects):
     loaf = objects["loaf"]
     folds = [objects[f"film_{i}"] for i in range(N_FOLDS)]
     film_centre = np.mean([fold.pos for fold in folds], axis=0)
-    in_clip, secured = closure(objects)
+    gap_mm, secured = closure(objects)
     if not secured:
         stable_frames, stable_anchor = 0, None
     elif stable_anchor is not None and (
@@ -166,14 +174,16 @@ def score(objects):
         stable_anchor = (clip_pose.pos.copy(), clip_pose.quat_xyzw.copy(), loaf.pos.copy())
     if os.getenv("BAG_DIAGNOSTICS"):
         sections = [film_section(clip_pose, fold) for fold in folds]
-        print("BAG", in_clip, "secured", secured, "steady frames", stable_frames,
+        print("BAG gap mm", round(gap_mm, 1), "secured", secured, "steady frames", stable_frames,
               "clip", np.round(objects["clip"].pos, 4).tolist(),
               "normal", np.round(quat_xyzw_to_matrix(clip_pose.quat_xyzw)[:, 1], 3).tolist(),
               "opening mm", [np.round(section[:, (0, 2)] * 1000, 1).tolist() if section is not None else None
                              for section in sections],
               "film", np.round([fold.pos for fold in folds], 4).tolist(),
               "tips", np.round(list(tips.values()), 4).tolist(), flush=True)
-    return 1.0 if success(objects) else 0.5 if in_clip == N_FOLDS else 0.25 if in_clip >= 2 else 0.0
+    if success(objects):
+        return 1.0
+    return 0.5 if gap_mm < CLOSED_GAP_MM else 0.25 if gap_mm <= PARTIAL_GAP_MM else 0.0
 
 
 def success(objects):

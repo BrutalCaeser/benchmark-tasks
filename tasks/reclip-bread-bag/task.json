@@ -9,11 +9,11 @@
   ],
   "instruction": "Gather the open bag neck. Slide the red clip over the gathered film to close the bag. Let go of both parts.",
   "context": "The reopening slit on an ordinary bread clip is narrower than its holding hole. One hand gathers and steadies the loose film while the other hand pushes the clip across it.",
-  "setup": "A 240 mm foam loaf fills an open bread bag between three low guide blocks. Its loose neck projects about 100 mm towards the clip and rests on a smooth block near the loaf. The red hand-applied Series A clip rests upright in a shallow slot with the opening toward the robot bases.",
-  "scoring": "Score 0.25 when at least two of the five film sections pass through the clip window and 0.5 when all five are captured. Score 1.0 when the unbroken neck holds the clip with at least 8 mm of tail. The loaf sits upright, both grippers clear the clip by at least 60 mm and the assembly holds its position for two seconds. A torn bag or fewer than two captured sections earns 0.0.",
+  "setup": "A 240 mm foam loaf fills a stock 8 x 4 x 18 in, 1 mil bread bag between three low guide blocks. The bag is cut to 120 mm of loose film, and its neck is gathered around a 20 mm dowel that is then removed, leaving a 20 mm opening resting on a smooth block near the loaf. The red hand-applied Series A clip rests upright in a shallow slot with the opening toward the robot bases.",
+  "scoring": "Neck gap = the open channel through the neck at the clip, out of the prepared 20 mm (real bag: largest gauge rod that passes the clip; sim: 20 mm times the share of the 45 mm modelled neck width outside the jaws). 0.25: clip on the gathered film with gap 12 mm or less. 0.5: gap below 2 mm while a hand still supports it. 1.0: gap below 2 mm, loaf upright, both grippers at least 60 mm from the clip and the clip and loaf still for 2 s. A torn neck or a larger gap earns 0.0.",
   "run_limit": "680 steps at 20 Hz (34 s)",
   "reset_notes": "Take the clip off the bag and place it upright in its slot. Reopen the loose neck. Return the foam loaf and the bag to the marked starting area.",
-  "fidelity": "The fixture uses the full footprint of a hand-applied Series A closure. Five breakable linked strips approximate a gathered film neck. Actual fit and friction should be checked with the named clip and bag.",
-  "scores": "Dream-1 run: 0.0; stock YAM scripted demo: 1.0",
-  "media": "M-RXC2V2"
+  "fidelity": "The clip has the full footprint of a hand-applied Series A closure. Five breakable linked strips approximate the gathered neck, and the sim reads the neck gap from film width in the jaws, an approximation of the gauge-rod check. Fit and friction should be checked with the named bag and clip.",
+  "scores": "Dream-1 run (seed 0): 0.0; stock YAM scripted demo: 1.0 at 376 steps",
+  "media": "M-7Z5VZN"
 }
