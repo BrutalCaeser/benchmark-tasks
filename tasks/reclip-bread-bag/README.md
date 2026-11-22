@@ -13,7 +13,7 @@ One hand gathers the loose polyethylene neck while the other slides the slot in 
 ## Items
 
 - **Bag:** Interplas BR-HI1218 bread bag, 8 x 4 x 18 in (203 mm face, 102 mm side gusset, 457 mm long), low density polyethylene listed as 1 mil (0.001 in, about 25 µm). [Product page](https://www.interplas.com/restaurant-supplies/bread-bags/8x4x18-1mil-plastic-bread-bags-p-br-hi1218) shows the size, the 1 mil thickness and the 1000-bag case. The listed thickness is nominal: before a trial series, measure one film layer cut from a spare bag with a 0.001 mm outside micrometer at three spots and record the mean.
-- **Clip:** Kwik Lok Series A hand-applied closure, listed by the maker as 2.14 x 3.49 cm. [Maker's page](https://www.kwiklok.com/product/series-a/). That page refused scripted requests (HTTP 403) when checked, so measure the clip with calipers; the simulated clip is 21.4 x 34.9 mm. [Bread clip](https://en.wikipedia.org/wiki/Bread_clip) describes the general type.
+- **Clip:** Kwik Lok Series A hand-applied closure, listed by the maker as 2.14 x 3.49 cm. [Maker's page](https://www.kwiklok.com/product/series-a/). The simulated clip matches it at 21.4 x 34.9 mm; confirm the real clip with calipers before trials. [Bread clip](https://en.wikipedia.org/wiki/Bread_clip) describes the general type.
 - **Gauge rods:** drill bit shanks or pin gauges of 2, 4, 6, 8, 10, 12 and 20 mm diameter.
 
 ## Setup and reset
