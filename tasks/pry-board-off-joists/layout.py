@@ -99,13 +99,13 @@ CARRIER_MASS = 0.05  # each of the carrier's two links
 CARRIER_Z = 25.0 * MM  # the carrier's hidden 6 mm boxes, inside each joist, this far above the table
 
 # -- the pry bar (loose) ---------------------------------------------------------------------------------------------
-# A 15 in (380 mm) flat pry bar: flat spring steel, 32 mm wide and 6 mm thick, ground to a flat chisel blade at one
+# A 15 in (380 mm) flat pry bar: flat spring steel, 35.6 mm wide and 6 mm thick, ground to a flat chisel blade at one
 # end and bent into a curved nail claw at the other, powder-coated blue with the blade and claw bare. The blade is
 # bent 15 deg off the shaft, away from the claw's curl: laid flat on the work with the shaft rising behind it, the bend
 # is the heel the bar rocks on.
 # Drawn in its own frame: x along the bar from the blade's tip (x = 0) to the claw, y across its width, z through its
 # thickness; the claw curls toward -z. Each segment: (length, thickness, angle from +x toward -z in degrees, colour).
-BAR_W = 32.0 * MM
+BAR_W = 35.6 * MM  # the DWHT55160 is listed 1.4 in wide
 BLADE_BEND = 15.0  # deg: from the tip, the blade falls toward -z (the claw's side) to meet the shaft
 BLADE_LEN = 48.0 * MM
 BAR_SEGMENTS = (
@@ -119,7 +119,7 @@ BAR_SEGMENTS = (
     (14.0 * MM, 3.5 * MM, 172.0, BAR_BRIGHT),  # the claw's tip
 )
 STEEL_DENSITY = 7850.0
-BAR_MASS = round(sum(l * t * BAR_W for l, t, _a, _c in BAR_SEGMENTS) * STEEL_DENSITY, 3)  # 0.57 kg
+BAR_MASS = round(sum(l * t * BAR_W for l, t, _a, _c in BAR_SEGMENTS) * STEEL_DENSITY, 3)  # 0.63 kg
 BAR_FRICTION = (0.9, 0.8)  # powder-coated steel on the grippers' rubber pads
 # Where it lies: on the table in front of the frame, parallel to the board, its blade to the robot's left and its
 # claw to the right, curled down: it rests on the claw and the blade's heel, the shaft sloping up toward the claw.

@@ -8,7 +8,7 @@ The board: a 600 mm length of 1x4 common pine (19 x 89 mm actual, 0.46 kg) lying
 centred between them (its ends overhang each joist by 78 mm), held by one 3d box nail (1-1/4 in, bright steel) into
 each joist, driven square through its centre line, head flush.
 
-The pry bar: a 380 mm flat pry bar (0.57 kg; 32 x 6 mm blue spring steel, a flat chisel blade at one end, a curved
+The pry bar: a 380 mm flat pry bar (0.63 kg; 35.6 x 6 mm blue spring steel, a flat chisel blade at one end, a curved
 nail claw at the other) lies on the table in front of the frame, parallel to the board, its claw to the robot's right,
 curled down.
 

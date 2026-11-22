@@ -4,7 +4,7 @@ This task builds on an earlier submission, whose 48-hour revision hold lapsed wi
 
 | Review point | What changed |
 |---|---|
-| "specify the make and model of pry bar" | The bar is now named: a DEWALT DWHT55160 15 in (380 mm) Spring Steel Flat Bar, with the maker's listing linked and the dimensions it states compared with the simulated bar (see "The pry bar for a real trial" below, and `task.json` setup). The simulated bar is unchanged: it matches the named bar's length and, within 4%, its mass; it is 3.6 mm narrower and its far end is drawn as a curled claw (that end is never used). |
+| "specify the make and model of pry bar" | The bar is now named: a DEWALT DWHT55160 15 in (380 mm) Spring Steel Flat Bar, with the maker's listing linked and the dimensions it states compared with the simulated bar (see "The pry bar for a real trial" below, and `task.json` setup). The simulated bar was widened from 32 to 35.6 mm to match the listed width (a one-line change in `layout.py`; the demo needed no retuning and still scores 1.0). It matches the listed length and width; its mass, computed from our estimated 6 mm thickness, is 0.63 kg against the listed 0.59 kg (7% heavier), and its far end is drawn as a curled claw (that end is never used). |
 
 Instruction given to the policy: `Pry the board off the joists with the pry bar and lay it flat on the table.`
 
@@ -58,7 +58,7 @@ or defective parts or sections of structures and repair or replace, using hand t
 | C-clamps | Two 6 in C-clamps hold the rim to the table's back edge, 12 cm either side of the middle (pad on the rim's top edge, fixed jaw under the table top). Nothing is screwed into the robot's table; while the bar levers, a joist is pushed down overall (the heel presses harder than the nail pulls), so the clamps only keep the frame in place |
 | Board (nailed) | 600 mm of 1x4 common pine (19.05 x 88.9 mm, S4S, eased edges), 0.46 kg, flat across the joists' tops, centred 40 cm out, ends overhanging 78 mm |
 | Nails | Two 3d box nails (1-1/4 in, 0.076 in shank, 7/32 in head, bright), one into each joist through the board's centre line, heads flush; 12.7 mm in the joist. The cleat is tacked lightly, as temporary cleats often are (about 150 N to pull a nail). Heavier nailing would be beyond what the arm can lever; the skill (seating the blade, levering on the joist, re-setting deeper) is the same |
-| Pry bar (loose) | 15 in flat pry bar, 32 x 6 mm spring steel, 0.57 kg; flat chisel blade 48 mm long bent 15 deg, ground on its top face to a 1.6 mm edge; curved nail claw at the other end. For a real trial: a DEWALT DWHT55160 15 in spring steel flat bar (see below) |
+| Pry bar (loose) | 15 in flat pry bar, 35.6 x 6 mm spring steel, 0.63 kg; flat chisel blade 48 mm long bent 15 deg, ground on its top face to a 1.6 mm edge; curved nail claw at the other end. For a real trial: a DEWALT DWHT55160 15 in spring steel flat bar (see below) |
 
 Nothing else is on the table. Coordinates for every object are in `task.json` (setup) and `layout.py`.
 
@@ -72,17 +72,16 @@ carrying a nail slot at one end and a wider, sharply bent prying end at the othe
 | | DWHT55160 (as listed) | Simulated bar |
 |---|---|---|
 | Length | 15.0 in (381 mm) | 380 mm |
-| Width | 1.4 in (35.6 mm) | 32 mm |
-| Weight | 1.3 lb (0.59 kg) | 0.57 kg |
+| Width | 1.4 in (35.6 mm) | 35.6 mm |
+| Weight | 1.3 lb (0.59 kg) | 0.63 kg (computed from the shape and our estimated thickness) |
 | Material, finish | spring steel, powder coated | spring steel, blue powder coat |
 | Thickness, blade bend | not listed | 6 mm, 15 deg (our estimates) |
 
 The bar's working end in this task is the chisel end: its blade goes into the joint and its bend rests on the joist.
-Length and mass agree; the real bar is 3.6 mm wider and its far end is a
-wide bent prying end rather than the drawn curled claw. The far end is never used here: the demo holds the bar by
-its shaft only. The thickness and blade bend are not on the listing; ours are estimates of a typical 15 in flat bar.
-The simulated bar was not re-drawn to the DEWALT outline;
-widening it to 35.6 mm and drawing the far end as the bent prying end would be the closer match.
+Length and width agree. The simulated mass, 0.63 kg, is 7% over the listed 1.3 lb: it follows from our 6 mm
+thickness estimate, so the real bar is probably somewhat thinner. Its far end is a wide bent prying end rather than
+the drawn curled claw; that end is never used here, as the demo holds the bar by its shaft only. The thickness and
+blade bend are not on the listing; ours are estimates of a typical 15 in flat bar.
 
 ## Scoring (scoring.py)
 
@@ -138,7 +137,7 @@ The scripted demo:
     python demokit.py task.py <out_dir>                   # final: records <out_dir>/full/demo.mp4 and setup.png
     python demokit.py task.py <out_dir> --fast            # physics on the CPU, no cameras: about 6 times faster
 
-It reaches 1.0 in 2,031 steps (102 s of robot time) on the GPU. A trial with cameras takes about 5 minutes of wall
+It reaches 1.0 in 2,024 steps (101 s of robot time) on the GPU. A trial with cameras takes about 5 minutes of wall
 time on one RTX 4080 (16 GB); the demo's other modes are `idle` (the setup image) and `right` (the first nail only).
 
 Offline tests (no simulator; `yam-isaac-lab-arena` on `PYTHONPATH` for `yam_arena.task_file`):
@@ -157,7 +156,7 @@ The Dream-1 run:
 Closed loop: every stage reads the bar's and the board's poses; it never reads the scorer or the nails' rule, and
 nothing is teleported or edited.
 
-1. The right arm picks the bar up by its shaft at its centre of mass (fingers across its 32 mm width), turns it
+1. The right arm picks the bar up by its shaft at its centre of mass (fingers across its 35.6 mm width), turns it
    blade forward and lays the blade flat on the right joist, its edge in the board's eased-edge V.
 2. It levers in small commanded steps until the board is seen 4 mm up (the arm is soft, so the command runs well
    past the bar's angle), re-sets the blade about 2 cm under the raised board, and levers again until the board
@@ -178,8 +177,8 @@ the bar, clear of the board; in a real trial it would then put the bar down.
 
 | Run | Score | Steps |
 |---|---|---|
-| Demo, GPU, recorded | 1.0 (right nail out at step 694, left at 1693; all 12.7 mm of each credited to the bar) | 2,031 |
-| Dream-1 (`--policy dream`, seed 0, full limit) | 0.0: it picked the bar up with its right arm several times and brought the blade to the board's front edge near the right joist, but never seated it in the joint or levered; neither nail moved, and the bar was dropped on the table and across the joists | 4,800 |
+| Demo, GPU, recorded | 1.0 (right nail out at step 676, left at 1680) | 2,024 |
+| Dream-1 (`--policy dream`, seed 0, full limit) | 0.0: it moved and turned the bar on the table with its hands but never seated the blade under the board or levered on a joist; neither nail moved and the board stayed nailed down | 4,800 |
 
 ## Third-party code and assets
 
