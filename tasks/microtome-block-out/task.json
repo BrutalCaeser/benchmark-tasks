@@ -18,5 +18,5 @@
   "reset_notes": "Turn the handwheel back to 10 o'clock with the handle pulled out, fold the knife guard down onto its forward stop, push the clamp lever forward, set the cassette in the clamp with its block facing the knife and release the lever, and put the tray back on its outline. Use a dulled mock blade for robot trials. Check once a session with a spring scale that the clamp lever, pushed forward at its foot, holds the lip 10 mm open (15 degrees) at 3.5 to 5.5 N, and that the wheel turns at 6 to 9 N at the knob (0.6 N m at 85 mm).",
   "fidelity": "Rigid boxes and cylinders, all mechanisms by contact: wheel on a hinge with friction, handle on a slider whose pin drops into the wall's hole at 12 o'clock, carriage driven by a crank pin in a yoke slot, guard on a hinge with stops, clamp a sprung rocker whose lip holds the cassette. Its lever is longer and lower than the instrument's, so a gripper fits behind it. Stroke and cassette size are from the flyer and IFU; housing, wheel, guard, frictions, springs and masses are estimates.",
   "scores": "Dream-1 run: 0.0; demo: 1.0",
-  "media": "M-CJWBHP"
+  "media": "M-Z49WL5"
 }

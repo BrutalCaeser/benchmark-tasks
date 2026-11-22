@@ -385,7 +385,7 @@
       "name": "clamp_spring_bridge",
       "joint": "on the carriage",
       "join": "head__carriage",
-      "note": "holds the clamp spring above the lever's forward arm, 40 mm in front of the pivot; glued to the carriage plate's top",
+      "note": "holds the clamp spring above the lever's forward arm, 40 mm in front of the pivot; glued to the carriage plate's top. Its second box is the cap that closes the 8 mm bore on top: 16 x 16 x 4.5 mm with a 9 x 9 x 1.5 mm recess underneath, so the pocket's ceiling is z 226.5 (printed as four ring blocks and a plate)",
       "boxes": [
         {
           "centre": [
@@ -408,6 +408,30 @@
               "d": 8.0
             }
           ]
+        },
+        {
+          "centre": [
+            466,
+            50,
+            227.25
+          ],
+          "size": [
+            16,
+            16,
+            4.5
+          ],
+          "recess_below": {
+            "size": [
+              9,
+              9,
+              1.5
+            ],
+            "centre": [
+              466,
+              50,
+              225.75
+            ]
+          }
         }
       ]
     }
@@ -447,7 +471,7 @@
       "name": "Head start position",
       "value": "the handle at 10 o'clock puts the head 14.75 mm below its top",
       "tolerance": "+-1 mm",
-      "check": "rule from the bench top to the cassette's centre: 160.3 mm at the start, 175 mm at the top"
+      "check": "rule from the bench top to the cassette's centre: 175.3 mm at the start, 190 mm at the top"
     },
     {
       "name": "Cassette clamp",
@@ -457,9 +481,9 @@
     },
     {
       "name": "Clamp lever",
-      "value": "lever on the clamp's side nearer the robot: an arm 40 mm forward from the rocker and a 24 mm wide push bar (x 446-470, y 47-55) down to 100 mm above the bench, pushed +y; rocker turns -1 to 26 degrees",
+      "value": "lever on the clamp's side nearer the robot: an arm 40 mm forward from the rocker and a 24 mm wide push bar (x 446-470, y 47-55) down to 100 mm above the bench, pushed +y; rocker turns -1 to 26 degrees in the simulation, to about 23 degrees on the fixture, where the clamp spring is solid",
       "tolerance": "",
-      "check": "pushing the bar's foot 20 mm forward (about 12 degrees) lifts the lip about 8 mm off the cassette; 25 mm (15 degrees, the fixture's open stop) lifts it 10 mm"
+      "check": "pushing the bar's foot 20 mm forward (about 12 degrees) lifts the lip about 8 mm off the cassette; 25 mm (15 degrees) lifts it 10 mm; the demo opens it 18 degrees"
     },
     {
       "name": "Knife edge",
@@ -498,8 +522,8 @@
     {
       "name": "Clamp lever",
       "model": "rocker spring 1.2 N m/rad with 0.07 N m at rest; the lever's foot 101 mm below the pivot",
-      "target": "3.5 to 5.5 N at the lever's foot, held 15 degrees open (the lip 10 mm up; the fixture's spring is solid there, its open stop); the model gives 4.4 N",
-      "set": "compression spring (BOM 1: Lee Spring LC 022D 03 S, 0.74 N/mm) in the bridge's 8 mm pocket, pressing down on the lever's forward arm 40 mm in front of the pivot; compressed 2.4 mm at rest it gives the model's 0.07 N m, and its rate at 40 mm is the model's 1.2 N m/rad; it reaches solid at about 15 degrees, which is the fixture's open stop. A washer under it raises the force",
+      "target": "3.5 to 5.5 N at the lever's foot, held 15 degrees open (the lip 10 mm up); the model gives 4.4 N",
+      "set": "compression spring (BOM 1: Lee Spring LC 026D 10 S, 0.736 N/mm, 25.40 mm free, 5.82 mm solid) standing in the bridge's 8 mm pocket under the printed cap, pressing down on the lever's forward arm 40 mm in front of the pivot. The cap's underside (z 226.5) is 23.05 mm above the arm at rest, so the spring starts 2.35 mm compressed: 1.73 N, 0.069 N m (the model 0.072 N m). Opening 15 degrees lifts the arm 10.79 mm on the pocket's axis, to 13.14 mm compressed: 9.67 N, 0.387 N m, 4.43 N at the foot (the model 0.386 N m, 4.42 N). That uses 13.14 of the spring's 19.58 mm to solid; it is solid at about 23 degrees. With the catalogue's free-length (+-0.84 mm) and rate (+-0.07 N/mm) tolerances the 15 degree push stays 3.75 to 5.16 N. Arithmetic: fabrication/clamp_spring.py",
       "check": "spring scale (BOM 14) on the lever's foot, pushed forward: 3.5 to 5.5 N with the lip 10 mm up"
     },
     {
@@ -520,12 +544,12 @@
   "bom": [
     {
       "item": "Compression spring, stainless",
-      "part_number": "Lee Spring LC 022D 03 S",
-      "spec": "7.62 mm OD, 15.88 mm free, 0.736 N/mm, 12.8 mm to solid",
+      "part_number": "Lee Spring LC 026D 10 S",
+      "spec": "7.62 mm OD (7.95 mm hole), 25.40 mm free, 5.82 mm solid, 0.736 N/mm, 15.93 N at solid",
       "qty": 2,
       "unit_price": 8.04,
       "seller": "Lee Spring",
-      "url": "https://www.leespring.com/product/compression-spring-lc022d03s-stainless-steel",
+      "url": "https://www.leespring.com/product/compression-spring-lc026d10s-stainless-steel",
       "use": "clamp lever spring (one spare)"
     },
     {
@@ -691,10 +715,10 @@
     "replace": {
       "1": {
         "item": "one spring instead of two",
-        "part_number": "Lee Spring LC 022D 03 S",
+        "part_number": "Lee Spring LC 026D 10 S",
         "qty": 1,
         "unit_price": 8.04,
-        "url": "https://www.leespring.com/product/compression-spring-lc022d03s-stainless-steel",
+        "url": "https://www.leespring.com/product/compression-spring-lc026d10s-stainless-steel",
         "note": "no hardware-store spring states its rate"
       },
       "2": {
