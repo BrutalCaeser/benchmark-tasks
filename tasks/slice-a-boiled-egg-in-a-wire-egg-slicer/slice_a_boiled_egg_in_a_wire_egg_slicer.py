@@ -1,7 +1,7 @@
 """On the station table: a hinged wire egg slicer (die-cast aluminium, 140 x 80 x 30 mm, ten stainless-steel cutting
 wires on a frame hinged at one end, like the Westmark "Justus" egg slicer) with its frame swung open, and a peeled
-hard-boiled egg (US large, 57 x 43 mm, 50 g) lying on a saucer. Task (instruction): slice the egg in the egg slicer,
-then swing the slicer's frame back open, leaving the slices in the slicer.
+hard-boiled egg (US large, 57 x 43 mm, 50 g) lying on a saucer. Task (instruction): slice the egg into round slices in
+the egg slicer, then swing the slicer's frame back open, leaving the slices in the slicer.
 
 How it is done (the slicer's own use: it "cuts the hard-boiled egg quickly and cleanly into round or oval slices";
 for round slices the egg lies lengthwise in the egg-shaped hollow of the cradle): the egg is laid in the hollow, the
@@ -31,11 +31,17 @@ the egg. Once the frame has come down so far that a wire over the egg reaches th
 closing with 1.2 N m (about 9 N at the tab, 19 N on the wires at the egg's centre: our estimate of the force the wires
 need to cut a hard-boiled egg); it holds the frame where it is when the hand lets go. When the frame closes (within
 1.5 deg of the cradle), the egg is cut: its ten welds become the light cling of moist cut faces (they part at 0.3 N
-or 0.8 mN m). If the egg was not lying in the hollow when a wire first reached it (its long axis more than 20 deg off
-the hollow's, its centre more than 6 mm off the hollow's centre, or more than 4 mm above its seat), the wires crush
-it instead: the score is 0 for the rest of the trial.
+or 0.8 mN m).
 
-Score (best stage reached; 0 once the egg is crushed):
+Damage (the egg's condition, not a contact rule): the wires' depth into the egg is computed every step from the egg's
+actual pose, whatever way it lies. A wire touching the egg, or pressing on it with less than the cutting force (the
+hinge's resistance then stops the frame), leaves it whole: the frame can be lifted off, the egg re-seated and then
+sliced for full score. The egg is damaged only when the wires go more than 2 mm into it while it is not lying in the
+hollow (its long axis more than 20 deg off the hollow's, its centre more than 6 mm off the hollow's centre, or more
+than 4 mm above its seat): there the wires would cut it crooked or split it outside their slots, so no clean round
+slices can come of it, and the score is 0 from then on.
+
+Score (best stage reached; 0 once the egg is damaged):
 - 0.25: the egg has lain in the hollow (lengthwise and centred, as above) at some time.
 - 0.5: the egg has been cut into its 11 slices (the frame closed over it lying in the hollow).
 - 1.0 (success, held 1 s): as 0.5, the frame swung back open (85 deg or more), all 11 slices in the cradle (centre
@@ -85,6 +91,7 @@ WIRE_DROP = (FLOOR - 0.001) - (H[2] - TOP)  # the wires below the frame's bars (
 TAU_CUT = float(_E("EGG_TAU", "1.2"))  # N m: the hinge's resistance while the wires cut
 K_CUT, D_CUT = 40.0, 0.3  # the holding drive (N m/rad, N m s/rad), capped at TAU_CUT
 CLOSED_DEG = 1.5
+PEN_CUT = 0.002  # m: the wires this far into an egg that is not lying in the hollow have cut it (damaged)
 HINGE_DAMP = 0.03  # N m s/rad: the hinge's own drag
 SAUCER = np.array([0.13, -0.10])
 SAUCER_R, SAUCER_T = 0.050, 0.006
@@ -274,7 +281,7 @@ _IDS: dict = {}
 
 @on_reset
 def _reset() -> None:
-    _EP.update(tick=0, step=0, theta=OPEN_DEG, engaged=False, ever_engaged=False, crushed=False, cut=False,
+    _EP.update(tick=0, step=0, theta=OPEN_DEG, engaged=False, damaged=False, pen=-1.0, pen_off=-1.0, cut=False,
                q_hold=0.0, drive_on=None, seated=False, was_seated=False, n_in=0, near=1.0, still=False, cut_step=None,
                centre=EGG_C0.copy(), axis_dev=0.0, tcp={}, gaps={}, cuts_written=False, mids=None)
 
@@ -340,6 +347,31 @@ def _wire_world(theta: float, w: float) -> np.ndarray:
     return H + _frame_rot(theta) @ np.array([0.0, w - 0.064, WIRE_DROP])
 
 
+def _egg_top(centre, r, wy: float):
+    """The egg's highest point (world z) in the plane y = wy, where a wire (a line along x) crosses it, from the egg's
+    actual pose (an ellipsoid, its long axis along body y); None if the plane misses the egg."""
+    m = r @ np.diag([1.0 / EGG_B ** 2, 1.0 / EGG_A ** 2, 1.0 / EGG_B ** 2]) @ r.T
+    d = wy - centre[1]
+    a = m[2, 2] - m[0, 2] ** 2 / m[0, 0]
+    b = 2.0 * d * (m[1, 2] - m[0, 2] * m[0, 1] / m[0, 0])
+    c = d * d * (m[1, 1] - m[0, 1] ** 2 / m[0, 0]) - 1.0
+    disc = b * b - 4.0 * a * c
+    if disc < 0.0:
+        return None
+    return float(centre[2] + (-b + math.sqrt(disc)) / (2.0 * a))
+
+
+def _pen(theta: float, centre, r) -> float:
+    """How far the deepest wire has gone below the egg's top where it crosses the egg (m; negative: still above it)."""
+    best = -1.0
+    for w in WIRES:
+        p = _wire_world(theta, w)
+        top = _egg_top(centre, r, float(p[1]))
+        if top is not None:
+            best = max(best, top - float(p[2]))
+    return best
+
+
 def _track_inner(env) -> None:
     import torch
 
@@ -391,19 +423,18 @@ def _track_inner(env) -> None:
     seated = bool(axis_dev <= 20.0 and math.hypot(centre[0] - CX, centre[1] - CY) <= 0.006
                   and centre[2] <= SEAT_Z + 0.004)
     engaged = False
+    pen = -1.0
     if not _EP["cut"] and in_cradle:
-        for w in WIRES:  # a wire over the egg's length, down at the egg's top there
-            p = _wire_world(theta, w)
-            dy = abs(p[1] - centre[1])
-            if dy < EGG_A and p[2] <= centre[2] + _ring_r(dy) + 0.001:
-                engaged = True
-                break
-    if engaged and not _EP["ever_engaged"]:
-        _EP["ever_engaged"] = True
-        if not seated:
-            _EP["crushed"] = True
-    if not engaged and not _EP["cut"]:
-        _EP["ever_engaged"] = False if not in_cradle else _EP["ever_engaged"]
+        pen = _pen(theta, centre, r_mid)  # from the egg's actual pose, whatever way it lies
+        engaged = pen >= -0.001  # a wire down at the egg's top (within 1 mm)
+    # The egg's condition: a wire touching it, or pressing on it less than the cutting force (the hinge's resistance
+    # stops the frame), leaves it whole, and it can be lifted off, re-seated and sliced. It is damaged only once the
+    # wires have actually gone into it (more than PEN_CUT below its top) while it is not lying in the hollow: there they
+    # would cut it crooked or split it outside the wires' slots, and no clean round slices can come of it.
+    if engaged and not seated:
+        _EP["pen_off"] = max(_EP["pen_off"], pen)
+        if pen > PEN_CUT:
+            _EP["damaged"] = True
     if engaged:
         _EP["q_hold"] = max(_EP["q_hold"], qf)
         if theta <= CLOSED_DEG:
@@ -430,13 +461,13 @@ def _track_inner(env) -> None:
     if _DEBUG and _EP["cut"] and (_EP["tick"] - _EP["cut_step"]) % 40 == 1:
         print("DBG slices " + " ".join(f"({(m[0] - CX) * 1000:.0f},{(m[1] - CY) * 1000:.0f},{(m[2] - TOP) * 1000:.0f})"
                                        for m in mids), flush=True)
-    _EP.update(theta=theta, engaged=engaged, seated=seated, centre=centre, axis_dev=axis_dev, n_in=sum(in_cradle),
+    _EP.update(theta=theta, engaged=engaged, seated=seated, pen=pen, centre=centre, axis_dev=axis_dev, n_in=sum(in_cradle),
                was_seated=_EP["was_seated"] or seated,
                near=near, still=bool(max(speeds) < STILL), mids=mids, vmax=max(speeds))
 
 
 def _tally(objects) -> dict:
-    done = bool(_EP["cut"] and not _EP["crushed"] and _EP["theta"] >= OPEN_DONE and _EP["n_in"] == N_SLICES
+    done = bool(_EP["cut"] and not _EP["damaged"] and _EP["theta"] >= OPEN_DONE and _EP["n_in"] == N_SLICES
                 and _EP["near"] >= CLEAR and _EP["still"])
     return dict(done=done)
 
@@ -448,7 +479,7 @@ def _debug(t) -> None:
     c = _EP["centre"]
     spread = 0.0 if _EP["mids"] is None else float(np.ptp(_EP["mids"][:, :2], axis=0).max())
     print(f"DBG step={_EP['step']} theta={_EP['theta']:.1f} eng={int(_EP['engaged'])} seated={int(_EP['seated'])} "
-          f"crushed={int(_EP['crushed'])} cut={int(_EP['cut'])} egg=({c[0]:.3f},{c[1]:.3f},{(c[2] - TOP) * 1000:.1f}mm)"
+          f"pen={_EP['pen'] * 1000:.1f}mm pen_off={_EP['pen_off'] * 1000:.1f}mm damaged={int(_EP['damaged'])} cut={int(_EP['cut'])} egg=({c[0]:.3f},{c[1]:.3f},{(c[2] - TOP) * 1000:.1f}mm)"
           f" axis={_EP['axis_dev']:.0f}deg in_cradle={_EP['n_in']} spread={spread * 1000:.0f}mm "
           f"near={_EP['near'] * 1000:.0f}mm vmax={_EP.get('vmax', 0.0) * 100:.1f}cm/s still={int(_EP['still'])} done={int(t['done'])} | "
           + " ".join(f"{k} tcp=({v[0]:.3f},{v[1]:.3f},{(v[2] - TOP) * 1000:.1f}mm) gap={_EP['gaps'][k] * 1000:.0f}"
@@ -459,7 +490,7 @@ def score(objects) -> float:
     t = _tally(objects)
     if _DEBUG:
         _debug(t)
-    if _EP["crushed"]:
+    if _EP["damaged"]:
         return 0.0
     if t["done"]:
         return 1.0
@@ -481,11 +512,16 @@ def success(objects) -> bool:
 # 1.2 N m from the egg's top down); it holds it closed 1.5 s, swings it back to 98 deg (past upright: the frame stops
 # at 95 deg on its stop), lets go and goes back.
 # EGG_CROSS=1 (the wrong way): the egg is set in without turning it, lying across the hollow; it cannot sink into
-# the hollow, and the wires crush it (score 0).
+# the hollow, and the frame is pressed down through it there: the wires go into it out of its seat (damaged, score 0).
+# EGG_RESEAT=1 (a recovery): the egg is first set in across the hollow, the frame is swung down until its wires touch
+# the egg's top and swung back open; the right gripper then picks the (whole) egg up, turns it lengthwise, sets it in
+# the hollow, and the frame is worked as in the demo: full score.
 OPEN_C = -0.047
 CROSS = _E("EGG_CROSS") == "1"
+RESEAT = _E("EGG_RESEAT") == "1"
 P = {k: float(_E("EGG_" + k.upper(), v)) for k, v in dict(
-    egg_grip="-0.017", push_past="8.0", tab_grip="-0.008", spread="-0.036").items()}
+    egg_grip="-0.017", push_past="8.0", tab_grip="-0.008", spread="-0.036", cross_dz="0.002",
+    touch_pen="0.0005", touch_lead="2.5").items()}
 
 
 def _rz(a: float) -> np.ndarray:
@@ -554,12 +590,16 @@ def _dur(wps) -> float:
     return float(sum(w.duration for w in wps))
 
 
-def _place_egg() -> list:
-    """Right arm: the egg from the saucer into the hollow, turned lengthwise (or not, the wrong way)."""
-    pick = np.array([SAUCER[0], SAUCER[1], EGG_C0[2] - 0.001])
+def _place_egg(cross: bool = False, again: bool = False) -> list:
+    """Right arm: the egg from the saucer (or, again, from across the hollow) into the hollow, turned lengthwise (or
+    not, the wrong way)."""
+    if again:
+        pick = np.array([CX, CY, SEAT_Z + P["cross_dz"] - 0.001])
+    else:
+        pick = np.array([SAUCER[0], SAUCER[1], EGG_C0[2] - 0.001])
     hi = 0.10 + TOP
-    put_rot = DOWN_Y if CROSS else DOWN_X
-    seat = np.array([CX, CY, SEAT_Z + 0.002 + (0.004 if CROSS else 0.0)])
+    put_rot = DOWN_Y if cross else DOWN_X
+    seat = np.array([CX, CY, SEAT_Z + 0.002 + (0.004 if cross else 0.0)])
     out = _lead_in("right", [pick[0], pick[1], hi], DOWN_Y, OPEN_C, "over the egg, fingers open")
     out += [_w(2.0, pick, OPEN_C, "down round the egg", DOWN_Y),
             _w(1.2, pick, P["egg_grip"], "pinch the egg across its middle", DOWN_Y),
@@ -568,7 +608,7 @@ def _place_egg() -> list:
     n = 8
     for k in range(1, n + 1):
         f = k / n
-        a = 0.0 if CROSS else (math.pi / 2) * f
+        a = 0.0 if cross else (math.pi / 2) * f
         p = np.array([pick[0], pick[1], hi]) * (1 - f) + np.array([CX, CY, hi]) * f
         out.append(_w(2.4 / n, p, P["egg_grip"], "carry it over, turning it lengthwise", _rz(a) @ DOWN_Y))
     out += [_w(2.0, seat, P["egg_grip"], "lower it into the hollow", put_rot),
@@ -599,20 +639,38 @@ def _swing(a: float, b: float, finger: float, seconds: float, label: str) -> lis
     return out
 
 
-def _work_frame() -> list:
+def _touch_deg() -> float:
+    """The angle to command for the frame's wires to be touch_pen into an egg lying across the hollow (the recovery
+    variant): the frame trails the fingertips by about touch_lead deg in this grip (2.7 deg in a debug run)."""
+    if _E("EGG_TOUCH_DEG"):
+        return float(_E("EGG_TOUCH_DEG"))
+    centre = np.array([CX, CY, SEAT_Z + P["cross_dz"]])
+    r = _rz(-math.pi / 2)  # the egg's axis (body y) along world x
+    th = OPEN_DEG
+    while th > 0.0 and _pen(th, centre, r) < P["touch_pen"]:
+        th -= 0.05
+    return th - P["touch_lead"]
+
+
+def _work_frame(touch: float | None = None) -> list:
     """Left arm: take the tab by its two side edges with the fingertips, swing the frame over (the tab turns between
-    the fingertips) and press it down through the egg, then swing it back open onto its stop and let go."""
+    the fingertips) and press it down through the egg, then swing it back open onto its stop and let go. With touch,
+    the frame only comes down to that angle (the wires on the egg's top) and goes back open."""
     p_hi, r = _tab_pose(OPEN_DEG, rise=0.04)
     p_tab, _ = _tab_pose(OPEN_DEG)
     out = _lead_in("left", p_hi, r, OPEN_C, "over the frame's tab, fingers open")
     out += [_w(1.5, p_tab, OPEN_C, "fingertips either side of the tab", r),
             _w(1.0, p_tab, P["tab_grip"], "pinch the tab's edges", r),
             _w(0.5, p_tab, P["tab_grip"], "settle", r)]
+    low = -P["push_past"] if touch is None else touch
     out += _swing(OPEN_DEG, 45.0, P["tab_grip"], 4.0, "swing the frame over onto the egg")
-    out += _swing(45.0, -P["push_past"], P["tab_grip"], 3.5, "press the wires down through the egg")
-    p_low, _ = _tab_pose(-P["push_past"])
-    out += [_w(1.5, p_low, P["tab_grip"], "hold it closed", r)]
-    out += _swing(-P["push_past"], OPEN_DEG + 3.0, P["tab_grip"], 5.0, "swing the frame back open onto its stop")
+    if touch is None:
+        out += _swing(45.0, low, P["tab_grip"], 3.5, "press the wires down through the egg")
+    else:
+        out += _swing(45.0, low, P["tab_grip"], 3.0, "bring the wires down onto the egg's top")
+    p_low, _ = _tab_pose(low)
+    out += [_w(1.5, p_low, P["tab_grip"], "hold it closed" if touch is None else "wires on the egg", r)]
+    out += _swing(low, OPEN_DEG + 3.0, P["tab_grip"], 5.0, "swing the frame back open onto its stop")
     p_end, _ = _tab_pose(OPEN_DEG + 3.0)
     out += [_w(0.5, p_end, P["tab_grip"], "settle", r),
             _w(1.0, p_end, OPEN_C, "let go", r),
@@ -624,7 +682,17 @@ def _work_frame() -> list:
 def demo():
     rp, rq = _ready("right")
     lp, lq = _ready("left")
-    a = _place_egg()
+    if RESEAT:
+        a1 = _place_egg(cross=True)
+        b1 = _work_frame(touch=_touch_deg())
+        a2 = _place_egg(again=True)
+        b2 = _work_frame()
+        right = (a1 + [_w(_dur(b1), rp, OPEN_C, "wait at the ready pose", rq)] + a2
+                 + [_w(_dur(b2) + 3.0, rp, OPEN_C, "stay at the ready pose", rq)])
+        left = ([_w(_dur(a1), lp, OPEN_C, "wait at the ready pose", lq)] + b1
+                + [_w(_dur(a2), lp, OPEN_C, "wait at the ready pose", lq)] + b2 + [_w(3.0, lp, OPEN_C, "stay clear", lq)])
+        return {"left": left, "right": right}
+    a = _place_egg(cross=CROSS)
     b = _work_frame()
     right = a + [_w(_dur(b) + 3.0, rp, OPEN_C, "stay at the ready pose", rq)]
     left = [_w(_dur(a), lp, OPEN_C, "wait at the ready pose", lq)] + b + [_w(3.0, lp, OPEN_C, "stay clear", lq)]

@@ -1,13 +1,24 @@
 # Slice a peeled boiled egg in a hinged wire egg slicer, laid lengthwise in its cradle, and swing the frame back open
 
+This task builds on an earlier submission, whose 48-hour revision hold lapsed without a revision. This version answers
+that submission's review (TK-592H42):
+
+| Review point | What changed |
+|---|---|
+| Construct validity: the rule that a wire touching an egg more than 6 mm off centre or 20 deg off axis crushes it misrepresents real egg slicing | The contact rule is gone. Damage is now judged from the egg's condition: every step the task file computes how far the wires have actually gone into the egg, from the egg's real pose (any orientation). A touch, or a press the wires' cutting resistance stops, leaves the egg whole. The egg counts as damaged only when the wires go more than 2 mm into it while it is not lying in the hollow (cut crooked or split outside the wires' slots). |
+| Scoring: the latched zero for any misaligned contact can invalidate a recoverable attempt | Recovery now scores. After a misaligned touch the frame can be lifted, the egg re-seated and then sliced for full score. A new variant, `EGG_RESEAT=1`, does exactly that (egg set in crosswise, wires brought down 1.4 mm onto it, frame lifted, egg turned and re-seated, then sliced): it scores 1.0 at step 1646. Pressing the wires through a crosswise egg (`EGG_CROSS=1`) still scores 0. |
+| Update sim and real-trial scoring consistently; state round slices in the instruction if required | The instruction now asks for round slices. The real-trial check is the same outcome as the sim's: the end photo must show eleven clean round slices in the cradle, and the video must not show the wires pressed into the egg while it lay outside the hollow; a touch or nudge that leaves the egg whole does not count against the trial. |
+| Team note: check the slicer's estimated cutting force and stability on the real non-slip mat | The 9 N at the tab is stated as an estimate. "Building it for real" now gives a pre-trial check of both: the kitchen-scale press for the cutting force, and a sideways push test of the slicer on its mat (with the fix to use if it slides). |
+
 A hinged wire egg slicer (die-cast aluminium cradle 140 x 80 mm with ten stainless-steel cutting wires on a frame
 hinged at one end, like the Westmark "Justus" egg slicer) stands on a non-slip mat with its frame swung open. A peeled
-hard-boiled egg lies on a saucer beside it, crosswise to the cradle. The instruction asks for the egg to be sliced in
-the slicer and the frame swung back open, the slices left in the slicer.
+hard-boiled egg lies on a saucer beside it, crosswise to the cradle. The instruction asks for the egg to be sliced into
+round slices in the slicer and the frame swung back open, the slices left in the slicer.
 
 Slicing a boiled egg in a wire slicer is an everyday kitchen job (egg salad, sandwiches, salads, garnish) that most
 people have done or watched. The maker describes the tool as cutting "the hard-boiled egg quickly and cleanly into
-round or oval slices without breaking the yolk" ([Westmark Justus][justus]); for round slices the egg lies lengthwise
+round or oval slices without breaking the yolk" ([Westmark Justus][justus], a retailer's page for this slicer
+with the maker's description and its 140 x 80 x 30 mm size); for round slices the egg lies lengthwise
 in the cradle's egg-shaped hollow. The usual way: lay the egg in the hollow, swing the wire frame over and press it
 down through the egg in one stroke until it closes on the cradle, then swing the frame open again to free the slices
 (they are then taken out or tipped onto a plate).
@@ -15,8 +26,9 @@ down through the egg in one stroke until it closes on the cradle, then swing the
 ## The hand skill
 
 - The peeled egg is slick and rounded. It lies across the robot's reach on the saucer and has to be picked up and
-  turned a quarter turn, then set lengthwise and centred in a hollow only 6 mm deep. An egg not lying in the hollow
-  when the wires reach it is crushed (score 0).
+  turned a quarter turn, then set lengthwise and centred in a hollow only 6 mm deep (lengthwise gives the round
+  slices the instruction asks for). Pressing the wires into an egg that is not lying in the hollow cuts it crooked or
+  splits it (score 0); merely touching it does no harm, and the egg can be set right before the frame comes down.
 - The frame is taken by its tab (30 x 32 mm, 3 mm thick) and swung over through 95 deg along its arc, then driven
   down through the egg against the wires' cutting resistance, about 9 N at the tab, until it closes on the cradle;
   then it is swung back open past upright onto its stop, without knocking the eleven loose slices out of the
@@ -76,9 +88,14 @@ What is modelled:
   it where it is. When the frame is within 1.5 deg of closed, the egg is cut: the slices' joints become the light
   cling of moist cut faces (they part at 0.3 N or 0.8 mN m), so the slices stand together in the hollow, as a
   sliced egg does.
-- Crushing: if the egg is not lying in the hollow when a wire first reaches it (its long axis more than 20 deg off the
-  hollow's, its centre more than 6 mm off the hollow's centre, or more than 4 mm above its seat), the wires crush it
-  rather than slice it: the score is 0 for the rest of the trial.
+- Damage, from the egg's condition: every step the task file computes, from the egg's actual pose (an ellipsoid,
+  whatever way it lies), how far the deepest wire has gone below the egg's top where it crosses it. A wire touching
+  the egg, or pressing it with less than the cutting force (the hinge's resistance then stops the frame), does not
+  harm it: the frame can be lifted off and the egg re-seated. The egg is damaged only when the wires go more than
+  2 mm into it while it is not lying in the hollow (its long axis more than 20 deg off the hollow's, its centre more
+  than 6 mm off the hollow's centre, or more than 4 mm above its seat): a real slicer pressed through such an egg
+  cuts it crooked or splits it outside the wires' slots, and it gives no clean round slices. The 2 mm
+  threshold marks the wires having cut in. A damaged egg scores 0 from then on.
 
 ## Run and score a trial
 
@@ -92,11 +109,17 @@ collision hulls. "In the cradle": a slice's centre over the cradle's 8 x 14 cm t
 - 1.0 (success, held 1 s): as 0.5, with the frame swung back open (85 deg or more), all 11 slices in the cradle, every
   finger point 1 cm or more from every slice, and all of them still (under 2 cm/s).
 
-Once the egg has been crushed (the wires reached it while it was not lying in the hollow) the score is 0 for the rest
-of the trial. Doing nothing scores 0. A real trial is scored from the video and a photo of the slicer at the end: the
-egg lay lengthwise in the hollow (video); the frame closed fully on the cradle with the egg under it (video); at the
-end the frame is open past upright and eleven clean round slices (the two smallest being the end caps) lie in the
-cradle, none on the table (photo). A crushed egg does not give eleven clean slices.
+Once the egg is damaged (the wires more than 2 mm into it while it was not lying in the hollow) the score is 0 for the
+rest of the trial. A misaligned touch that leaves the egg whole costs nothing: a re-seated egg that is then sliced
+scores in full. Doing nothing scores 0; an egg seated but never cut scores 0.25; an egg cut but with the frame left
+closed scores 0.5.
+
+A real trial is scored the same way, from the video and a photo of the slicer at the end: the egg lay lengthwise in
+the hollow (video); the frame closed fully on the cradle with the egg under it (video); at the end the frame is open
+past upright and eleven clean round slices (the two smallest being the end caps) lie in the cradle, none on the table
+(photo). The egg is damaged (score 0) if the video shows the wires pressed into it while it lay outside the hollow, or
+if the photo shows a crooked, split or crushed egg instead of clean round slices. A wire that only touched or nudged
+the egg, which was then set right and sliced cleanly, does not lower the score.
 
 Dream-1 (needs a key in `~/.dreamlabs/credentials`):
 
@@ -104,7 +127,7 @@ Dream-1 (needs a key in `~/.dreamlabs/credentials`):
 inspect-robots run --embodiment yam_arena --policy dream \
   -E task=slice_a_boiled_egg_in_a_wire_egg_slicer.py -E object_jitter=0 -E control_hz=20 \
   -E cam_width=320 -E cam_height=176 \
-  --instruction "Slice the peeled egg in the egg slicer, then swing the slicer's frame back open, leaving the slices in it." \
+  --instruction "Slice the peeled egg into round slices in the egg slicer, then swing the slicer's frame back open, leaving the slices in it." \
   --scorer task_score --max-steps 2400 --store-frames --log-dir ~/yam-eval/eggslicer-dream
 ```
 
@@ -120,7 +143,7 @@ reaches success at about step 785 (39 s).
 inspect-robots run --embodiment yam_arena --policy yam_scripted \
   -E task=slice_a_boiled_egg_in_a_wire_egg_slicer.py -E object_jitter=0 -E control_hz=20 \
   -E cam_width=320 -E cam_height=176 \
-  --instruction "Slice the peeled egg in the egg slicer, then swing the slicer's frame back open, leaving the slices in it." \
+  --instruction "Slice the peeled egg into round slices in the egg slicer, then swing the slicer's frame back open, leaving the slices in it." \
   --scorer task_score --max-steps 1000 --store-frames --log-dir ~/yam-eval/eggslicer-demo
 ```
 
@@ -131,14 +154,28 @@ for log in ~/yam-eval/eggslicer-dream/*.json; do inspect-robots video "$log"; do
 ```
 
 `EGG_DEBUG=1` prints, every 5 steps (`EGG_DEBUG_EVERY=1` for every step), the frame's opening angle, whether the hinge
-is resisting (the wires in the egg), whether the egg lies in the hollow, whether it has been crushed or cut, the egg's
+is resisting (the wires in the egg), whether the egg lies in the hollow, how far the wires are into the egg (and the most while it was out of the hollow), whether it is damaged or cut, the egg's
 centre and how far its axis is off the hollow's, how many slices are in the cradle and how far they spread, how close
 the nearest finger is to a slice, and where each gripper is and how far it is open; after the cut it also prints each
 slice's position every 2 s.
 
 `EGG_CROSS=1` runs the demo the wrong way: the egg is set into the cradle without turning it, so it lies across the
-hollow. It cannot settle into the hollow (it rests 2 mm higher, turned 90 deg from it), so when the wires reach it they
-crush it: the score is 0 from then on, although the same frame strokes follow.
+hollow. It cannot settle into the hollow (it rests higher, turned 90 deg from it), and the same frame stroke presses
+the wires through it there: the egg is damaged and the score is 0 from then on.
+
+`EGG_RESEAT=1` runs a recovery: the egg is first set in across the hollow, the left gripper swings the frame down until
+its wires are on the egg's top and swings it back open; the right gripper then picks the whole egg up again, turns it
+a quarter turn, sets it lengthwise in the hollow, and the frame is worked as in the demo. The wires reach 1.4 mm into the crosswise egg (under the 2 mm damage
+threshold), and the run reaches full score at step 1646 (82 s) of its 2,400.
+
+## Results
+
+| Run | Score | Notes |
+|---|---|---|
+| Scripted demo | 1.0 | success at step 785 (39 s) |
+| `EGG_RESEAT=1` (touch a crosswise egg, re-seat, slice) | 1.0 | success at step 1646 (82 s) |
+| `EGG_CROSS=1` (crosswise egg pressed through) | 0.0 | damaged as the wires pass 2 mm into it |
+| Dream-1, seed 0, 2,400 steps | 0.0 | both arms moved over the table and drew back; the egg stayed on the saucer and the frame stayed open |
 
 ## Runtime per trial
 
@@ -159,9 +196,21 @@ toward the robot's left, the hollow's centre 21 cm in front of the midpoint betw
 left; a saucer about 10 cm across at x 13, y -10. Eggs: US
 large, hard-boiled (10 minutes in boiling water, then into iced water for 5 minutes), peeled, kept in the fridge (4 C)
 and used within the day; one egg per trial, laid on the saucer lengthwise along x just before the trial. The egg is
-moist: thin food-safe nitrile covers on the finger pads keep the pads clean; wipe them between trials. The cutting
-force can be checked by pressing the frame's tab down on an egg with a kitchen scale under the slicer (about 0.9 kg
-shown at the tab, by our estimate). Before each trial clear the slices out, wipe the cradle and swing the frame open
-past upright onto its stop.
+moist: thin food-safe nitrile covers on the finger pads keep the pads clean; wipe them between trials. 
+
+Two checks on the real slicer before the first trial:
+
+- Cutting force: set the slicer on its mat on a kitchen scale, lay an egg in the hollow and press the tab down slowly
+  by hand until the wires go through; the peak reading minus the slicer's weight is the force at the tab. The
+  simulation uses about 9 N (0.9 kg on the scale), our estimate. If the reading differs much, set `EGG_TAU` (the
+  hinge's resistance in N m; the tab is 13.5 cm from the hinge) to match and rerun the demo.
+- Stability on the mat: pressed straight down, the tab closes over the cradle's end, so the press pushes the slicer
+  onto the mat rather than tipping it; the sideways loads come from swinging the light (about 40 g) frame and from a
+  gripper bumping the cradle. Push the cradle sideways at its hinge end with a luggage scale or a finger and note the
+  force at which it starts to slide; it must stay put while the frame is swung and pressed by hand. If it slides or
+  rocks, hold it with double-sided tape or a small clamp at the mat's edge and record that. The simulation keeps the
+  cradle fixed.
+
+Before each trial clear the slices out, wipe the cradle and swing the frame open past upright onto its stop.
 
 [justus]: https://www.culinaris.de/en/Westmark-Egg-divider-Justus/31305
