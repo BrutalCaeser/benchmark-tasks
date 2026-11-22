@@ -72,13 +72,13 @@ The demo is open loop: it uses only the fixed layout, never the simulator's inte
 4. **The left hand lets the bag close,** then takes the filled bag across its middle (the fingers close the seams on
    the board's edges through the films). It lifts the bag, carries it over the tote, lays it on the floor and lets go.
 
-The demo reaches 1.0 (success) in 773 steps (38.7 s). No step of it is clamped by the run's delta-limit guard (the
+In our run (seed 0, `-E object_jitter=0`) the demo reaches 1.0 (success) at step 773 (38.7 s). No step of it is clamped by the run's delta-limit guard (the
 gripper may change by at most 5% of its range per step). `test_bag_a_circuit_board.py` checks every step against the
 guard and that every pose along the arms' paths is reached.
 
 **Shortcut check.** With `BG_DEMO=noopen` the left hand stays home and the right hand does exactly the same. The
-board's leading edge rides up onto the shut bag and pushes it 3 cm along the mat; the board never gets between the
-films, and the trial scores 0.
+board's leading edge rides up onto the shut bag and the board ends lying on top of it; it never gets between the
+films. Our run of this variant scored 0.0 (the demo script ended at step 887).
 
 ## Scoring
 
@@ -102,9 +102,12 @@ the demo: `python -m pytest -q test_bag_a_circuit_board.py` (21 tests, no simula
 
 ## Runtime and seeds
 
-Measured on an L40S with the viewer on, Isaac Sim's start-up included:
-- the demo trial (773 steps, 38.7 s of simulated time) took 3.3 minutes of wall-clock time;
-- the Dream-1 trial (the full 2,400 steps, 2 minutes simulated; it scored 0.0) took 8.3 minutes.
+Measured on one L40S that was running up to six other simulations at the same time, so an idle machine will be
+faster; Isaac Sim's start-up included:
+- the demo trial (773 steps, 38.7 s of simulated time; it scored 1.0) took 10.2 minutes of wall-clock time;
+- the Dream-1 trial (seed 0, the full 2,400 steps, 2 minutes simulated) took 21.2 minutes. It scored 0.0: the right
+  hand reaches over the board and the bag several times but never grips either, the board and the bag never move,
+  and the left hand stays near home.
 
 The layout is fixed (`-E object_jitter=0`); there are no seeds to choose.
 

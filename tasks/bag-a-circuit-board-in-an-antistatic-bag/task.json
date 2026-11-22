@@ -17,6 +17,6 @@
   "run_limit": "2,400 steps (2 minutes at 20 Hz)",
   "reset_notes": "Take the board out, flatten the bag on the mat at its marks (a bag that has creased or lost its shape is replaced: about $0.10), lay the board at its marks and empty the tote. Nothing is consumed.",
   "fidelity": "All contacts and forces, no rules. The bag is a closed loop of five film strips hinged along its length (a weak bending spring each): squeezing its side seams stands its edges up and arches the top film open, as with a real bag. Strips are 2 mm thick and stiff along the length; the bag weighs 6 g (real 1.5 g). Board, mat and tote are boxes; frictions are our estimates (film 0.4).",
-  "scores": "Dream-1 run: 0.0 (the right hand hovers over the bag and the board and never grips either; the left stays near home); demo: 1.0 (success at step 773)",
-  "media": "M-QTMQFS"
+  "scores": "Dream-1 run (seed 0): 0.0 (the right hand reaches over the board and the bag several times but never grips either; board and bag never move; the left stays near home); demo: 1.0 (success at step 773)",
+  "media": "M-LTHHST"
 }
