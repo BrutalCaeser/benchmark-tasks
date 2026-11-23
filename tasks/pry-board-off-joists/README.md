@@ -54,7 +54,7 @@ or defective parts or sections of structures and repair or replace, using hand t
 
 | Object | What |
 |---|---|
-| Frame (fixed) | A piece of floor or deck framing: two kiln-dried SPF 2x4 joists (38.1 x 88.9 mm), 612 mm long, on edge along x from 25 to 86 cm out, 16 in (406.4 mm) apart on centre either side of the middle, and a 2x4 rim joist on edge across their back ends (444.5 mm, flush with their outer faces, face-nailed with two 16d nails at each end) |
+| Frame (fixed) | A piece of floor or deck framing: two kiln-dried SPF 2x4 joists (38.1 x 88.9 mm), 612 mm long, on edge along x from 25 to 86 cm out, 16 in (406.4 mm) apart on centre either side of the middle, and a 2x4 rim joist on edge across their back ends (444.5 mm, flush with their outer faces, screwed with two #9 x 3 in wood screws at each end, so a joist can be turned over or replaced between trials) |
 | C-clamps | Two 6 in C-clamps hold the rim to the table's back edge, 12 cm either side of the middle (pad on the rim's top edge, fixed jaw under the table top). Nothing is screwed into the robot's table; while the bar levers, a joist is pushed down overall (the heel presses harder than the nail pulls), so the clamps only keep the frame in place |
 | Board (nailed) | 600 mm of 1x4 common pine (19.05 x 88.9 mm, S4S, eased edges), 0.46 kg, flat across the joists' tops, centred 40 cm out, ends overhanging 78 mm |
 | Nails | Two 3d box nails (1-1/4 in, 0.076 in shank, 7/32 in head, bright), one into each joist through the board's centre line, heads flush; 12.7 mm in the joist. The cleat is tacked lightly, as temporary cleats often are (about 150 N to pull a nail). Heavier nailing would be beyond what the arm can lever; the skill (seating the blade, levering on the joist, re-setting deeper) is the same |
@@ -82,6 +82,21 @@ Length and width agree. The simulated mass, 0.63 kg, is 7% over the listed 1.3 l
 thickness estimate, so the real bar is probably somewhat thinner. Its far end is a wide bent prying end rather than
 the drawn curled claw; that end is never used here, as the demo holds the bar by its shaft only. The thickness and
 blade bend are not on the listing; ours are estimates of a typical 15 in flat bar.
+
+## Reset between trials
+
+Every trial pulls nails out of fresh wood at the same spots as the simulator: one 3d box nail through the board's centre
+line at x 400 mm, into the centre of each joist's top edge (y +203.2 and -203.2 mm).
+
+| Trial | Board | Joists |
+|---|---|---|
+| 1 | new 600 mm 1x4 | new pair, top edges |
+| 2 | new 600 mm 1x4 | same pair, each rolled 180 deg about its length so its unused edge is up (rim screws backed out and refitted) |
+| 3 | new 600 mm 1x4 | new pair, top edges; the cycle repeats |
+
+No nail hole is ever reused, so each trial starts from a freshly driven nail (about 150 N to withdraw; check it with a
+spring scale on a nail driven 12.7 mm into an offcut of each new joist stock). The board is seated against a square at
+x 355.6 to 444.5 mm, centred on y 0, and the bar is laid back as in the setup.
 
 ## Scoring (scoring.py)
 
